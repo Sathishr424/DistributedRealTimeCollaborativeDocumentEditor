@@ -1,0 +1,32 @@
+src/
+├── config/                     # environment & app configuration
+│   ├── db.config.ts
+│   └── env.config.ts
+│
+├── core/                       # core abstractions (optional)
+│   ├── errors/
+│   │   └── AppError.ts
+│   ├── exceptions/
+│   │   ├── EmailExistsException.ts
+│   │   └── NotFoundException.ts
+│   ├── middlewares/
+│   │   ├── ErrorHandler.ts
+│   │   └── authMiddleware.ts
+│   └── utils/
+│       └── logger.ts
+│
+├── modules/                    # 🔥 group by feature (scalable)
+│   └── auth/
+│       ├── auth.controller.ts
+│       ├── AuthService.ts
+│       ├── auth.repository.ts
+│       ├── auth.dto.ts
+│       ├── auth.validation.ts
+│       ├── auth.routes.ts
+│       └── index.ts            # optional export aggregator
+│
+├── database/
+│   └── prismaClient.ts
+│
+├── server.ts
+└── app.ts

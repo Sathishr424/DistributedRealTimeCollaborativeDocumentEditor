@@ -1,0 +1,18 @@
+import {hash, compare} from "bcrypt";
+import {ServerError} from "../exceptions/ServerError";
+
+export async function hashPassword(password: string) {
+    try {
+        return await hash(password, 10);
+    } catch (err) {
+        throw new ServerError();
+    }
+}
+
+export async function checkPassword(password: string, hashedPassword: string): Promise<boolean> {
+    try {
+        return await compare(password, hashedPassword);
+    } catch (err) {
+        throw new ServerError();
+    }
+}
