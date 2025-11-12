@@ -1,6 +1,7 @@
 import {useNavigate} from "react-router-dom";
 import React, {useEffect, useState} from "react";
 import UserService from "../../services/AuthService.js";
+import NavbarLoggedIn from "../../components/NavbarLoggedIn.jsx";
 
 export default function DashboardLayout({children}) {
     const navigate = useNavigate();
@@ -26,6 +27,7 @@ export default function DashboardLayout({children}) {
 
     return (
         <section>
+            <NavbarLoggedIn />
             {children}
         </section>
     );

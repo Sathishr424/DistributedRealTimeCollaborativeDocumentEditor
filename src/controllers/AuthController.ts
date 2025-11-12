@@ -1,10 +1,10 @@
-import { Router, Request, Response } from "express";
+import {Router, Request, Response} from "express";
 import {asyncHandler} from "../utils/asyncHandler";
 import AuthService from "../services/AuthService";
 import {validationMiddleware} from "../middlewares/ValidationMiddleware";
 import {RegisterUserDTO} from "../dto/request/RegisterUserDTO";
 import {LoginUserDTO} from "../dto/request/LoginUserDTO";
-import {LogoutUserDTO} from "../dto/request/LogoutUserDTO";
+import {getBearerToken} from "../helpers/helper";
 
 class AuthController {
     public router = Router();
@@ -17,7 +17,7 @@ class AuthController {
     private initializeRoutes() {
         this.router.post("/register", validationMiddleware(RegisterUserDTO), asyncHandler(this.register.bind(this)));
         this.router.post("/login", validationMiddleware(LoginUserDTO), asyncHandler(this.login.bind(this)));
-        this.router.post("/logout", validationMiddleware(LogoutUserDTO), asyncHandler(this.logout.bind(this)));
+        this.router.post("/logout", asyncHandler(this.logout.bind(this)));
     }
 
     private async register(req: Request, res: Response) {
@@ -40,7 +40,8 @@ class AuthController {
     }
 
     private async logout(req: Request, res: Response) {
-        await this.service.logout(req.body.token);
+        const token = getBearerToken(req);
+        await this.service.logout(token);
 
         return res.status(200).json({
             success: true,
