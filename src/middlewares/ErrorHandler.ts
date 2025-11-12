@@ -2,7 +2,7 @@ import {Request, Response, NextFunction} from "express"
 import {AppError} from "../errors/AppError";
 
 function handleError(err: AppError, req: Request, res: Response, next: NextFunction) {
-    console.error(err); // Log for debugging
+    console.log("ERROR LOG FROM HANDLER ", err); // Log for debugging
 
     const status = err.statusCode || 500;
     const message = err.message || 'Internal Server Error';

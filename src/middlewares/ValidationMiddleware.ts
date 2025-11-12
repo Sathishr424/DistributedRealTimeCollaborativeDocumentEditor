@@ -5,24 +5,26 @@ import {RequestValidation} from "../interfaces/RequestValidation";
 import {ValidationErrorException} from "../exceptions/ValidationErrorException";
 
 export function validationMiddleware(type: any): RequestHandler {
-    return (req: Request, res: Response, next: NextFunction) => {
-        // 1. Transform plain JS object (req.body) into an instance of the DTO class
-        const dtoInstance = plainToInstance(type, req.body);
+    return async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            // 1. Transform plain JS object (req.body) into an instance of the DTO class
+            const dtoInstance = plainToInstance(type, req.body);
+            const errors: ValidationError[] = await validate(dtoInstance); // 👈 Use await
 
-        // 2. Run validation against the DTO instance
-        validate(dtoInstance).then((errors: ValidationError[]) => {
             if (errors.length > 0) {
-                // 3. Format errors for a clean response
                 const message = errors.map((error: ValidationError) => {
                     return Object.values(error.constraints || {})
                 }).flat();
 
-                throw new ValidationErrorException(message);
+                const validationError = new ValidationErrorException(message);
 
-            } else {
-                req.body = dtoInstance;
-                next();
+                return next(validationError); // 👈 Correct way to signal an error
             }
-        });
+
+            req.body = dtoInstance;
+            next();
+        } catch (error) {
+            next(error);
+        }
     };
 }

@@ -1,5 +1,8 @@
 import {hash, compare} from "bcrypt";
 import {ServerError} from "../exceptions/ServerError";
+import {Request} from "express";
+import {TokenNotFound} from "../exceptions/TokenNotFound";
+
 
 export async function hashPassword(password: string) {
     try {
@@ -15,4 +18,14 @@ export async function checkPassword(password: string, hashedPassword: string): P
     } catch (err) {
         throw new ServerError();
     }
+}
+
+export function getBearerToken(req: Request): string {
+    const authHeader = req.headers.authorization;
+
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+        return authHeader.substring(7);
+    }
+
+    throw new TokenNotFound();
 }

@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+@theme {
+    /* Root variables (optional, can also be on :root selector) */
+    --color-primary: #1B1B1B;
+    --color-secondary: #0B0B0B;
+
+    --color-header-background: #28282A;
+    --color-header-text: #D8FFFB;
+    --color-header-text-hover: #00DAC6; /* kebab-case key becomes hyphenated var name */
+
+    --color-border: #383838;
+
+    --color-text-primary: #FFFFFF;
+    --color-text-secondary: #A2A2A2;
+
+    --color-category-bg1: #222255;
+    --color-category-text1: #C09BF9;
+    --color-category-bg2: #682C2B;
+    --color-category-text2: #DA0016;
+    --color-category-bg3: #6F2751;
+    --color-category-text3: #F11F99;
+    --color-category-bg4: #124241;
+    --color-category-text4: #00DAC6;
+}

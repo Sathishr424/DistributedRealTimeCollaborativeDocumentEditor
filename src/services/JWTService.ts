@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import {ServerError} from "../exceptions/ServerError";
 import {UserTokenDTO} from "../dto/UserTokenDTO";
 
-const JWT_SECRET: jwt.Secret = process.env.JWT_SECRET as string;
+const JWT_SECRET: jwt.Secret = process.env.JWT_SECRETKEY as string;
 
 class JWTService {
     async generateToken(user: User): Promise<string> {
@@ -15,9 +15,12 @@ class JWTService {
     }
 
     private signToken(user: UserTokenDTO): Promise<string> {
-        return new Promise(resolve => {
+        return new Promise((resolve, reject) => {
             jwt.sign(user, JWT_SECRET, { expiresIn: '1h' }, (err, token: string | undefined) => {
-                if (err || token === undefined) throw new ServerError();
+                if (err || token === undefined) {
+                    console.log(err);
+                    return reject(new ServerError());
+                }
                 resolve(token);
             })
         });

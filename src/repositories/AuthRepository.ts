@@ -24,7 +24,7 @@ class AuthRepository {
 
     async registerUser(email: string, username: string, password: string) {
         try {
-            await pool.execute("INSERT INTO users (`username`, `email`, `password`) VALUES (?,?,?)", [email, username, password]);
+            await pool.execute("INSERT INTO users (`email`, `username`, `password`) VALUES (?,?,?)", [email, username, password]);
         } catch (err) {
             throw new ServerError();
         }

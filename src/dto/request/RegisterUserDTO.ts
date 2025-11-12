@@ -12,6 +12,6 @@ export class RegisterUserDTO implements RequestValidation {
     public username!: string;
 
     @IsNotEmpty({ message: 'Password is required.' })
-    @MinLength(8, { message: 'Password must be at least 8 characters.' })
+    @MinLength(4, { message: 'Password must be at least 4 characters.' })
     public password!: string;
 }
