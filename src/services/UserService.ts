@@ -3,9 +3,10 @@ import {UserNotExists} from "../exceptions/UserNotExists";
 import {User} from "../models/User";
 import JWTService from "./JWTService";
 import {UserResponseDTO} from "../dto/response/UserResponseDTO";
+import UserRepository from "../repositories/UserRepository";
 
 class UserService {
-    private repo = AuthRepository;
+    private repo = UserRepository;
     private jwtService = JWTService;
 
     async getUser(token: string): Promise<UserResponseDTO> {
