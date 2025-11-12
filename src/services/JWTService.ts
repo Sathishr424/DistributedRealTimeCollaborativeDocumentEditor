@@ -19,7 +19,7 @@ class JWTService {
             jwt.sign(user, JWT_SECRET, { expiresIn: '1h' }, (err, token: string | undefined) => {
                 if (err || token === undefined) {
                     console.log(err);
-                    return reject(new ServerError());
+                    return reject(new ServerError(err));
                 }
                 resolve(token);
             })
@@ -30,7 +30,7 @@ class JWTService {
         try {
             return jwt.verify(token, JWT_SECRET) as UserTokenDTO;
         } catch (err) {
-            throw new ServerError();
+            throw new ServerError(err);
         }
     }
 }

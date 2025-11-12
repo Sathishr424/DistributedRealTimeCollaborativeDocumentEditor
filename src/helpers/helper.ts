@@ -8,7 +8,7 @@ export async function hashPassword(password: string) {
     try {
         return await hash(password, 10);
     } catch (err) {
-        throw new ServerError();
+        throw new ServerError(err);
     }
 }
 
@@ -16,7 +16,7 @@ export async function checkPassword(password: string, hashedPassword: string): P
     try {
         return await compare(password, hashedPassword);
     } catch (err) {
-        throw new ServerError();
+        throw new ServerError(err);
     }
 }
 

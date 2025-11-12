@@ -1,7 +1,7 @@
 import {AppError} from "../errors/AppError";
 
 export class ServerError extends AppError {
-    constructor() {
+    constructor(err: any) {
         super("Server error", 500);
     }
 }

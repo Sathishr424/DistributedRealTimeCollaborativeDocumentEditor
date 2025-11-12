@@ -9,7 +9,7 @@ class UserRepository {
             const [rows] = await pool.query<User[]>("SELECT * FROM users WHERE email=? LIMIT 1", [email]);
             return rows;
         } catch(err) {
-            throw new ServerError();
+            throw new ServerError(err);
         }
     }
 }
