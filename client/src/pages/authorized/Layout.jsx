@@ -27,7 +27,6 @@ export default function DashboardLayout({children}) {
 
     return (
         <section>
-            <NavbarLoggedIn />
             {children}
         </section>
     );

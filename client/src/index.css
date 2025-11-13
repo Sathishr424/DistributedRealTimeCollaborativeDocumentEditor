@@ -23,3 +23,7 @@
     --color-category-bg4: #124241;
     --color-category-text4: #00DAC6;
 }
+
+.btn-primary {
+    @apply bg-blue-500 text-white px-4 py-2 cursor-pointer rounded;
+}
