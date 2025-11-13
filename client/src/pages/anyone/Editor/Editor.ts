@@ -8,7 +8,7 @@ const config: DefaultEditorConfig = {
     color: "black"
 }
 
-interface POS {
+export interface POS {
     x: number,
     y: number
 }
@@ -18,7 +18,11 @@ interface InsetOperation {
 }
 
 interface UpdateOperation {
-    pos: number
+    pos: POS
+}
+
+interface EmptyOperation {
+
 }
 
 interface EditorOperationsHandle<T> {
@@ -104,15 +108,15 @@ class EditorOperations {
         this._ctx.clearRect(x, y, width, height);
     }
 
-    public getCursorPositionOnCanvas(pos?: number): POS {
+    public getCursorPositionOnCanvas(pos?: POS): POS {
         if (pos === undefined) {
-            pos = this._editor.getCursorPosition();
+            pos = this.editor.getCursorPosition();
         }
 
-        let x = pos % this._cols * this._width;
-        let y = Math.floor(pos / this._cols);
+        let x = pos.x * this.width;
+        let y = pos.y * this.height;
 
-        return { x: x - (x % this._width), y: y * this._height + this._height };
+        return { x: x, y: y + this._height };
     }
 
     private drawText(text: string, pos: POS) {
@@ -122,12 +126,18 @@ class EditorOperations {
 
     renderText() {
         this.clearArea();
-        let i=0;
+        let row = 0;
+        let col = 0;
         [this.editor.getLeft().getHead(), this.editor.getRight().getHead()].forEach(node => {
             while (node) {
-                this.drawText(node.val, this.getCursorPositionOnCanvas(i));
+                this.drawText(node.val, this.getCursorPositionOnCanvas({ x: col, y: row }));
+                if (node.val === '\n' || col == this.cols) {
+                    row++;
+                    col = 0;
+                } else {
+                    col++;
+                }
                 node = node.next;
-                i++;
             }
         })
     }
@@ -186,11 +196,7 @@ class InsertNewLine extends EditorOperations implements EditorOperationsHandle<I
     }
 
     handle(options: InsetOperation): void {
-        let pos = this.editor.getCursorPosition();
-        let rem = this.cols - (pos % this.cols);
-        for (let i=0; i<rem; i++) {
-            this.editor.insert(options.char);
-        }
+        this.editor.insertNewLine();
         this.renderText();
     }
 }
@@ -202,6 +208,17 @@ class DeleteText extends EditorOperations implements EditorOperationsHandle<Upda
 
     handle(options: UpdateOperation): void {
         this.editor.delete(options.pos);
+        this.renderText();
+    }
+}
+
+class BackSpace extends EditorOperations implements EditorOperationsHandle<UpdateOperation> {
+    constructor(config: EditorOperationConfig) {
+        super(config);
+    }
+
+    handle(options: UpdateOperation): void {
+        this.editor.backspace();
         this.renderText();
     }
 }
@@ -218,17 +235,19 @@ class Editor {
     private insertNewLine: InsertNewLine;
     private cursorOperation: CursorOperation;
     private deleteText: DeleteText;
+    private backspace: BackSpace;
 
     constructor(canvas: HTMLCanvasElement) {
         this.canvas = canvas;
         this.ctx = <CanvasRenderingContext2D>canvas.getContext('2d');
-        this.editor = new RawEditor();
 
         this.ctx.fillStyle = config.color;
         this.ctx.font = `${config.fontSize}px ${config.font}`;
         this.charWidth = this.ctx.measureText("a").width;
         const { width } = this.canvas.getBoundingClientRect();
         this.cols = (width - this.charWidth) / this.charWidth;
+
+        this.editor = new RawEditor(this.cols);
 
         let opConfig: EditorOperationConfig = {
             ctx: this.ctx,
@@ -242,6 +261,7 @@ class Editor {
         this.insertText = new InsertText(opConfig);
         this.insertNewLine = new InsertNewLine(opConfig);
         this.deleteText = new DeleteText(opConfig);
+        this.backspace = new BackSpace(opConfig);
         this.cursorOperation = new CursorOperation(opConfig);
 
     }
@@ -274,7 +294,7 @@ class Editor {
         }
 
         if (key === 'Backspace') {
-            this.deleteText.handle({ pos: this.editor.getCursorPosition() - 1 });
+            this.backspace.handle({ pos: { x: 0, y: 0 } });
         }
         if (key === 'Enter') {
             this.insertNewLine.handle({ char: '' })
