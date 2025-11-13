@@ -26,26 +26,50 @@ export class RawEditor {
     }
 
     public delete(newPos: number) {
+        let diff = this.left.size() - newPos;
 
+        if (diff > 0) {
+            this.deleteLeft(diff);
+        } else {
+            this.deleteRight(diff * -1);
+        }
     }
 
     public moveCursor(newPos: number) {
+        let diff = this.left.size() - newPos;
 
+        if (diff > 0) {
+            this.moveCursorLeft(diff);
+        } else {
+            this.moveCursorRight(diff * -1);
+        }
     }
 
     private deleteLeft(k: number) {
-
+        while (this.left.size() && k) {
+            this.left.pop_back();
+            k--;
+        }
     }
 
     private deleteRight(k: number) {
-
+        while (this.right.size() && k) {
+            this.right.pop_front();
+            k++;
+        }
     }
 
     private moveCursorLeft(k: number) {
-
+        while (this.left.size() && k) {
+            this.right.push_front(<string>this.left.pop_back());
+            k--;
+        }
     }
 
     private moveCursorRight(k: number) {
-
+        while (this.right.size() && k) {
+            this.left.push_back(<string>this.right.pop_front());
+            k--;
+        }
     }
 }
