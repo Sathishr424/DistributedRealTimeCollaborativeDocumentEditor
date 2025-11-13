@@ -180,6 +180,21 @@ class InsertText extends EditorOperations implements EditorOperationsHandle<Inse
     }
 }
 
+class InsertNewLine extends EditorOperations implements EditorOperationsHandle<InsetOperation> {
+    constructor(config: EditorOperationConfig) {
+        super(config);
+    }
+
+    handle(options: InsetOperation): void {
+        let pos = this.editor.getCursorPosition();
+        let rem = this.cols - (pos % this.cols);
+        for (let i=0; i<rem; i++) {
+            this.editor.insert(options.char);
+        }
+        this.renderText();
+    }
+}
+
 class DeleteText extends EditorOperations implements EditorOperationsHandle<UpdateOperation> {
     constructor(config: EditorOperationConfig) {
         super(config);
@@ -200,6 +215,7 @@ class Editor {
     private lineHeight: number = 20;
     private cols: number = 0;
     private insertText: InsertText;
+    private insertNewLine: InsertNewLine;
     private cursorOperation: CursorOperation;
     private deleteText: DeleteText;
 
@@ -224,6 +240,7 @@ class Editor {
         }
 
         this.insertText = new InsertText(opConfig);
+        this.insertNewLine = new InsertNewLine(opConfig);
         this.deleteText = new DeleteText(opConfig);
         this.cursorOperation = new CursorOperation(opConfig);
 
@@ -253,10 +270,14 @@ class Editor {
 
         if (key.length === 1) {
             this.insertText.handle({ char: key })
+            e.preventDefault();
         }
 
         if (key === 'Backspace') {
             this.deleteText.handle({ pos: this.editor.getCursorPosition() - 1 });
+        }
+        if (key === 'Enter') {
+            this.insertNewLine.handle({ char: '' })
         }
     }
 
