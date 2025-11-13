@@ -1,4 +1,4 @@
-export function getRandomString(length) {
+export function getRandomString(length: number) {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let result = '';
     const charactersLength = characters.length;
@@ -11,7 +11,7 @@ export function getRandomString(length) {
     return result;
 }
 
-export function convertToExcelFriendlyDate(isoDate) {
+export function convertToExcelFriendlyDate(isoDate: any) {
     const date = new Date(isoDate);
     const year = date.getFullYear();
     const month = ('0' + (date.getMonth() + 1)).slice(-2);
@@ -23,23 +23,23 @@ export function convertToExcelFriendlyDate(isoDate) {
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
 
-const padNumber = (num) => {
+const padNumber = (num: number) => {
     return num.toString().padStart(2, '0');
 }
 
-export const dateConverter = (date) => {
+export const dateConverter = (date: any) => {
     let d = new Date(date);
     return `${padNumber(d.getDate())}/${padNumber(d.getMonth() + 1)}/${d.getFullYear()}`
 }
 
-export const dateConverterOnlyMonthAndYear = (date) => {
+export const dateConverterOnlyMonthAndYear = (date: any) => {
     let d = new Date(date);
     return `${d.toLocaleString('en-US', { month: 'short' })} ${d.getFullYear()}`
 }
 
-export const dateGetReadableString = (date) => {
+export const dateGetReadableString = (date: any) => {
     let d = new Date(date);
-    const options = {
+    const options: Intl.DateTimeFormatOptions = {
         weekday: "short",
         year: "numeric",
         month: "short",
@@ -51,23 +51,23 @@ export const dateGetReadableString = (date) => {
     return d.toLocaleDateString("en-US", options)
 }
 
-export function isValidDate(dateString) {
+export function isValidDate(dateString: any) {
     const date = new Date(dateString);
 
     return !isNaN(date.getTime());
 }
 
-export const dateConverterUSFormat = (date) => {
+export const dateConverterUSFormat = (date: any) => {
     let d = new Date(date);
     return `${d.getFullYear()}-${padNumber(d.getMonth() + 1)}-${padNumber(d.getDate())}`
 }
 
-export const dateConverterGetTimeOnly = (date) => {
+export const dateConverterGetTimeOnly = (date: any) => {
     let d = new Date(date);
     return `${padNumber(d.getHours())}:${padNumber(d.getMinutes())}`
 }
 
-export const htmlDateTimeToDate = (date, time) => {
+export const htmlDateTimeToDate = (date: any, time: any) => {
     if (date.length > 0) {
         let combined = `${date}`;
         if (time.length > 0) {
@@ -87,12 +87,12 @@ export const getMaxDate = () => {
     return new Date("2125-11-08T00:00:00Z");
 };
 
-export const isDateValid = (dateString) => {
+export const isDateValid = (dateString: any) => {
     const date = new Date(dateString);
     return !isNaN(date.getTime()) && dateString.length > 0;
 }
 
-export const getUrlEncodedDate = (dateObj) => {
+export const getUrlEncodedDate = (dateObj: any) => {
     const date = new Date(dateObj);
     const isoString = date.toISOString();
     return encodeURIComponent(isoString);

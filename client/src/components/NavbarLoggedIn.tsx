@@ -1,6 +1,6 @@
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faPowerOff} from "@fortawesome/free-solid-svg-icons";
-import AuthService from "../services/AuthService.js";
+import AuthService from "../services/AuthService";
 import {useNavigate} from "react-router-dom";
 
 export default function NavbarLoggedIn() {

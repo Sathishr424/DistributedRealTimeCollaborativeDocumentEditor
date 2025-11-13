@@ -1,32 +1,33 @@
-import {useContext, useEffect, useState} from "react";
+import {FormEvent, useContext, useEffect, useState} from "react";
 import { Link, useNavigate } from "react-router-dom";
-import UserService from "../../services/AuthService.js";
-import Navbar from "../../components/Navbar.jsx";
+import UserService from "../../services/AuthService";
+import Navbar from "../../components/Navbar";
 import { getRandomString } from "../../utils/helper";
-import JWTService from "../../services/JWTService.js";
-import AlertContext from "../../components/AlertContext.jsx";
+import JWTService from "../../services/JWTService";
+import AlertContext from "../../components/AlertContext";
+import {AlertItem} from "../../interfaces/Alerts";
 
 export default function Login() {
-    const { alert, setAlerts } = useContext(AlertContext);
+    const { alerts, setAlerts } = useContext(AlertContext);
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
 
-    const onSubmit = async (event) => {
+    const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
 
         try {
             setIsLoading(true);
-            const data = await UserService.login(email, password);
+            const data = await UserService.login({email, password});
             if (data.token !== undefined && data.token.length > 0) {
-                setAlerts(prev => [...prev, { id: getRandomString(16), message: "Login successful!" }])
+                setAlerts(prev => [...prev, { id: getRandomString(16), message: "Login successfull!" }])
                 navigate("/");
             } else {
                 setAlerts(prev => [...prev, { id: getRandomString(16), message: "Login failed" }])
             }
             setIsLoading(false);
-        } catch (error) {
+        } catch (error: any) {
             setIsLoading(false);
             if (error.status === 401) {
                 setAlerts(prev => [...prev, { id: getRandomString(16), message: "Invalid Credentials" }])
@@ -62,7 +63,7 @@ export default function Login() {
                     <h2 className="p-2 font-bold text-lg">Login</h2>
                 </div>
                 <div className="p-2">
-                    <form onSubmit={onSubmit}>
+                    <form onSubmit={(event) => onSubmit(event)}>
                         <div className="flex flex-col my-2 justify-center min-w-[350px]">
                             <label htmlFor="email">email</label>
                             <input typeof="email" placeholder="email" value={email} onChange={(event) => setEmail(event.target.value)} required className="shadow appearance-none border w-full py-3 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mt-1" id="email" type="text" name='email' />
@@ -80,7 +81,7 @@ export default function Login() {
                 </div>
                 <div className="flex flex-row justify-center">
                     <p className="p-2">
-                        Don't have an account? <a className="text-blue-400 hover:underline" href="/register">Sign Up</a>
+                        Don't have an account? <a className="text-blue-400 hover:underline" href="/client/src/pages/auth/Register">Sign Up</a>
                     </p>
                 </div>
             </div>

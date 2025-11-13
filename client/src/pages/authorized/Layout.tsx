@@ -1,9 +1,8 @@
 import {useNavigate} from "react-router-dom";
 import React, {useEffect, useState} from "react";
-import UserService from "../../services/AuthService.js";
-import NavbarLoggedIn from "../../components/NavbarLoggedIn.jsx";
+import UserService from "../../services/AuthService";
 
-export default function DashboardLayout({children}) {
+export default function DashboardLayout({children}: { children: React.ReactNode }) {
     const navigate = useNavigate();
     const [user, setUser] = useState({});
 
@@ -17,7 +16,6 @@ export default function DashboardLayout({children}) {
             setUser(userData);
         } catch (error) {
             navigate('/login');
-            console.log(error.status)
         }
     }
 

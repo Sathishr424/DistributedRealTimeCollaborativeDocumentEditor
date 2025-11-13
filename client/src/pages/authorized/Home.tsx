@@ -1,6 +1,6 @@
 import DashboardLayout from "./Layout";
-import NavbarLoggedIn from "../../components/NavbarLoggedIn.jsx";
 import {Link} from "react-router-dom";
+import NavbarLoggedIn from "@components/NavbarLoggedIn";
 
 export default function Home() {
     return <DashboardLayout>

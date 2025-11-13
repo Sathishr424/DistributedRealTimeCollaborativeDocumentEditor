@@ -1,6 +1,8 @@
 import axios from "axios";
 import JWTService from "./JWTService";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 class APIRequest {
 
     #getAuthHeaders() {
@@ -11,9 +13,9 @@ class APIRequest {
         return {};
     }
 
-    #postRequest(url, data) {
+    #postRequest(url: string, data: any) {
         return new Promise((resolve, reject) => {
-            axios.post(`${import.meta.env.VITE_API_URL}/${url}`, data, {
+            axios.post(`${API_URL}/${url}`, data, {
                 headers: this.#getAuthHeaders(),
             }).then(res => {
                 resolve(res.data);
@@ -23,9 +25,9 @@ class APIRequest {
         })
     }
 
-    #putRequest(url, data) {
+    #putRequest(url: string, data: any) {
         return new Promise((resolve, reject) => {
-            axios.put(`${import.meta.env.VITE_API_URL}/${url}`, data, {
+            axios.put(`${API_URL}/${url}`, data, {
                 headers: this.#getAuthHeaders(),
             }).then(res => {
                 resolve(res.data);
@@ -35,9 +37,9 @@ class APIRequest {
         })
     }
 
-    #getRequest(url) {
+    #getRequest(url: string) {
         return new Promise((resolve, reject) => {
-            axios.get(`${import.meta.env.VITE_API_URL}/${url}`, {
+            axios.get(`${API_URL}/${url}`, {
                 headers: this.#getAuthHeaders(),
             }).then(res => {
                 resolve(res.data);
@@ -47,7 +49,7 @@ class APIRequest {
         })
     }
 
-    request(url, method, data) {
+    request(url: string, method: string, data: any): Promise<any> {
         if (method === 'POST') return this.#postRequest(url, data);
         else if (method === 'GET') return this.#getRequest(url)
         else if (method === 'PUT') return this.#putRequest(url, data);

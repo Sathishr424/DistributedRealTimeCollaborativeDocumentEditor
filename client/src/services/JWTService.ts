@@ -3,7 +3,7 @@ class JWTService {
         return localStorage.getItem('authToken') || "";
     }
 
-    storeToken(newToken) {
+    storeToken(newToken: string) {
         localStorage.setItem('authToken', newToken);
     }
 

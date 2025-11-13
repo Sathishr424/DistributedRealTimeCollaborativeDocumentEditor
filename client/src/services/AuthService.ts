@@ -1,8 +1,9 @@
 import APIRequest from "./APIRequest";
 import JWTService from "./JWTService";
+import {LoginRequestDTO, RegisterRequestDTO, UserResponseDTO} from "../dto/DTOs";
 
 class AuthService {
-    async getUserData() {
+    async getUserData(): Promise<UserResponseDTO> {
         try {
             return await APIRequest.request("api/users/me", "GET", {});
         } catch (error) {
@@ -13,7 +14,7 @@ class AuthService {
 
     async isUserLoggedIn() {
         try {
-            let data = await this.getUserData();
+            let data: UserResponseDTO = await this.getUserData();
             return data !== null && data.email !== undefined;
         } catch (error) {
             console.error(error);
@@ -21,9 +22,9 @@ class AuthService {
         }
     }
 
-    async login(email, password) {
+    async login(request: LoginRequestDTO) {
         try {
-            let data = await APIRequest.request("api/auth/login", "POST", { email, password });
+            let data = await APIRequest.request("api/auth/login", "POST", { email: request.email, password: request.password });
             if (data.token !== undefined) {
                 JWTService.storeToken(data.token);
             }
@@ -34,9 +35,9 @@ class AuthService {
         }
     }
 
-    async register(email, username, password) {
+    async register(request: RegisterRequestDTO) {
         try {
-            return await APIRequest.request("api/auth/register", "POST", {email, username, password});
+            return await APIRequest.request("api/auth/register", "POST", {email: request.email, username: request.username, password: request.password});
         } catch (error) {
             console.error(error);
             throw error;
