@@ -1,13 +1,22 @@
 import {RefObject, useEffect, useRef} from "react";
+import Editor from "./Editor/Editor";
 
 export default function DocumentEditor() {
-    let editor: RefObject<Editor | null> = useRef(null);
+    const canvasRef: RefObject<HTMLCanvasElement | null> =  useRef(null);
+    const editorInstanceRef: RefObject<Editor | null> = useRef(null);
 
     useEffect(() => {
-        let canvas = document.querySelector("canvas");
-        if (canvas) editor.current = new Editor(canvas);
-    }, [])
+        const canvasElement = canvasRef.current;
 
+        if (canvasElement) {
+            console.log(canvasElement)
+            editorInstanceRef.current = new Editor(canvasElement);
+            editorInstanceRef.current.attachEvents();
+        }
+
+        return () => {
+        }
+    }, [])
 
     return (
         <main className="flex flex-col h-screen">
@@ -20,7 +29,9 @@ export default function DocumentEditor() {
             </header>
             <div className="document-body bg-slate-100 overflow-auto">
                 <div className="w-full flex items-center justify-center">
-                    <canvas width="595px" height="892px" className="bg-white border-1 border-gray-200 m-10 p-4"></canvas>
+                    <div className="bg-white border-1 border-gray-200 m-10 p-4">
+                        <canvas ref={canvasRef} width="595px" height="892px"></canvas>
+                    </div>
                 </div>
             </div>
         </main>
