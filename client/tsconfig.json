@@ -1,0 +1,51 @@
+{
+  "compilerOptions": {
+    /* Type Checking */
+    "strict": true,                                 /* Enable all strict type-checking options. Highly recommended. */
+    "noImplicitAny": true,                          /* Raise error on expressions and declarations with an implied 'any' type. (Included in strict) */
+    "strictNullChecks": true,                       /* Enable strict checking of null and undefined. (Included in strict) */
+    "strictFunctionTypes": true,                    /* Enable strict checking of function types. (Included in strict) */
+    "strictBindCallApply": true,                    /* Enable strict 'bind', 'call', and 'apply' methods on functions. (Included in strict) */
+    "strictPropertyInitialization": true,           /* Enable strict checking of property initialization in classes. (Included in strict) */
+    "noImplicitThis": true,                         /* Raise error on 'this' expressions with an implied 'any' type. (Included in strict) */
+    "useUnknownInCatchVariables": true,             /* Type catch clause variables as 'unknown' instead of 'any'. */
+
+    /* Modules & Interop */
+    "module": "ESNext",                             /* Specify what module code is generated (e.g., 'commonjs', 'es2020'). */
+    "moduleResolution": "node",                     /* Resolve modules using Node.js style (essential for finding packages in node_modules). */
+    "allowSyntheticDefaultImports": true,           /* Allow default imports from modules with no default export. */
+    "esModuleInterop": true,                        /* Enables compatibility between CommonJS and ES modules. */
+    "resolveJsonModule": true,                      /* Allows importing modules with a '.json' extension. */
+    "isolatedModules": true,                        /* Ensure that each file can be safely transpiled by tools like Babel or swc. */
+
+    /* React / JSX */
+    "target": "ES2020",                             /* Specify the ECMAScript target version for output. */
+    "lib": ["dom", "dom.iterable", "esnext"],       /* Specify a list of library files to be included in the compilation. */
+    "jsx": "react-jsx",                             /* Specify what JSX code is generated (e.g., 'react', 'react-jsx', or 'preserve'). */
+
+    /* Output */
+    "outDir": "./dist",                             /* Specify an output directory for converted JavaScript files. (Only if using tsc for build) */
+    "noEmit": true,                                 /* Do not emit compiler output (use this if you are using Babel/Vite/Webpack for compilation). */
+    "declaration": true,                            /* Generate .d.ts files for type declarations (useful for libraries). */
+
+    /* Paths */
+    "baseUrl": "./src",                             /* Base directory to resolve non-relative module names. */
+    "paths": {
+      "@components/*": ["components/*"],            /* Example: Allows absolute imports from @components/Button */
+      "@utils/*": ["utils/*"]
+    },
+
+    /* General */
+    "skipLibCheck": true,                           /* Skip type checking of declaration files. Improves compilation speed. */
+    "forceConsistentCasingInFileNames": true,       /* Disallow inconsistencies in file name casing. */
+  },
+
+  "include": [
+    "src/**/*",
+    "vite-env.d.ts"
+  ],
+  "exclude": [
+    "node_modules",                                 /* Exclude node_modules for compilation */
+    "dist"
+  ]
+}
