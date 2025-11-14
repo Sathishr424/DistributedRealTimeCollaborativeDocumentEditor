@@ -8,6 +8,8 @@ const config: DefaultEditorConfig = {
     color: "black"
 }
 
+const sampleText: string = "class Solution {\npublic:\n    int maxOperations(string s) {\n        int n = s.length();\n        int ans = 0;\n        int i = n-1;\n        while (i >= 0 && s[i] == '1') {\n            i--;\n        }\n        bool first = true;\n        int ones = 0;\n        while (i >= 0) {\n            if (s[i] == '1') {\n                int add = 0;\n                if (s[i + 1] == '0') add++;\n                while (i >= 0 && s[i] == '1') {\n                    ans+=ones + 1;\n                    i--;\n                }\n                ones += add;\n            }\n            i--;\n        }\n\n        return ans;\n    }\n}";
+
 export interface POS {
     x: number,
     y: number
@@ -95,7 +97,7 @@ class EditorOperations {
     }
 
     constructor(config: EditorOperationConfig) {
-        const { ctx, canvas, editor, cols, width, height } = config;
+        const {ctx, canvas, editor, cols, width, height} = config;
         this._ctx = ctx;
         this._canvas = canvas;
         this._editor = editor;
@@ -104,7 +106,7 @@ class EditorOperations {
         this._height = height;
     }
 
-    public clearArea(x=0, y=0, width=this._canvas.width, height=this._canvas.height): void {
+    public clearArea(x = 0, y = 0, width = this._canvas.width, height = this._canvas.height): void {
         this._ctx.clearRect(x, y, width, height);
     }
 
@@ -113,10 +115,7 @@ class EditorOperations {
             pos = this.editor.getCursorPosition();
         }
 
-        let x = pos.x * this.width;
-        let y = pos.y * this.height;
-
-        return { x: x, y: y };
+        return {x: pos.x * this.width, y: pos.y * this.height};
     }
 
     private drawText(text: string, pos: POS) {
@@ -130,7 +129,7 @@ class EditorOperations {
         let col = 0;
         [this.editor.getLeft().getHead(), this.editor.getRight().getHead()].forEach(node => {
             while (node) {
-                this.drawText(node.val, this.getCursorPositionOnCanvas({ x: col, y: row + 1 }));
+                this.drawText(node.val, this.getCursorPositionOnCanvas({x: col, y: row + 1}));
                 if (node.val === '\n' || col == this.cols) {
                     row++;
                     col = 0;
@@ -143,25 +142,26 @@ class EditorOperations {
     }
 }
 
-class CursorOperation extends EditorOperations implements EditorOperationsHandle<UpdateOperation> {
+class CursorOperation extends EditorOperations {
     private cursorInterval: any;
     private cursorToggle: boolean = false;
+
     constructor(config: EditorOperationConfig) {
         super(config);
-        this.cursorInterval = setInterval(this.renderCursor.bind(this), 250);
+        this.cursorInterval = setInterval(this.renderCursor.bind(this), 300);
     }
 
     private clearCursor() {
         if (this.ctx) {
             const pos = this.getCursorPositionOnCanvas();
-            this.clearArea(pos.x-0.5, pos.y, 2, this.height);
+            this.clearArea(pos.x - 0.5, pos.y + 5, 2, this.height);
         }
     }
 
     private showCursor() {
         if (this.ctx) {
             const pos = this.getCursorPositionOnCanvas();
-            this.ctx.fillRect(pos.x, pos.y, 1, this.height);
+            this.ctx.fillRect(pos.x, pos.y + 5, 1, this.height);
         }
     }
 
@@ -179,14 +179,23 @@ class CursorOperation extends EditorOperations implements EditorOperationsHandle
         this.editor.moveCursor(mousePos);
     }
 
-    handle(options: UpdateOperation): void {
-        this.editor.moveCursor(options.pos);
+    public onMouseUp(mousePos: POS) {
+    }
+
+    public onMouseMove(mousePos: POS) {
     }
 }
 
 class InsertText extends EditorOperations implements EditorOperationsHandle<InsetOperation> {
     constructor(config: EditorOperationConfig) {
         super(config);
+    }
+
+    public insertSampleText(text: string) {
+        for (let char of sampleText) {
+            this.editor.insert(char);
+        }
+        this.renderText();
     }
 
     handle(options: InsetOperation): void {
@@ -249,7 +258,7 @@ class Editor {
         this.ctx.fillStyle = config.color;
         this.ctx.font = `${config.fontSize}px ${config.font}`;
         this.charWidth = this.ctx.measureText("a").width;
-        const { width } = this.canvas.getBoundingClientRect();
+        const {width} = this.canvas.getBoundingClientRect();
         this.cols = Math.floor((width - this.charWidth) / this.charWidth);
 
         this.editor = new RawEditor(this.cols);
@@ -269,6 +278,7 @@ class Editor {
         this.backspace = new BackSpace(opConfig);
         this.cursorOperation = new CursorOperation(opConfig);
 
+        this.insertText.insertSampleText(sampleText);
     }
 
     public attachEvents() {
@@ -283,8 +293,10 @@ class Editor {
 
     private getCorrectPosition(x: number, y: number): POS {
         const {left, top} = this.canvas.getBoundingClientRect();
-
-        return {x: Math.floor((x - left) / this.charWidth), y: Math.floor((y - top) / this.lineHeight)};
+        x -= left;
+        y -= top;
+        x += (x % this.charWidth);
+        return {x: Math.floor(x / this.charWidth), y: Math.floor(y / this.lineHeight)};
     }
 
     private onKeyDown(e: KeyboardEvent) {
@@ -296,23 +308,20 @@ class Editor {
         }
 
         if (key.length === 1) {
-            this.insertText.handle({ char: key })
+            this.insertText.handle({char: key})
             e.preventDefault();
         }
 
         const pos = this.editor.getCursorPosition();
         if (key === 'Backspace') {
-            this.backspace.handle({ pos: { x: 0, y: 0 } });
-        }
-        if (key === 'Backspace') {
-            this.backspace.handle({ pos: { x: 0, y: 0 } });
+            this.backspace.handle({pos: {x: 0, y: 0}});
         }
         if (key === 'Enter') {
-            this.insertNewLine.handle({ char: '' })
+            this.insertNewLine.handle({char: ''})
         }
         switch (key) {
             case "ArrowLeft":
-                this.cursorOperation.onMouseDown({ x: pos.x - 1, y: pos.y })
+                this.cursorOperation.onMouseDown({x: pos.x - 1, y: pos.y})
                 e.preventDefault();
                 break
             case "ArrowUp":
@@ -320,11 +329,11 @@ class Editor {
                 e.preventDefault();
                 break
             case "ArrowRight":
-                this.cursorOperation.onMouseDown({ x: pos.x + 1, y: pos.y })
+                this.cursorOperation.onMouseDown({x: pos.x + 1, y: pos.y})
                 e.preventDefault();
                 break
             case "ArrowDown":
-                this.cursorOperation.onMouseDown({ x: pos.x, y: pos.y + 1 })
+                this.cursorOperation.onMouseDown({x: pos.x, y: pos.y + 1})
                 e.preventDefault();
                 break
             default:
@@ -333,19 +342,18 @@ class Editor {
     }
 
     private onMouseMove(e: MouseEvent) {
-        this.getCorrectPosition(e.clientX, e.clientY);
+        const pos = this.getCorrectPosition(e.clientX, e.clientY);
+        this.cursorOperation.onMouseMove(pos);
     }
 
     private onMouseUp(e: MouseEvent) {
-        // console.log("MouseUp: ", e);
-        // this.mousePressed = false;
+        const pos = this.getCorrectPosition(e.clientX, e.clientY);
+        this.cursorOperation.onMouseUp(pos);
     }
 
     private onMouseDown(e: MouseEvent) {
         const pos = this.getCorrectPosition(e.clientX, e.clientY);
         this.cursorOperation.onMouseDown(pos);
-        // console.log("MouseDown: ", e);
-        // this.mousePressed = true;
     }
 }
 

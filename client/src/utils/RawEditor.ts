@@ -39,10 +39,11 @@ export class RawEditor {
     }
 
     public insert(char: string) {
+        if (char == '\n') return this.insertNewLine();
         this.left.pushBack(char);
         this.newLines[this.lineIndex]++;
         this.columnIndex++;
-        console.log(this.newLines)
+        console.log(this.columnLength, char, this.newLines, this.columnIndex, this.lineIndex)
     }
 
     public insertNewLine() {
