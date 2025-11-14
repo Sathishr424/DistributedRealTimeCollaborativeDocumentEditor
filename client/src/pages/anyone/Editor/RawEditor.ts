@@ -41,8 +41,11 @@ export class RawEditor {
 
     public insertNewLine() {
         this.left.pushBack("\n");
+        let rem = this.newLines[this.lineIndex] - this.columnIndex;
+        this.newLines[this.lineIndex] = this.columnIndex;
         this.lineIndex++;
         this.newLines.splice(this.lineIndex, 0, 0);
+        this.newLines[this.lineIndex] += rem;
         this.columnIndex = 0;
     }
 

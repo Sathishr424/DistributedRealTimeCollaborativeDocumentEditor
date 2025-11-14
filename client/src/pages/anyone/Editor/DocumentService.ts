@@ -95,7 +95,7 @@ export class DocumentService {
                 let possible_chars = remRow * this.sizes.cols;
                 index += possible_chars;
                 index += Math.min(pos.x, line - possible_chars);
-                break;
+                return index;
             }
 
             index += line + 1;
@@ -114,6 +114,7 @@ export class DocumentService {
         const pos: Vec2 = { x: colIndex, y: rows }
         pos.x = pos.x % this.sizes.cols;
         pos.y = pos.y + Math.floor(colIndex / this.sizes.cols);
+        // console.log(this.editor.getLeft().toArray(), this.editor.getLines(), pos)
         return pos;
     }
 
@@ -129,8 +130,8 @@ export class DocumentService {
     }
 
     public moveCursor(newPos: Vec2) {
-        console.log("MovePOS:", newPos);
         let realPos = this.convertTo1DPosition(newPos);
+        console.log("MovePOS:", newPos, "1DPos:", realPos);
         let diff = this.editor.getLeft().size() - realPos;
 
         if (diff > 0) {

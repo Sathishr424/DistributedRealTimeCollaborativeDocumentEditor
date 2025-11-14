@@ -87,5 +87,15 @@ export class Deque<T> {
             this._back = newNode;
         }
     }
+
+    public toArray(): T[] {
+        let arr: T[] = [];
+        let node = this._front;
+        while (node) {
+            arr.push(node.val);
+            node = node.next;
+        }
+        return arr;
+    }
 }
 
