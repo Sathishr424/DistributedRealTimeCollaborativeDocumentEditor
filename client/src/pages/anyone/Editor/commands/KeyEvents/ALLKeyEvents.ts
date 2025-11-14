@@ -3,6 +3,7 @@ import {KeyCombination} from "./KeyCombination";
 import {RawEditor} from "../../RawEditor";
 import {TextKey} from "./TextKey";
 import {SpecialKeys} from "./SpecialKeys";
+import CursorUpdateSubscription from "../../interfaces/CursorUpdateSubscription";
 
 export class ALLKeyEvents {
     private events: KeyEvent[] = [];
@@ -15,7 +16,10 @@ export class ALLKeyEvents {
 
     handle(e: KeyboardEvent) {
         for (let event of this.events) {
-            if (!event.handle(e)) break;
+            if (!event.handle(e)) {
+                CursorUpdateSubscription.notifyAll("KEY EVENT");
+                break;
+            }
         }
     }
 }

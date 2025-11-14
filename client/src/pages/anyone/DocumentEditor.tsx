@@ -9,12 +9,11 @@ export default function DocumentEditor() {
         const canvasElement = canvasRef.current;
 
         if (canvasElement) {
-            console.log(canvasElement)
             editorInstanceRef.current = new Editor(canvasElement);
-            editorInstanceRef.current.attachEvents();
         }
 
         return () => {
+            editorInstanceRef.current ? editorInstanceRef.current.dispose() : null;
         }
     }, [])
 

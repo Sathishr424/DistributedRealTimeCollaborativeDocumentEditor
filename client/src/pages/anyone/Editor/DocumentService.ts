@@ -4,6 +4,7 @@ import {Vec2} from "./interfaces/interfaces";
 import {CursorOperation} from "./commands/CursorOperation";
 import {ALLKeyEvents} from "./commands/KeyEvents/ALLKeyEvents";
 
+let cnt: number = 0;
 export class DocumentService {
     private renderer: DocumentRenderer;
     private editor: RawEditor
@@ -41,6 +42,8 @@ export class DocumentService {
     }
 
     public onKeyDown(e: KeyboardEvent) {
+        console.log("Events: ", cnt);
         this.keyEvents.handle(e);
+        cnt++;
     }
 }

@@ -3,4 +3,6 @@ export interface DefaultEditorConfig {
     fontSize: number;
     color: string;
     lineHeight: number;
+    cursorWidth: number;
+    cursorColor: string;
 }

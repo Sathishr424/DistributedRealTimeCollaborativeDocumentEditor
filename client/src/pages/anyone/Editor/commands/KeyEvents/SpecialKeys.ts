@@ -13,21 +13,27 @@ export class SpecialKeys extends KeyEventsParent implements KeyEvent{
 
         switch (key) {
             case "Backspace":
+                this.editor.backspace();
                 e.preventDefault();
                 return false;
             case "Enter":
+                this.editor.insertNewLine();
                 e.preventDefault();
                 return false;
             case "ArrowLeft":
+                this.editor.moveCursorLeft(1);
                 e.preventDefault();
                 return false;
             case "ArrowUp":
+                this.editor.moveCursorUp(1);
                 e.preventDefault();
                 return false;
             case "ArrowRight":
+                this.editor.moveCursorRight(1);
                 e.preventDefault();
                 return false;
             case "ArrowDown":
+                this.editor.moveCursorDown(1);
                 e.preventDefault();
                 return false;
             default:

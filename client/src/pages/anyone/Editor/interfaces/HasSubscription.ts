@@ -1,0 +1,3 @@
+interface HasSubscription {
+    notify(): void;
+}

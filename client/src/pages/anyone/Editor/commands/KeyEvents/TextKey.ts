@@ -1,6 +1,7 @@
 import {KeyEventsParent} from "./KeyEventsParent";
 import {KeyEvent} from "./KeyEvent";
 import {RawEditor} from "../../RawEditor";
+import CursorUpdateSubscription from "../../interfaces/CursorUpdateSubscription";
 
 export class TextKey extends KeyEventsParent implements KeyEvent{
     type = "TextKey";
@@ -14,6 +15,7 @@ export class TextKey extends KeyEventsParent implements KeyEvent{
         if (key.length === 1) {
             this.editor.insert(key);
             e.preventDefault();
+            return false;
         }
 
         return true;

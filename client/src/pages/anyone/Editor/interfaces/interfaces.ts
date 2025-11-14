@@ -6,7 +6,9 @@ export const config: DefaultEditorConfig = {
     font: "monospace",
     fontSize: 16,
     color: "black",
-    lineHeight: 20
+    lineHeight: 20,
+    cursorColor: 'black',
+    cursorWidth: 1
 }
 
 export interface Vec2 {
