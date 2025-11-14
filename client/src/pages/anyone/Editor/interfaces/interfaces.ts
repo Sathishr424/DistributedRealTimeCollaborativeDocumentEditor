@@ -1,6 +1,5 @@
-import {RawEditor} from "@utils/RawEditor";
+import {RawEditor} from "../RawEditor";
 import {DefaultEditorConfig} from "../../../../interfaces/DefaultEditorConfig";
-import {MouseEvent} from "react";
 import {DocumentRenderer} from "../DocumentRenderer";
 
 export const config: DefaultEditorConfig = {
@@ -15,50 +14,12 @@ export interface Vec2 {
     y: number
 }
 
-export interface InsetOperation {
-    char: string,
-}
-
-export interface UpdateOperation {
-    pos: Vec2
-}
-
-export interface EmptyOperation {
-
-}
-
-export interface EditorOperationsHandle<T> {
-    handle(options: T): void;
-}
-
-export interface EditorOperationConfig {
-    ctx: CanvasRenderingContext2D;
-    canvas: HTMLCanvasElement;
-    editor: RawEditor;
-    sizes: DocumentSizes
-}
-
 export interface DocumentSizes {
     cols: number;
-    width: number
+    charWidth: number
     height: number;
-}
-
-export interface OperationType {
-    type: string,
-    handle(e?: unknown): void;
-}
-
-export interface KeyBoardOperation extends OperationType {
-    handle(e: KeyboardEvent): void;
-}
-
-export interface MouseOperation extends OperationType {
-    handle(e: MouseEvent): void;
-}
-
-export interface TextOperation extends OperationType {
-    handle(): void;
+    left: number;
+    top: number;
 }
 
 export class EditorOperation {

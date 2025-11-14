@@ -1,5 +1,5 @@
-import {Vec2, EditorOperation, EditorOperationConfig} from "../interfaces/interfaces";
-import {RawEditor} from "@utils/RawEditor";
+import {Vec2, EditorOperation} from "../interfaces/interfaces";
+import {RawEditor} from "../RawEditor";
 import {DocumentRenderer} from "../DocumentRenderer";
 
 export class CursorOperation extends EditorOperation {
