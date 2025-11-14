@@ -1,113 +1,32 @@
 import {MouseEvent} from "react";
-import {DefaultEditorConfig} from "../../../interfaces/DefaultEditorConfig";
 import {RawEditor} from "@utils/RawEditor";
-
-const config: DefaultEditorConfig = {
-    font: "monospace",
-    fontSize: 16,
-    color: "black"
-}
+import {
+    config,
+    EditorOperationConfig,
+    EditorOperationsHandle,
+    InsetOperation,
+    UpdateOperation,
+    Vec2
+} from "./interfaces/vec2";
+import {DocumentService} from "./DocumentService";
+import {DocumentRenderer} from "./DocumentRenderer";
 
 const sampleText: string = "class Solution {\npublic:\n    int maxOperations(string s) {\n        int n = s.length();\n        int ans = 0;\n        int i = n-1;\n        while (i >= 0 && s[i] == '1') {\n            i--;\n        }\n        bool first = true;\n        int ones = 0;\n        while (i >= 0) {\n            if (s[i] == '1') {\n                int add = 0;\n                if (s[i + 1] == '0') add++;\n                while (i >= 0 && s[i] == '1') {\n                    ans+=ones + 1;\n                    i--;\n                }\n                ones += add;\n            }\n            i--;\n        }\n\n        return ans;\n    }\n}";
 
-export interface Vec2 {
-    x: number,
-    y: number
-}
-
-interface InsetOperation {
-    char: string,
-}
-
-interface UpdateOperation {
-    pos: Vec2
-}
-
-interface EmptyOperation {
-
-}
-
-interface EditorOperationsHandle<T> {
-    handle(options: T): void;
-}
-
-interface EditorOperationConfig {
-    ctx: CanvasRenderingContext2D;
-    canvas: HTMLCanvasElement;
-    editor: RawEditor;
-    cols: number;
-    width: number
-    height: number;
-}
-
 class EditorOperations {
-    private _ctx: CanvasRenderingContext2D;
-    private _canvas: HTMLCanvasElement;
-    private _editor: RawEditor;
-    private _cols: number;
-    private _width: number
-    private _height: number;
-
-    get ctx(): CanvasRenderingContext2D {
-        return this._ctx;
-    }
-
-    set ctx(value: CanvasRenderingContext2D) {
-        this._ctx = value;
-    }
-
-    get canvas(): HTMLCanvasElement {
-        return this._canvas;
-    }
-
-    set canvas(value: HTMLCanvasElement) {
-        this._canvas = value;
-    }
-
-    get editor(): RawEditor {
-        return this._editor;
-    }
-
-    set editor(value: RawEditor) {
-        this._editor = value;
-    }
-
-    get cols(): number {
-        return this._cols;
-    }
-
-    set cols(value: number) {
-        this._cols = value;
-    }
-
-    get width(): number {
-        return this._width;
-    }
-
-    set width(value: number) {
-        this._width = value;
-    }
-
-    get height(): number {
-        return this._height;
-    }
-
-    set height(value: number) {
-        this._height = value;
-    }
+    private ctx: CanvasRenderingContext2D;
+    private canvas: HTMLCanvasElement;
+    private editor: RawEditor;
 
     constructor(config: EditorOperationConfig) {
-        const {ctx, canvas, editor, cols, width, height} = config;
-        this._ctx = ctx;
-        this._canvas = canvas;
-        this._editor = editor;
-        this._cols = cols;
-        this._width = width;
-        this._height = height;
+        const {ctx, canvas, editor, sizes} = config;
+        this.ctx = ctx;
+        this.canvas = canvas;
+        this.editor = editor;
     }
 
-    public clearArea(x = 0, y = 0, width = this._canvas.width, height = this._canvas.height): void {
-        this._ctx.clearRect(x, y, width, height);
+    public clearArea(x = 0, y = 0, width = this.canvas.width, height = this.canvas.height): void {
+        this.ctx.clearRect(x, y, width, height);
     }
 
     public getCursorPositionOnCanvas(pos?: Vec2): Vec2 {
@@ -142,49 +61,6 @@ class EditorOperations {
     }
 }
 
-class CursorOperation extends EditorOperations {
-    private cursorInterval: any;
-    private cursorToggle: boolean = false;
-
-    constructor(config: EditorOperationConfig) {
-        super(config);
-        this.cursorInterval = setInterval(this.renderCursor.bind(this), 300);
-    }
-
-    private clearCursor() {
-        if (this.ctx) {
-            const pos = this.getCursorPositionOnCanvas();
-            this.clearArea(pos.x - 0.5, pos.y + 5, 2, this.height);
-        }
-    }
-
-    private showCursor() {
-        if (this.ctx) {
-            const pos = this.getCursorPositionOnCanvas();
-            this.ctx.fillRect(pos.x, pos.y + 5, 1, this.height);
-        }
-    }
-
-    private renderCursor() {
-        if (!this.cursorToggle) {
-            this.showCursor();
-        } else {
-            this.clearCursor();
-        }
-        this.cursorToggle = !this.cursorToggle;
-    }
-
-    public onMouseDown(mousePos: Vec2) {
-        this.clearCursor();
-        this.editor.moveCursor(mousePos);
-    }
-
-    public onMouseUp(mousePos: Vec2) {
-    }
-
-    public onMouseMove(mousePos: Vec2) {
-    }
-}
 
 class InsertText extends EditorOperations implements EditorOperationsHandle<InsetOperation> {
     constructor(config: EditorOperationConfig) {
@@ -239,46 +115,18 @@ class BackSpace extends EditorOperations implements EditorOperationsHandle<Updat
 
 class Editor {
     private canvas: HTMLCanvasElement;
-    private editor: RawEditor;
     private ctx: CanvasRenderingContext2D;
-
-    private charWidth: number = 20;
-    private lineHeight: number = 20;
-    private cols: number = 0;
-    private insertText: InsertText;
-    private insertNewLine: InsertNewLine;
-    private cursorOperation: CursorOperation;
-    private deleteText: DeleteText;
-    private backspace: BackSpace;
+    private editor: RawEditor;
+    private renderer: DocumentRenderer;
+    private service: DocumentService;
 
     constructor(canvas: HTMLCanvasElement) {
         this.canvas = canvas;
         this.ctx = <CanvasRenderingContext2D>canvas.getContext('2d');
 
-        this.ctx.fillStyle = config.color;
-        this.ctx.font = `${config.fontSize}px ${config.font}`;
-        this.charWidth = this.ctx.measureText("a").width;
-        const {width} = this.canvas.getBoundingClientRect();
-        this.cols = Math.floor((width - this.charWidth) / this.charWidth);
-
-        this.editor = new RawEditor(this.cols);
-
-        let opConfig: EditorOperationConfig = {
-            ctx: this.ctx,
-            canvas: this.canvas,
-            editor: this.editor,
-            cols: this.cols,
-            width: this.charWidth,
-            height: this.lineHeight
-        }
-
-        this.insertText = new InsertText(opConfig);
-        this.insertNewLine = new InsertNewLine(opConfig);
-        this.deleteText = new DeleteText(opConfig);
-        this.backspace = new BackSpace(opConfig);
-        this.cursorOperation = new CursorOperation(opConfig);
-
-        this.insertText.insertSampleText(sampleText);
+        this.editor = new RawEditor();
+        this.renderer = new DocumentRenderer(this.ctx, this.canvas, this.editor);
+        this.service = new DocumentService(this.renderer, this.editor);
     }
 
     public attachEvents() {

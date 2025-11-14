@@ -1,5 +1,5 @@
-import {Vec2} from "../pages/anyone/Editor/Editor";
 import {Deque} from "@utils/Deque";
+import {Vec2} from "../pages/anyone/Editor/interfaces/vec2";
 
 export class RawEditor {
     private left: Deque<string>;
@@ -7,12 +7,10 @@ export class RawEditor {
     private newLines: number[] = [0];
     private lineIndex: number = 0;
     private columnLength: number = 0;
-    private columnIndex: number = 0;
 
-    constructor(columnLength: number) {
+    constructor() {
         this.left = new Deque<string>();
         this.right = new Deque<string>();
-        this.columnLength = columnLength;
     }
 
     public getLeft(): Deque<string> {
