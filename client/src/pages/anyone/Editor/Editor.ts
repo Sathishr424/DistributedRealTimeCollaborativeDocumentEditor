@@ -10,7 +10,7 @@ const config: DefaultEditorConfig = {
 
 const sampleText: string = "class Solution {\npublic:\n    int maxOperations(string s) {\n        int n = s.length();\n        int ans = 0;\n        int i = n-1;\n        while (i >= 0 && s[i] == '1') {\n            i--;\n        }\n        bool first = true;\n        int ones = 0;\n        while (i >= 0) {\n            if (s[i] == '1') {\n                int add = 0;\n                if (s[i + 1] == '0') add++;\n                while (i >= 0 && s[i] == '1') {\n                    ans+=ones + 1;\n                    i--;\n                }\n                ones += add;\n            }\n            i--;\n        }\n\n        return ans;\n    }\n}";
 
-export interface POS {
+export interface Vec2 {
     x: number,
     y: number
 }
@@ -20,7 +20,7 @@ interface InsetOperation {
 }
 
 interface UpdateOperation {
-    pos: POS
+    pos: Vec2
 }
 
 interface EmptyOperation {
@@ -110,7 +110,7 @@ class EditorOperations {
         this._ctx.clearRect(x, y, width, height);
     }
 
-    public getCursorPositionOnCanvas(pos?: POS): POS {
+    public getCursorPositionOnCanvas(pos?: Vec2): Vec2 {
         if (pos === undefined) {
             pos = this.editor.getCursorPosition();
         }
@@ -118,7 +118,7 @@ class EditorOperations {
         return {x: pos.x * this.width, y: pos.y * this.height};
     }
 
-    private drawText(text: string, pos: POS) {
+    private drawText(text: string, pos: Vec2) {
         // @ts-ignore
         this.ctx.fillText(text, pos.x, pos.y, this.charWidth);
     }
@@ -174,15 +174,15 @@ class CursorOperation extends EditorOperations {
         this.cursorToggle = !this.cursorToggle;
     }
 
-    public onMouseDown(mousePos: POS) {
+    public onMouseDown(mousePos: Vec2) {
         this.clearCursor();
         this.editor.moveCursor(mousePos);
     }
 
-    public onMouseUp(mousePos: POS) {
+    public onMouseUp(mousePos: Vec2) {
     }
 
-    public onMouseMove(mousePos: POS) {
+    public onMouseMove(mousePos: Vec2) {
     }
 }
 
@@ -291,7 +291,7 @@ class Editor {
         document.addEventListener('keydown', this.onKeyDown.bind(this));
     }
 
-    private getCorrectPosition(x: number, y: number): POS {
+    private getCorrectPosition(x: number, y: number): Vec2 {
         const {left, top} = this.canvas.getBoundingClientRect();
         x -= left;
         y -= top;

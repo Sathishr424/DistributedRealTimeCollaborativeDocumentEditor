@@ -1,5 +1,4 @@
-
-import {POS} from "../pages/anyone/Editor/Editor";
+import {Vec2} from "../pages/anyone/Editor/Editor";
 import {Deque} from "@utils/Deque";
 
 export class RawEditor {
@@ -24,17 +23,16 @@ export class RawEditor {
         return this.right;
     }
 
-    public getCursorPosition(): POS {
+    public getCursorPosition(): Vec2 {
         let row = 0;
         let index = 0;
         for (let i=0; i<this.lineIndex; i++) {
            row += Math.ceil((Math.max(this.columnLength, this.newLines[i]) / this.columnLength));
            index += this.newLines[i];
         }
-        const pos: POS = { x: this.columnIndex, y: row }
+        const pos: Vec2 = { x: this.columnIndex, y: row }
         pos.x = pos.x % (this.columnLength + 1);
         pos.y = pos.y + Math.floor(this.columnIndex / (this.columnLength + 1));
-        // console.log(this.left.size(), pos, this.convertTo1DPosition(pos));
         return pos;
     }
 
@@ -43,7 +41,6 @@ export class RawEditor {
         this.left.pushBack(char);
         this.newLines[this.lineIndex]++;
         this.columnIndex++;
-        console.log(this.columnLength, char, this.newLines, this.columnIndex, this.lineIndex)
     }
 
     public insertNewLine() {
@@ -53,7 +50,7 @@ export class RawEditor {
         this.columnIndex = 0;
     }
 
-    public convertTo1DPosition(pos: POS) {
+    public convertTo1DPosition(pos: Vec2) {
         let row = 0;
         let index = 0;
         for (let i=0; i<this.newLines.length; i++) {
@@ -61,7 +58,6 @@ export class RawEditor {
             row += curr;
             if (row > pos.y) {
                 if (this.newLines[i] > this.columnLength) {
-                    console.log(index, pos.y, row, pos.x)
                     return index + ( (curr - (row - pos.y) ) * this.columnLength ) + pos.x;
                 } else {
                     return index + Math.min(this.newLines[i], pos.x);
@@ -77,7 +73,7 @@ export class RawEditor {
         this.deleteLeft(1);
     }
 
-    public delete(newPos: POS) {
+    public delete(newPos: Vec2) {
         let realPos = this.convertTo1DPosition(newPos);
         let diff = this.left.size() - realPos;
 
@@ -88,12 +84,9 @@ export class RawEditor {
         }
     }
 
-    public moveCursor(newPos: POS) {
+    public moveCursor(newPos: Vec2) {
         let realPos = this.convertTo1DPosition(newPos);
         let diff = this.left.size() - realPos;
-
-        console.log(this.newLines)
-        console.log(newPos, realPos, this.left.size());
 
         if (diff > 0) {
             this.moveCursorLeft(diff);
@@ -103,7 +96,6 @@ export class RawEditor {
     }
 
     private deleteLeft(k: number) {
-        // console.log(this.newLines)
         while (this.left.size() && k) {
             let char = this.left.popBack();
             if (char == '\n') {
@@ -133,7 +125,6 @@ export class RawEditor {
     }
 
     private moveCursorLeft(k: number) {
-        console.log(k)
         while (this.left.size() && k) {
             let char = this.left.popBack();
             this.right.pushFront(<string>char);
