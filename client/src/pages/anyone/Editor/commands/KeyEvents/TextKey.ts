@@ -1,7 +1,5 @@
 import {KeyEventsParent} from "./KeyEventsParent";
 import {KeyEvent} from "./KeyEvent";
-import {RawEditor} from "../../RawEditor";
-import CursorUpdateSubscription from "../../interfaces/CursorUpdateSubscription";
 import {DocumentService} from "../../DocumentService";
 
 export class TextKey extends KeyEventsParent implements KeyEvent{

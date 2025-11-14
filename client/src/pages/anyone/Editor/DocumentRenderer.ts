@@ -55,7 +55,7 @@ export class DocumentRenderer implements HasSubscription{
         this.clearArea();
         let row = 0;
         let col = 0;
-        [this.editor.getLeft().getHead(), this.editor.getRight().getHead()].forEach(node => {
+        [this.editor.getTotalCharsBeforeCursor().getHead(), this.editor.getRight().getHead()].forEach(node => {
             while (node) {
                 this.drawText(node.val, this.getCursorPositionOnCanvas({x: col, y: row + 1}));
                 if (node.val === '\n' || col + 1 == this.sizes.cols) {

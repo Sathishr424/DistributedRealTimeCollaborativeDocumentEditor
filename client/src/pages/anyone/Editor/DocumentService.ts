@@ -85,7 +85,7 @@ export class DocumentService {
     public convertTo1DPosition(pos: Vec2) {
         let index = 0;
         let row = 0;
-        for (let line of this.editor.getLines()) {
+        for (let line of this.editor.getLogicalLineLengths()) {
             let lineLength = Math.max(this.sizes.cols, line);
             let rowsLineContain = Math.ceil(lineLength / this.sizes.cols);
 
@@ -106,21 +106,21 @@ export class DocumentService {
 
     public getCursorPosition(): Vec2 {
         let chars = 0;
-        for (let i=0; i<this.editor.getCurrentLineIndex(); i++) {
-            chars += Math.max(this.sizes.cols, this.editor.getLines()[i]);
+        for (let i=0; i<this.editor.getLogicalLineIndex(); i++) {
+            chars += Math.max(this.sizes.cols, this.editor.getLogicalLineLengths()[i]);
         }
         let rows = Math.ceil(chars / this.sizes.cols);
-        const colIndex = this.editor.getColumnIndex();
+        const colIndex = this.editor.getLogicalColumnIndex();
         const pos: Vec2 = { x: colIndex, y: rows }
         pos.x = pos.x % this.sizes.cols;
         pos.y = pos.y + Math.floor(colIndex / this.sizes.cols);
-        // console.log(this.editor.getLeft().toArray(), this.editor.getLines(), pos)
+        // console.log(this.editor.getTotalCharsBeforeCursor().toArray(), this.editor.getLogicalLineLengths(), pos)
         return pos;
     }
 
     public delete(newPos: Vec2) {
         let realPos = this.convertTo1DPosition(newPos);
-        let diff = this.editor.getLeft().size() - realPos;
+        let diff = this.editor.getTotalCharsBeforeCursor().size() - realPos;
 
         if (diff > 0) {
             this.editor.deleteLeft(diff);
@@ -132,7 +132,7 @@ export class DocumentService {
     public moveCursor(newPos: Vec2) {
         let realPos = this.convertTo1DPosition(newPos);
         console.log("MovePOS:", newPos, "1DPos:", realPos);
-        let diff = this.editor.getLeft().size() - realPos;
+        let diff = this.editor.getTotalCharsBeforeCursor().size() - realPos;
 
         if (diff > 0) {
             this.editor.moveLeft(diff);

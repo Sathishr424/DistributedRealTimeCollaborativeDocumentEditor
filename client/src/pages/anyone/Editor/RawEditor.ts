@@ -12,19 +12,19 @@ export class RawEditor {
         this.right = new Deque<string>();
     }
 
-    public getLines(): number[] {
+    public getLogicalLineLengths(): number[] {
         return this.newLines;
     }
 
-    public getCurrentLineIndex(): number {
+    public getLogicalLineIndex(): number {
         return this.lineIndex;
     }
 
-    public getColumnIndex(): number {
+    public getLogicalColumnIndex(): number {
         return this.columnIndex;
     }
 
-    public getLeft(): Deque<string> {
+    public getTotalCharsBeforeCursor(): Deque<string> {
         return this.left;
     }
 
