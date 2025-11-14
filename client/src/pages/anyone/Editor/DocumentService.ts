@@ -27,17 +27,17 @@ export class DocumentService {
 
     public onMouseMove(e: MouseEvent) {
         const pos = this.getCorrectPosition(e.clientX, e.clientY);
-        this.cursorOperation.onMouseMove(pos);
+        this.cursorOperation.handleOnMouseMove(pos);
     }
 
     public onMouseUp(e: MouseEvent) {
         const pos = this.getCorrectPosition(e.clientX, e.clientY);
-        this.cursorOperation.onMouseUp(pos);
+        this.cursorOperation.handleOnMouseUp(pos);
     }
 
     public onMouseDown(e: MouseEvent) {
         const pos = this.getCorrectPosition(e.clientX, e.clientY);
-        this.cursorOperation.onMouseDown(pos);
+        this.cursorOperation.handleOnMouseDown(pos);
     }
 
     public onKeyDown(e: KeyboardEvent) {

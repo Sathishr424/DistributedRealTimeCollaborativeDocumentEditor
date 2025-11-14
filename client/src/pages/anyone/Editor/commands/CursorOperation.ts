@@ -20,14 +20,14 @@ export class CursorOperation extends EditorOperation {
         this.cursorToggle = !this.cursorToggle;
     }
 
-    public onMouseDown(mousePos: Vec2) {
+    public handleOnMouseDown(mousePos: Vec2) {
         this.renderer.clearCursor();
         this.editor.moveCursor(mousePos);
     }
 
-    public onMouseUp(mousePos: Vec2) {
+    public handleOnMouseUp(mousePos: Vec2) {
     }
 
-    public onMouseMove(mousePos: Vec2) {
+    public handleOnMouseMove(mousePos: Vec2) {
     }
 }

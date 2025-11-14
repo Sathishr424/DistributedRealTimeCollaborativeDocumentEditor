@@ -1,7 +1,6 @@
-import {config, DocumentSizes} from "./interfaces/interfaces";
+import {config} from "./interfaces/interfaces";
 import {RawEditor} from "./RawEditor";
 import {Vec2} from "./interfaces/interfaces";
-import {DocumentService} from "./DocumentService";
 
 export class DocumentRenderer {
     private ctx: CanvasRenderingContext2D;
