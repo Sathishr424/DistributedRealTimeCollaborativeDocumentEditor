@@ -46,4 +46,8 @@ export class DocumentService {
         this.keyEvents.handle(e);
         cnt++;
     }
+
+    public dispose() {
+        this.cursorOperation.dispose();
+    }
 }

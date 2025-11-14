@@ -15,7 +15,6 @@ export class CursorOperation extends EditorOperation implements HasSubscription 
         CursorUpdateSubscription.subscribe(this);
     }
 
-
     notify(): void {
         this.cursorPosition = this.editor.getCursorPosition();
     }
@@ -39,5 +38,10 @@ export class CursorOperation extends EditorOperation implements HasSubscription 
     }
 
     public handleOnMouseMove(mousePos: Vec2) {
+    }
+
+    public dispose(): void {
+        clearInterval(this.cursorInterval);
+        this.renderer.clearCursor(this.cursorPosition);
     }
 }

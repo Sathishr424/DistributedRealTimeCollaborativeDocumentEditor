@@ -61,6 +61,8 @@ class Editor {
         this.canvas.removeEventListener('mousedown', this.boundMouseDown);
         document.removeEventListener('keydown', this.boundKeyDown);
 
+        this.service.dispose();
+
         // @ts-ignore
         this.editor = null;
         // @ts-ignore
