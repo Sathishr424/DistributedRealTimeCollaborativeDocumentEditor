@@ -1,5 +1,6 @@
-import {Deque} from "@utils/Deque";
+
 import {POS} from "../pages/anyone/Editor/Editor";
+import {Deque} from "@utils/Deque";
 
 export class RawEditor {
     private left: Deque<string>;
@@ -25,22 +26,27 @@ export class RawEditor {
 
     public getCursorPosition(): POS {
         let row = 0;
+        let index = 0;
         for (let i=0; i<this.lineIndex; i++) {
-           row += Math.floor((Math.max(this.columnLength, this.newLines[i]) + (this.columnLength - 1)) / this.columnLength);
+           row += Math.ceil((Math.max(this.columnLength, this.newLines[i]) / this.columnLength));
+           index += this.newLines[i];
         }
-
-        return { x: this.columnIndex, y: row };
+        const pos: POS = { x: this.columnIndex, y: row }
+        pos.x = pos.x % (this.columnLength + 1);
+        pos.y = pos.y + Math.floor(this.columnIndex / (this.columnLength + 1));
+        // console.log(this.left.size(), pos, this.convertTo1DPosition(pos));
+        return pos;
     }
 
     public insert(char: string) {
-        this.left.push_back(char);
+        this.left.pushBack(char);
         this.newLines[this.lineIndex]++;
         this.columnIndex++;
         console.log(this.newLines)
     }
 
     public insertNewLine() {
-        this.left.push_back("\n");
+        this.left.pushBack("\n");
         this.lineIndex++;
         this.newLines.splice(this.lineIndex, 0, 0);
         this.columnIndex = 0;
@@ -50,14 +56,20 @@ export class RawEditor {
         let row = 0;
         let index = 0;
         for (let i=0; i<this.newLines.length; i++) {
-            row += (this.newLines[i] + (this.columnLength - 1)) / this.columnLength;
-            if (row >= pos.y) {
-                return this.newLines[i] - (pos.y - row) * this.columnLength + pos.x;
+            let curr = Math.ceil(Math.max(this.newLines[i], this.columnLength) / this.columnLength);
+            row += curr;
+            if (row > pos.y) {
+                if (this.newLines[i] > this.columnLength) {
+                    console.log(index, pos.y, row, pos.x)
+                    return index + ( (curr - (row - pos.y) ) * this.columnLength ) + pos.x;
+                } else {
+                    return index + Math.min(this.newLines[i], pos.x);
+                }
             }
-            index += this.newLines[i];
+            index += this.newLines[i] + (i < this.newLines.length - 1 ? 1 : 0);
         }
 
-        return row + pos.x;
+        return index;
     }
 
     public backspace() {
@@ -79,6 +91,9 @@ export class RawEditor {
         let realPos = this.convertTo1DPosition(newPos);
         let diff = this.left.size() - realPos;
 
+        console.log(this.newLines)
+        console.log(newPos, realPos, this.left.size());
+
         if (diff > 0) {
             this.moveCursorLeft(diff);
         } else {
@@ -89,7 +104,7 @@ export class RawEditor {
     private deleteLeft(k: number) {
         // console.log(this.newLines)
         while (this.left.size() && k) {
-            let char = this.left.pop_back();
+            let char = this.left.popBack();
             if (char == '\n') {
                 this.lineIndex--;
                 this.columnIndex = this.newLines[this.lineIndex];
@@ -105,7 +120,7 @@ export class RawEditor {
 
     private deleteRight(k: number) {
         while (this.right.size() && k) {
-            let char = this.right.pop_front();
+            let char = this.right.popFront();
             if (char == '\n') {
                 this.newLines[this.lineIndex] += this.newLines[this.lineIndex + 1];
                 this.newLines.splice(this.lineIndex + 1, 1);
@@ -117,27 +132,29 @@ export class RawEditor {
     }
 
     private moveCursorLeft(k: number) {
+        console.log(k)
         while (this.left.size() && k) {
-            let char = this.left.pop_back();
-            this.right.push_front(<string>char);
+            let char = this.left.popBack();
+            this.right.pushFront(<string>char);
             if (char == '\n') {
                 this.lineIndex--;
                 this.columnIndex = this.newLines[this.lineIndex];
+            } else {
+                this.columnIndex--;
             }
-            this.columnIndex--;
             k--;
         }
     }
 
     private moveCursorRight(k: number) {
         while (this.right.size() && k) {
-            let char = this.right.pop_front();
+            let char = this.right.popFront();
             if (char == '\n') {
                 this.lineIndex++;
                 this.columnIndex = -1;
             }
             this.columnIndex++;
-            this.left.push_back(<string>char);
+            this.left.pushBack(<string>char);
             k--;
         }
     }

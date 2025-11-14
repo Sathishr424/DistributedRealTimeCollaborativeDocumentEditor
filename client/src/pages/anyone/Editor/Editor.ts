@@ -116,7 +116,7 @@ class EditorOperations {
         let x = pos.x * this.width;
         let y = pos.y * this.height;
 
-        return { x: x, y: y + this._height };
+        return { x: x, y: y };
     }
 
     private drawText(text: string, pos: POS) {
@@ -130,7 +130,7 @@ class EditorOperations {
         let col = 0;
         [this.editor.getLeft().getHead(), this.editor.getRight().getHead()].forEach(node => {
             while (node) {
-                this.drawText(node.val, this.getCursorPositionOnCanvas({ x: col, y: row }));
+                this.drawText(node.val, this.getCursorPositionOnCanvas({ x: col, y: row + 1 }));
                 if (node.val === '\n' || col == this.cols) {
                     row++;
                     col = 0;
@@ -154,14 +154,14 @@ class CursorOperation extends EditorOperations implements EditorOperationsHandle
     private clearCursor() {
         if (this.ctx) {
             const pos = this.getCursorPositionOnCanvas();
-            this.clearArea(pos.x, pos.y, 2, this.height);
+            this.clearArea(pos.x-0.5, pos.y, 2, this.height);
         }
     }
 
     private showCursor() {
         if (this.ctx) {
             const pos = this.getCursorPositionOnCanvas();
-            this.ctx.fillRect(pos.x, pos.y - this.height, 2, this.height);
+            this.ctx.fillRect(pos.x, pos.y, 1, this.height);
         }
     }
 
@@ -172,6 +172,11 @@ class CursorOperation extends EditorOperations implements EditorOperationsHandle
             this.clearCursor();
         }
         this.cursorToggle = !this.cursorToggle;
+    }
+
+    public onMouseDown(mousePos: POS) {
+        this.clearCursor();
+        this.editor.moveCursor(mousePos);
     }
 
     handle(options: UpdateOperation): void {
@@ -245,7 +250,7 @@ class Editor {
         this.ctx.font = `${config.fontSize}px ${config.font}`;
         this.charWidth = this.ctx.measureText("a").width;
         const { width } = this.canvas.getBoundingClientRect();
-        this.cols = (width - this.charWidth) / this.charWidth;
+        this.cols = Math.floor((width - this.charWidth) / this.charWidth);
 
         this.editor = new RawEditor(this.cols);
 
@@ -276,8 +281,10 @@ class Editor {
         document.addEventListener('keydown', this.onKeyDown.bind(this));
     }
 
-    private calcRealPosition(x: number, y: number) {
+    private getCorrectPosition(x: number, y: number): POS {
         const {left, top} = this.canvas.getBoundingClientRect();
+
+        return {x: Math.floor((x - left) / this.charWidth), y: Math.floor((y - top) / this.lineHeight)};
     }
 
     private onKeyDown(e: KeyboardEvent) {
@@ -302,17 +309,18 @@ class Editor {
     }
 
     private onMouseMove(e: MouseEvent) {
-        this.calcRealPosition(e.clientX, e.clientY);
+        this.getCorrectPosition(e.clientX, e.clientY);
     }
 
     private onMouseUp(e: MouseEvent) {
-        console.log("MouseUp: ", e);
+        // console.log("MouseUp: ", e);
         // this.mousePressed = false;
     }
 
     private onMouseDown(e: MouseEvent) {
-        this.calcRealPosition(e.clientX, e.clientY);
-        console.log("MouseDown: ", e);
+        const pos = this.getCorrectPosition(e.clientX, e.clientY);
+        this.cursorOperation.onMouseDown(pos);
+        // console.log("MouseDown: ", e);
         // this.mousePressed = true;
     }
 }

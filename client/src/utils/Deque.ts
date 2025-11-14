@@ -28,7 +28,7 @@ export class Deque<T> {
         return null;
     }
 
-    public pop_front(): T | null {
+    public popFront(): T | null {
         if (this._front !== null) {
             this._size--;
             let ret = this._front.val;
@@ -45,7 +45,7 @@ export class Deque<T> {
         }
     }
 
-    public pop_back(): T | null {
+    public popBack(): T | null {
         if (this._back !== null) {
             this._size--;
             let ret = this._back.val;
@@ -62,7 +62,7 @@ export class Deque<T> {
         }
     }
 
-    public push_front(val: T) {
+    public pushFront(val: T) {
         let newNode = new DoublyLinkedList<T>(val);
         this._size++;
         if (this._front === null) {
@@ -75,7 +75,7 @@ export class Deque<T> {
         }
     }
 
-    public push_back(val: T) {
+    public pushBack(val: T) {
         let newNode = new DoublyLinkedList<T>(val);
         this._size++;
         if (this._back === null) {

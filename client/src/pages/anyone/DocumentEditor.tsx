@@ -30,7 +30,7 @@ export default function DocumentEditor() {
             <div className="document-body bg-slate-100 overflow-auto">
                 <div className="w-full flex items-center justify-center">
                     <div className="bg-white border-1 border-gray-200 m-10 p-4">
-                        <canvas ref={canvasRef} width="595px" height="892px"></canvas>
+                        <canvas className="cursor-text" ref={canvasRef} width="595px" height="892px"></canvas>
                     </div>
                 </div>
             </div>
