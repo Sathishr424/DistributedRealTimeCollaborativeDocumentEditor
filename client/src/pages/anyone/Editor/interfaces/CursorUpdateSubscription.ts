@@ -11,7 +11,6 @@ class CursorUpdateSubscription {
     }
 
     notifyAll(from = "unknown") {
-        console.log("Notification triggered from ", from)
         for (let subscription of this.subscribers) {
             subscription.notify();
         }

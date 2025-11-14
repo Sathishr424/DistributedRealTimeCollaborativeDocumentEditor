@@ -23,15 +23,39 @@ export class RawEditor {
         return this.right;
     }
 
+    public convertTo1DPosition(pos: Vec2) {
+        let index = 0;
+        let row = 0;
+        for (let line of this.newLines) {
+            let lineLength = Math.max(this.sizes.cols, line);
+            let rowsLineContain = Math.ceil(lineLength / this.sizes.cols);
+
+            row += rowsLineContain;
+            if (row > pos.y) {
+                let remRow = pos.y - (row - rowsLineContain);
+                let possible_chars = remRow * this.sizes.cols;
+                index += possible_chars;
+                index += Math.min(pos.x, line - possible_chars);
+                return index;
+            }
+
+            index += line + 1;
+        }
+
+        return index;
+    }
+
     public getCursorPosition(): Vec2 {
         let chars = 0;
         for (let i=0; i<this.lineIndex; i++) {
             chars += Math.max(this.sizes.cols, this.newLines[i]);
         }
-        let row = Math.ceil(chars / this.sizes.cols);
-        const pos: Vec2 = { x: this.columnIndex, y: row }
-        pos.x = pos.x % (this.sizes.cols + 1);
-        pos.y = pos.y + Math.floor(this.columnIndex / (this.sizes.cols + 1));
+        let rows = Math.ceil(chars / this.sizes.cols);
+        const colIndex = this.columnIndex;
+        const pos: Vec2 = { x: colIndex, y: rows }
+        pos.x = pos.x % this.sizes.cols;
+        pos.y = pos.y + Math.floor(colIndex / this.sizes.cols);
+        // console.log([rows, colIndex, Math.ceil(colIndex / this.sizes.cols)], this.sizes.cols, this.newLines, pos, this.left.size(), this.convertTo1DPosition(pos));
         return pos;
     }
 
@@ -47,25 +71,6 @@ export class RawEditor {
         this.lineIndex++;
         this.newLines.splice(this.lineIndex, 0, 0);
         this.columnIndex = 0;
-    }
-
-    public convertTo1DPosition(pos: Vec2) {
-        let row = 0;
-        let index = 0;
-        for (let i=0; i<this.newLines.length; i++) {
-            let curr = Math.ceil(Math.max(this.newLines[i], this.sizes.cols) / this.sizes.cols);
-            row += curr;
-            if (row > pos.y) {
-                if (this.newLines[i] > this.sizes.cols) {
-                    return index + ( (curr - (row - pos.y) ) * this.sizes.cols ) + pos.x;
-                } else {
-                    return index + Math.min(this.newLines[i], pos.x);
-                }
-            }
-            index += this.newLines[i] + (i < this.newLines.length - 1 ? 1 : 0);
-        }
-
-        return index;
     }
 
     public backspace() {
@@ -84,6 +89,7 @@ export class RawEditor {
     }
 
     public moveCursor(newPos: Vec2) {
+        console.log("MovePOS:", newPos);
         let realPos = this.convertTo1DPosition(newPos);
         let diff = this.left.size() - realPos;
 
@@ -151,18 +157,13 @@ export class RawEditor {
     }
 
     public moveCursorUp(k: number) {
-        while (this.lineIndex < this.newLines.length && k) {
-            this.lineIndex++;
-            this.columnIndex = Math.min(this.columnIndex, this.newLines[this.lineIndex]);
-            k--;
-        }
+        const pos = this.getCursorPosition();
+        console.log(pos)
+        this.moveCursor({ x: pos.x, y: pos.y - 1 });
     }
 
     public moveCursorDown(k: number) {
-        while (this.lineIndex > 0) {
-            this.lineIndex--;
-            this.columnIndex = Math.min(this.columnIndex, this.newLines[this.lineIndex]);
-            k--;
-        }
+        const pos = this.getCursorPosition();
+        this.moveCursor({ x: pos.x, y: pos.y + 1 });
     }
 }

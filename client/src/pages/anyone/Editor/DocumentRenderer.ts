@@ -56,8 +56,7 @@ export class DocumentRenderer implements HasSubscription{
         [this.editor.getLeft().getHead(), this.editor.getRight().getHead()].forEach(node => {
             while (node) {
                 this.drawText(node.val, this.getCursorPositionOnCanvas({x: col, y: row + 1}));
-                // console.log(node.val)
-                if (node.val === '\n' || col == this.editor.sizes.cols) {
+                if (node.val === '\n' || col + 1 == this.editor.sizes.cols) {
                     row++;
                     col = 0;
                 } else {
