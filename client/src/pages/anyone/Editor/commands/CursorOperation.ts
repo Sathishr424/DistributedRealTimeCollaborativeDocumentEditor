@@ -1,37 +1,36 @@
 import {Vec2, EditorOperation} from "../interfaces/interfaces";
-import {RawEditor} from "../RawEditor";
-import {DocumentRenderer} from "../DocumentRenderer";
 import CursorUpdateSubscription from "../interfaces/CursorUpdateSubscription";
+import {DocumentService} from "../DocumentService";
 
 export class CursorOperation extends EditorOperation implements HasSubscription {
     private cursorInterval: any;
     private cursorToggle: boolean = false;
     private cursorPosition: Vec2;
 
-    constructor(editor: RawEditor, renderer: DocumentRenderer) {
-        super(editor, renderer);
+    constructor(service: DocumentService) {
+        super(service);
         this.cursorInterval = setInterval(this.renderCursor.bind(this), 300);
-        this.cursorPosition = editor.getCursorPosition();
+        this.cursorPosition = service.getCursorPosition();
         CursorUpdateSubscription.subscribe(this);
     }
 
     notify(): void {
-        this.cursorPosition = this.editor.getCursorPosition();
+        this.cursorPosition = this.service.getCursorPosition();
     }
 
     private renderCursor() {
         if (!this.cursorToggle) {
-            this.renderer.showCursor(this.cursorPosition);
+            this.service.drawCursor(this.cursorPosition);
         } else {
-            this.renderer.clearCursor(this.cursorPosition);
+            this.service.clearCursor(this.cursorPosition);
         }
         this.cursorToggle = !this.cursorToggle;
     }
 
     public handleOnMouseDown(mousePos: Vec2) {
-        this.renderer.clearCursor(this.cursorPosition);
-        this.editor.moveCursor(mousePos);
-        this.cursorPosition = this.editor.getCursorPosition();
+        this.service.clearCursor(this.cursorPosition);
+        this.service.moveCursor(mousePos);
+        this.cursorPosition = this.service.getCursorPosition();
     }
 
     public handleOnMouseUp(mousePos: Vec2) {
@@ -42,6 +41,6 @@ export class CursorOperation extends EditorOperation implements HasSubscription 
 
     public dispose(): void {
         clearInterval(this.cursorInterval);
-        this.renderer.clearCursor(this.cursorPosition);
+        this.service.clearCursor(this.cursorPosition);
     }
 }

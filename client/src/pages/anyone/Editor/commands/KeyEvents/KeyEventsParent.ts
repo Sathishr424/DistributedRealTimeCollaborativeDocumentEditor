@@ -1,9 +1,9 @@
-import {RawEditor} from "../../RawEditor";
+import {DocumentService} from "../../DocumentService";
 
 export class KeyEventsParent {
-    protected editor: RawEditor
+    protected service: DocumentService
 
-    constructor(editor: RawEditor) {
-        this.editor = editor
+    constructor(service: DocumentService) {
+        this.service = service;
     }
 }

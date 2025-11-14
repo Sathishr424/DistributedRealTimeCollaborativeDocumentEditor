@@ -2,18 +2,19 @@ import {KeyEventsParent} from "./KeyEventsParent";
 import {KeyEvent} from "./KeyEvent";
 import {RawEditor} from "../../RawEditor";
 import CursorUpdateSubscription from "../../interfaces/CursorUpdateSubscription";
+import {DocumentService} from "../../DocumentService";
 
 export class TextKey extends KeyEventsParent implements KeyEvent{
     type = "TextKey";
-    constructor(editor: RawEditor) {
-        super(editor);
+    constructor(service: DocumentService) {
+        super(service);
     }
 
     handle(e: KeyboardEvent): boolean {
         const key = e.key;
 
         if (key.length === 1) {
-            this.editor.insert(key);
+            this.service.handleInsertChar(key);
             e.preventDefault();
             return false;
         }

@@ -1,11 +1,11 @@
 import {KeyEventsParent} from "./KeyEventsParent";
 import {KeyEvent} from "./KeyEvent";
-import {RawEditor} from "../../RawEditor";
+import {DocumentService} from "../../DocumentService";
 
 export class KeyCombination extends KeyEventsParent implements KeyEvent{
     type = "KeyCombination";
-    constructor(editor: RawEditor) {
-        super(editor);
+    constructor(service: DocumentService) {
+        super(service);
     }
 
     handle(e: KeyboardEvent): boolean {

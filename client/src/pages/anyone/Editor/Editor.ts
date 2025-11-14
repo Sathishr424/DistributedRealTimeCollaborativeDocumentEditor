@@ -35,9 +35,9 @@ class Editor {
             top: top
         }
 
-        this.editor = new RawEditor(this.sizes);
-        this.renderer = new DocumentRenderer(this.ctx, this.canvas, this.editor);
-        this.service = new DocumentService(this.renderer, this.editor);
+        this.editor = new RawEditor();
+        this.renderer = new DocumentRenderer(this.ctx, this.canvas, this.editor, this.sizes);
+        this.service = new DocumentService(this.renderer, this.editor, this.sizes);
 
         this.boundMouseMove = this.service.onMouseMove.bind(this.service);
         this.boundMouseUp = this.service.onMouseUp.bind(this.service);

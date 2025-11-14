@@ -1,11 +1,11 @@
 import {KeyEventsParent} from "./KeyEventsParent";
 import {KeyEvent} from "./KeyEvent";
-import {RawEditor} from "../../RawEditor";
+import {DocumentService} from "../../DocumentService";
 
 export class SpecialKeys extends KeyEventsParent implements KeyEvent{
     type = "SpecialKeys";
-    constructor(editor: RawEditor) {
-        super(editor);
+    constructor(service: DocumentService) {
+        super(service);
     }
 
     handle(e: KeyboardEvent): boolean {
@@ -13,27 +13,27 @@ export class SpecialKeys extends KeyEventsParent implements KeyEvent{
 
         switch (key) {
             case "Backspace":
-                this.editor.backspace();
+                this.service.handleBackSpace();
                 e.preventDefault();
                 return false;
             case "Enter":
-                this.editor.insertNewLine();
+                this.service.handleInsertNewLine();
                 e.preventDefault();
                 return false;
             case "ArrowLeft":
-                this.editor.moveCursorLeft(1);
+                this.service.handleArrowLeft();
                 e.preventDefault();
                 return false;
             case "ArrowUp":
-                this.editor.moveCursorUp(1);
+                this.service.handleArrowUp();
                 e.preventDefault();
                 return false;
             case "ArrowRight":
-                this.editor.moveCursorRight(1);
+                this.service.handleArrowRight();
                 e.preventDefault();
                 return false;
             case "ArrowDown":
-                this.editor.moveCursorDown(1);
+                this.service.handleArrowDown();
                 e.preventDefault();
                 return false;
             default:

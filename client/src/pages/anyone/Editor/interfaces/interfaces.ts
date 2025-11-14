@@ -1,6 +1,7 @@
 import {RawEditor} from "../RawEditor";
 import {DefaultEditorConfig} from "../../../../interfaces/DefaultEditorConfig";
 import {DocumentRenderer} from "../DocumentRenderer";
+import {DocumentService} from "../DocumentService";
 
 export const config: DefaultEditorConfig = {
     font: "monospace",
@@ -25,11 +26,9 @@ export interface DocumentSizes {
 }
 
 export class EditorOperation {
-    protected editor: RawEditor;
-    protected renderer: DocumentRenderer
+    protected service: DocumentService;
 
-    constructor(editor: RawEditor, renderer: DocumentRenderer) {
-        this.editor = editor;
-        this.renderer = renderer;
+    constructor(service: DocumentService) {
+        this.service = service;
     }
 }
