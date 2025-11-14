@@ -2,7 +2,7 @@ class CursorUpdateSubscription {
     private subscribers: HasSubscription[] = [];
 
     subscribe(subscription: HasSubscription) {
-        console.log("Subscribing to the cursor update", subscription);
+        // console.log("Subscribing to the cursor update", subscription);
         this.subscribers.push(subscription);
     }
 

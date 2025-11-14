@@ -18,7 +18,6 @@ export class DocumentRenderer implements HasSubscription{
         this.ctx.fillStyle = config.color;
         this.ctx.font = `${config.fontSize}px ${config.font}`;
         CursorUpdateSubscription.subscribe(this);
-        console.log("Install")
     }
 
     notify(): void {
@@ -52,6 +51,7 @@ export class DocumentRenderer implements HasSubscription{
     }
 
     public renderText() {
+        console.log("Rerendering text");
         this.clearArea();
         let row = 0;
         let col = 0;

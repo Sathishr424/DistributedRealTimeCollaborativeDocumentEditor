@@ -21,7 +21,6 @@ class Editor {
 
     constructor(canvas: HTMLCanvasElement) {
         this.canvas = canvas;
-        console.log(this.canvas);
         this.ctx = <CanvasRenderingContext2D>canvas.getContext('2d');
 
         const charWidth = this.ctx.measureText("a").width;
@@ -30,7 +29,7 @@ class Editor {
         this.sizes = {
             charWidth: charWidth,
             height: config.lineHeight,
-            cols: Math.floor((width - charWidth) / charWidth),
+            cols: Math.floor(width / charWidth),
             left: left,
             top: top
         }
@@ -52,7 +51,6 @@ class Editor {
         this.canvas.addEventListener('mouseup', this.boundMouseUp);
         this.canvas.addEventListener('mousedown', this.boundMouseDown);
         document.addEventListener('keydown', this.boundKeyDown);
-        console.log("EVENTS")
     }
 
     public dispose() {
@@ -71,7 +69,6 @@ class Editor {
         this.service = null;
 
         CursorUpdateSubscription.clearAll();
-        console.log('disposed');
     }
 }
 
