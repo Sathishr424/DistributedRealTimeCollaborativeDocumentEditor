@@ -300,11 +300,35 @@ class Editor {
             e.preventDefault();
         }
 
+        const pos = this.editor.getCursorPosition();
+        if (key === 'Backspace') {
+            this.backspace.handle({ pos: { x: 0, y: 0 } });
+        }
         if (key === 'Backspace') {
             this.backspace.handle({ pos: { x: 0, y: 0 } });
         }
         if (key === 'Enter') {
             this.insertNewLine.handle({ char: '' })
+        }
+        switch (key) {
+            case "ArrowLeft":
+                this.cursorOperation.onMouseDown({ x: pos.x - 1, y: pos.y })
+                e.preventDefault();
+                break
+            case "ArrowUp":
+                this.cursorOperation.onMouseDown({x: pos.x, y: pos.y - 1})
+                e.preventDefault();
+                break
+            case "ArrowRight":
+                this.cursorOperation.onMouseDown({ x: pos.x + 1, y: pos.y })
+                e.preventDefault();
+                break
+            case "ArrowDown":
+                this.cursorOperation.onMouseDown({ x: pos.x, y: pos.y + 1 })
+                e.preventDefault();
+                break
+            default:
+                break;
         }
     }
 
