@@ -91,12 +91,16 @@ export class DocumentService implements HasSubscription {
         this.keyEvents.handle(e);
     }
 
-    public onPaste(e: ClipboardEvent) {
-        this.clipboardEvents.executePasteCommand(e);
-    }
-
     public onCopy(e: ClipboardEvent) {
         this.clipboardEvents.executeCopyCommand(e);
+    }
+
+    public onCut(e: ClipboardEvent) {
+        this.clipboardEvents.executeCutCommand(e);
+    }
+
+    public onPaste(e: ClipboardEvent) {
+        this.clipboardEvents.executePasteCommand(e);
     }
 
     public deleteTextSelection() {
@@ -212,10 +216,25 @@ export class DocumentService implements HasSubscription {
         return index;
     }
 
+    public getLastTextPosition(): Vec2 {
+        let rows = 0;
+        for (let i=0; i<this.editor.getLinesLength(); i++) {
+            const chars = Math.max(this.sizes.cols, this.editor.getLineAtIndex(i));
+            rows += Math.ceil(chars / this.sizes.cols);
+        }
+        const colIndex = this.editor.getLastLine();
+        return {x: colIndex % this.sizes.cols, y: rows};
+    }
+
+    public moveCursorToEnd() {
+        const pos = this.getLastTextPosition();
+        this.moveCursor(pos);
+    }
+
     public getCursorPosition(): Vec2 {
         let rows = 0;
         for (let i=0; i<this.editor.getLogicalLineIndex(); i++) {
-            const chars = Math.max(this.sizes.cols, this.editor.getLogicalLineLengths()[i]);
+            const chars = Math.max(this.sizes.cols, this.editor.getLineAtIndex(i));
             rows += Math.ceil(chars / this.sizes.cols);
         }
         const colIndex = this.editor.getLogicalColumnIndex();

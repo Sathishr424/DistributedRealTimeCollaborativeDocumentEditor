@@ -17,6 +17,7 @@ class Editor {
     private boundMouseDown: (e: MouseEvent) => void;
     private boundKeyDown: (e: KeyboardEvent) => void;
     private boundCopy: (e: ClipboardEvent) => void;
+    private boundCut: (e: ClipboardEvent) => void;
     private boundPaste: (e: ClipboardEvent) => void;
 
     constructor(canvas: HTMLCanvasElement) {
@@ -33,7 +34,6 @@ class Editor {
             left: left,
             top: top
         }
-        console.log(this.sizes)
 
         this.editor = new RawEditor();
         this.renderer = new DocumentRenderer(this.ctx, this.canvas, this.editor, this.sizes);
@@ -44,6 +44,7 @@ class Editor {
         this.boundMouseDown = this.service.onMouseDown.bind(this.service);
         this.boundKeyDown = this.service.onKeyDown.bind(this.service);
         this.boundCopy = this.service.onCopy.bind(this.service);
+        this.boundCut = this.service.onCut.bind(this.service);
         this.boundPaste = this.service.onPaste.bind(this.service);
 
         this.attachEvents();
@@ -55,6 +56,7 @@ class Editor {
         this.canvas.addEventListener('mousedown', this.boundMouseDown);
         document.addEventListener('keydown', this.boundKeyDown);
         document.addEventListener('copy', this.boundCopy);
+        document.addEventListener('cut', this.boundCut);
         document.addEventListener('paste', this.boundPaste);
     }
 
@@ -64,6 +66,7 @@ class Editor {
         this.canvas.removeEventListener('mousedown', this.boundMouseDown);
         document.removeEventListener('keydown', this.boundKeyDown);
         document.removeEventListener('copy', this.boundCopy);
+        document.removeEventListener('cut', this.boundCut);
         document.removeEventListener('paste', this.boundPaste);
 
         this.service.dispose();

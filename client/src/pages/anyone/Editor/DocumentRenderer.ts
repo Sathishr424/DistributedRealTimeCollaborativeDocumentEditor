@@ -110,7 +110,7 @@ export class DocumentRenderer {
 
                 if (node.val === '\n' || col + 1 == this.sizes.cols) {
                     if (isSelection) {
-                        this.drawSelectionRow(row, prevCol, Math.max(0, col - 1));
+                        this.drawSelectionRow(row, prevCol, Math.max(0, col - (node.val === '\n' ? 1 : 0)));
                         prevCol = 0;
                     }
                     row++;

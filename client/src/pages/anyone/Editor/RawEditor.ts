@@ -22,11 +22,24 @@ export class RawEditor {
             this.insert(char);
         }
 
-        console.log(this.left.toArray(), this.lineIndex, this.newLines, this.columnIndex);
+        // console.log(this.left.toArray(), this.lineIndex, this.newLines, this.columnIndex);
     }
 
     public getLogicalLineLengths(): number[] {
         return this.newLines;
+    }
+
+    public getLinesLength() {
+        return this.newLines.length;
+    }
+
+    public getLineAtIndex(index: number): number {
+        if (index < this.newLines.length)  return this.newLines[index];
+        return 0;
+    }
+
+    public getLastLine() {
+        return this.newLines[this.newLines.length - 1];
     }
 
     public getLogicalLineIndex(): number {

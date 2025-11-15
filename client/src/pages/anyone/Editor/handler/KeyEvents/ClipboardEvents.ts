@@ -2,14 +2,21 @@ import {DocumentService} from "../../DocumentService";
 import {MyClipboardEvent} from "../../interfaces/MyClipboardEvent";
 import {CopyCommand} from "../commands/ManualCommands/CopyCommand";
 import {PasteCommand} from "../commands/ManualCommands/PasteCommand";
+import {CutCommand} from "../commands/ManualCommands/CutCommand";
 
 export class ClipboardEvents {
     private copyCommand: CopyCommand;
+    private cutCommand: CopyCommand;
     private pasteCommand: PasteCommand;
 
     constructor(service: DocumentService) {
+        this.cutCommand = new CutCommand(service);
         this.copyCommand = new CopyCommand(service);
         this.pasteCommand = new PasteCommand(service);
+    }
+    
+    executeCutCommand(e: ClipboardEvent) {
+        this.cutCommand.handle(e);
     }
 
     executeCopyCommand(e: ClipboardEvent) {

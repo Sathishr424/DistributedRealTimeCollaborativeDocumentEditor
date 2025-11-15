@@ -11,6 +11,7 @@ import {ShiftArrowLeftCommand} from "./handler/commands/ShiftArrowLeftCommand";
 import {ShiftArrowRightCommand} from "./handler/commands/ShiftArrowRightCommand";
 import {ShiftArrowUpCommand} from "./handler/commands/ShiftArrowUpCommand";
 import {ShiftArrowDownCommand} from "./handler/commands/ShiftArrowDownCommand";
+import {ControlAll} from "./handler/commands/ControlAll";
 
 type CommandConstructor = new (service: DocumentService) => KeyCommand;
 
@@ -19,6 +20,8 @@ const CommandRegistry: Record<string, CommandConstructor> = {
     "ArrowRight": ArrowRightCommand,
     "ArrowUp": ArrowUpCommand,
     "ArrowDown": ArrowDownCommand,
+    "Ctrl+a": ControlAll,
+    "Ctrl+A": ControlAll,
     "Shift+ArrowLeft": ShiftArrowLeftCommand,
     "Shift+ArrowRight": ShiftArrowRightCommand,
     "Shift+ArrowUp": ShiftArrowUpCommand,
