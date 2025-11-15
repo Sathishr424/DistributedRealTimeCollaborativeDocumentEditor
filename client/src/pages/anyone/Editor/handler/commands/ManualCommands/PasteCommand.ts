@@ -1,6 +1,7 @@
 import {DocumentService} from "../../../DocumentService";
 import {ClipboardEventParent} from "../../../interfaces/ClipboardEventParent";
 import {MyClipboardEvent} from "../../../interfaces/MyClipboardEvent";
+import CursorUpdateSubscription from "../../../interfaces/CursorUpdateSubscription";
 
 export class PasteCommand extends ClipboardEventParent implements MyClipboardEvent{
     constructor(service: DocumentService) {
@@ -11,10 +12,13 @@ export class PasteCommand extends ClipboardEventParent implements MyClipboardEve
         e.preventDefault();
 
         const clipboardData = e.clipboardData || (window as any).clipboardData;
-        const pastedText = clipboardData.getData('text/plain');
+        const pastedText: string = clipboardData.getData('text/plain');
 
-        if (pastedText) {
+        console.log("Paste event:", clipboardData, pastedText);
+
+        if (pastedText.length > 0) {
             this.service.insertText(pastedText);
+            CursorUpdateSubscription.notifyForTextAndCursorUpdate();
         }
     }
 }
