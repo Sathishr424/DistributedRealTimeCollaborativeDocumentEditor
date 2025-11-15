@@ -21,8 +21,6 @@ export class RawEditor {
         for (let char of sampleText) {
             this.insert(char);
         }
-
-        // console.log(this.left.toArray(), this.lineIndex, this.newLines, this.columnIndex);
     }
 
     public getLogicalLineLengths(): number[] {

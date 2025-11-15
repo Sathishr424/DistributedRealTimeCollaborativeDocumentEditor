@@ -216,7 +216,7 @@ export class DocumentService implements HasSubscription {
         return index;
     }
 
-    public getLastTextPosition(): Vec2 {
+    public getLastCharPosition(): Vec2 {
         let rows = 0;
         for (let i=0; i<this.editor.getLinesLength(); i++) {
             const chars = Math.max(this.sizes.cols, this.editor.getLineAtIndex(i));
@@ -227,7 +227,7 @@ export class DocumentService implements HasSubscription {
     }
 
     public moveCursorToEnd() {
-        const pos = this.getLastTextPosition();
+        const pos = this.getLastCharPosition();
         this.moveCursor(pos);
     }
 
