@@ -86,8 +86,9 @@ export class CursorOperation extends EditorOperation implements HasSubscription 
             CursorUpdateSubscription.notifyForTextAndCursorUpdate();
         }
         this.clickIntervals.push(this.cursorPosition);
-        if (this.clickIntervals.length == 3) {
-
+        if (this.clickIntervals.length >= 3) {
+            this.service.selectEntireLine();
+            this.clickIntervals.splice(3, this.clickIntervals.length);
         } else if (this.clickIntervals.length == 2) {
             this.service.selectCurrentWord();
         }

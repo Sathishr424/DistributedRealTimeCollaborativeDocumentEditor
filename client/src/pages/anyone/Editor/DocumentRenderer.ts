@@ -80,38 +80,31 @@ export class DocumentRenderer {
         })
     }
 
-    public renderTextWithSelection(start: number, end: number) {
+    public renderTextWithSelection(start: Vec2, end: Vec2) {
         // console.log("Rerendering text with selection:", start, end);
 
         this.clearArea();
         let row = 0;
         let col = 0;
+        let onSelection = false;
         let cursorPos: Vec2 = {x: -1, y: -1};
-        let prevCol = 0;
-        let isSelection = false;
+
         [this.editor.getTotalCharsBeforeCursor().getHead(), this.editor.getRight().getHead()].forEach(node => {
             while (node) {
                 cursorPos = this.getCursorPositionOnCanvas({x: col, y: row});
                 this.drawText(node.val, cursorPos);
 
                 const pos = row * this.sizes.cols + col;
-                if (pos >= start && pos <= end) {
-                    if (!isSelection) {
-                        isSelection = true;
-                        prevCol = col;
-                    }
-                } else {
-                    if (isSelection) {
-                        isSelection = false;
-                        this.drawSelectionRow(row, prevCol, Math.max(0, col - 1));
-                        prevCol = col;
-                    }
+                if (row == start.y && col == start.x) onSelection = true;
+                if (row == end.y && col == end.x) {
+                    this.drawSelectionRow(row, row == end.y ? (start.y == end.y ? start.x : 0) : 0, col - 1);
+                    onSelection = false;
                 }
 
                 if (node.val === '\n' || col + 1 == this.sizes.cols) {
-                    if (isSelection) {
-                        this.drawSelectionRow(row, prevCol, Math.max(0, col - (node.val === '\n' ? 1 : 0)));
-                        prevCol = 0;
+                    if (onSelection) {
+                        this.drawSelectionRow(row, row == start.y ? start.x : 0, col);
+                        onSelection = row + 1 <= end.y;
                     }
                     row++;
                     col = 0;
@@ -122,8 +115,8 @@ export class DocumentRenderer {
             }
         })
 
-        if (isSelection) {
-            this.drawSelectionRow(row, prevCol, Math.max(0, col - 1));
+        if (onSelection) {
+            this.drawSelectionRow(row, row == end.y ? (start.y == end.y ? start.x : 0) : 0, col - 1);
         }
     }
 

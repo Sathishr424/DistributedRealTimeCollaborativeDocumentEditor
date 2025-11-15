@@ -9,10 +9,10 @@ export class ControlAll implements KeyCommand {
     }
 
     execute(): void {
-        this.service.moveCursor({x: 0, y: 0});
-        CursorUpdateSubscription.notifyForCursorUpdate();
         this.service.moveCursorToEnd();
-        CursorUpdateSubscription.notifyForTextSelection();
+        this.service.updatePrevCursorPosition({x: 0, y: 0});
+        this.service.updateCursorPosition();
+        this.service.enableTextSelection();
         CursorUpdateSubscription.notifyForTextUpdate();
     }
 }

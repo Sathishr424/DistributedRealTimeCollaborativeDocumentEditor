@@ -49,7 +49,7 @@ export class DocumentService implements HasSubscription {
 
     public getCursorPositionsStartAndEnd(): Vec2[] {
         let start = this.cursorOperation.getPrevCursorPosition();
-        let end = this.cursorOperation.getCursorPosition()
+        let end = this.cursorOperation.getCursorPosition();
         if (start.y > end.y || (start.y == end.y && start.x > end.x)) {
             [start, end] = [end, start];
         }
@@ -67,7 +67,7 @@ export class DocumentService implements HasSubscription {
         if (this.isCursorInTextSelection()) {
             const [start, end] = this.getCursorPositionsStartAndEnd();
 
-            this.renderer.renderTextWithSelection(start.y * this.sizes.cols + start.x, end.y * this.sizes.cols + end.x - 1);
+            this.renderer.renderTextWithSelection(start, end);
         } else {
             this.renderer.renderText();
         }
@@ -290,6 +290,18 @@ export class DocumentService implements HasSubscription {
         this.moveCursor({ x: pos.x, y: pos.y + 1 });
     }
 
+    public updatePrevCursorPosition(pos: Vec2) {
+        this.cursorOperation.setPrevCursorPosition(pos);
+    }
+
+    public updateCursorPosition(pos?: Vec2) {
+        this.cursorOperation.updateCursorPosition(pos || this.getCursorPosition());
+    }
+
+    public enableTextSelection() {
+        this.cursorOperation.enableTextSelection();
+    }
+
     public selectCurrentWord() {
         const left = this.continuousCharacterOnLeft();
         const right = this.continuousCharacterOnRight();
@@ -298,8 +310,21 @@ export class DocumentService implements HasSubscription {
         this.moveCursor(left);
         this.moveCursor(right);
         this.cursorOperation.enableTextSelection();
-        this.cursorOperation.setPrevCursorPosition(left);
-        this.cursorOperation.updateCursorPosition(right);
+        this.updatePrevCursorPosition(left);
+        this.updateCursorPosition(right);
+        CursorUpdateSubscription.notifyForTextSelection();
+    }
+
+    public selectEntireLine() {
+        const pos = this.getCursorPosition();
+
+        const left = {x: 0, y: pos.y}
+        const right = {x: this.sizes.cols, y: pos.y}
+        this.moveCursor(left);
+        this.moveCursor(right);
+        this.cursorOperation.enableTextSelection();
+        this.updatePrevCursorPosition(left);
+        this.updateCursorPosition(right);
         CursorUpdateSubscription.notifyForTextSelection();
     }
 
