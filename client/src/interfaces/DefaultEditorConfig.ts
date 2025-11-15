@@ -7,5 +7,7 @@ export interface DefaultEditorConfig {
     cursorColor: string;
     selectionColor: string;
     tabSize: number;
-    canPassthroughCharacters: string
+    canPassthroughCharacters: string;
+    mouseInterval: number;
+    backgroundColor: string;
 }

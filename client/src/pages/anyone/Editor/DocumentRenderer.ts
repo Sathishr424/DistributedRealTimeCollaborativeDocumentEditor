@@ -16,6 +16,7 @@ export class DocumentRenderer {
         this.editor = editor;
         this.sizes = sizes;
 
+        this.canvas.style.backgroundColor = config.backgroundColor;
         this.ctx.fillStyle = config.color;
         this.ctx.font = `${config.fontSize}px ${config.font}`;
         this.renderText();

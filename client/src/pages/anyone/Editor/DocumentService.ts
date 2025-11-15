@@ -305,38 +305,44 @@ export class DocumentService implements HasSubscription {
     public selectCurrentWord() {
         const left = this.continuousCharacterOnLeft();
         const right = this.continuousCharacterOnRight();
-        console.log(left, right);
 
         this.moveCursor(left);
         this.moveCursor(right);
-        this.cursorOperation.enableTextSelection();
         this.updatePrevCursorPosition(left);
         this.updateCursorPosition(right);
-        CursorUpdateSubscription.notifyForTextSelection();
+        this.enableTextSelection();
+        CursorUpdateSubscription.notifyForTextUpdate();
+        console.log("SELECT LINE")
     }
 
     public selectEntireLine() {
         const pos = this.getCursorPosition();
 
         const left = {x: 0, y: pos.y}
-        const right = {x: this.sizes.cols, y: pos.y}
+        let right = {x: this.sizes.cols, y: pos.y}
         this.moveCursor(left);
         this.moveCursor(right);
+        right = this.getCursorPosition();
         this.cursorOperation.enableTextSelection();
         this.updatePrevCursorPosition(left);
         this.updateCursorPosition(right);
-        CursorUpdateSubscription.notifyForTextSelection();
+        CursorUpdateSubscription.notifyForTextUpdate();
+        console.log("SELECT LINE")
+    }
+
+    public checkIfCharIsInContinuous(char: string): boolean {
+        return config.canPassthroughCharacters.includes(char);
     }
 
     public continuousCharacterOnLeft() {
         let pos: Vec2 = this.getCursorPosition();
 
         let node = this.editor.getTotalCharsBeforeCursor().getTail();
-        while (node && config.canPassthroughCharacters.includes(node.val)) {
+        while (node && this.checkIfCharIsInContinuous(node.val)) {
             if (pos.x == 0) {
                 pos.y--;
                 pos.x = this.sizes.cols;
-            } else pos.x--;
+            } pos.x--;
             node = node.prev;
         }
 
@@ -347,11 +353,11 @@ export class DocumentService implements HasSubscription {
         let pos: Vec2 = this.getCursorPosition();
 
         let node = this.editor.getTotalCharsAfterCursor().getHead();
-        while (node && config.canPassthroughCharacters.includes(node.val)) {
+        while (node && this.checkIfCharIsInContinuous(node.val)) {
             if (pos.x == this.sizes.cols) {
                 pos.y++;
                 pos.x = 0;
-            } else pos.x++;
+            } pos.x++;
             node = node.next;
         }
 

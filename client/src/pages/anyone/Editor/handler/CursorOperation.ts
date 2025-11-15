@@ -1,6 +1,7 @@
-import {Vec2, EditorOperation} from "../interfaces/interfaces";
+import {Vec2, EditorOperation, config} from "../interfaces/interfaces";
 import CursorUpdateSubscription from "../interfaces/CursorUpdateSubscription";
 import {DocumentService} from "../DocumentService";
+import {Deque} from "@utils/Deque";
 
 export class CursorOperation extends EditorOperation implements HasSubscription {
     private cursorInterval: any;
@@ -10,7 +11,7 @@ export class CursorOperation extends EditorOperation implements HasSubscription 
     private isTextSelected = false;
     private isMouseDown = false;
     private prevCursorPositionForRerender: Vec2 = {x: -1, y: -1};
-    private clickIntervals: Vec2[] = [];
+    private clickIntervals: Deque<number>;
 
     public getIsTextSelection(): boolean {
         return this.isTextSelected;
@@ -30,6 +31,7 @@ export class CursorOperation extends EditorOperation implements HasSubscription 
 
     constructor(service: DocumentService) {
         super(service);
+        this.clickIntervals = new Deque<number>();
         this.cursorInterval = setInterval(this.renderCursor.bind(this), 300);
         this.cursorPosition = service.getCursorPosition();
         CursorUpdateSubscription.subscribe(this);
@@ -85,13 +87,24 @@ export class CursorOperation extends EditorOperation implements HasSubscription 
             this.isTextSelected = false;
             CursorUpdateSubscription.notifyForTextAndCursorUpdate();
         }
-        this.clickIntervals.push(this.cursorPosition);
-        if (this.clickIntervals.length >= 3) {
-            this.service.selectEntireLine();
-            this.clickIntervals.splice(3, this.clickIntervals.length);
-        } else if (this.clickIntervals.length == 2) {
-            this.service.selectCurrentWord();
+        while (this.clickIntervals.size() && Date.now() - (this.clickIntervals.front() || 0) > config.mouseInterval) {
+            this.clickIntervals.popBack();
         }
+        this.clickIntervals.pushBack(Date.now());
+        if (this.clickIntervals.size() === 3) {
+            let left = this.clickIntervals.front() || 0;
+            let right = this.clickIntervals.back() || 0;
+            if (right - left <= config.mouseInterval) {
+                this.service.selectEntireLine();
+            }
+        } else if (this.clickIntervals.size() === 2) {
+            let left = this.clickIntervals.front() || 0;
+            let right = this.clickIntervals.back() || 0;
+            if (right - left <= config.mouseInterval) {
+                this.service.selectCurrentWord();
+            }
+        }
+        console.log(this.clickIntervals.size())
     }
 
     public setPrevCursorPosition(mousePos: Vec2) {
@@ -115,7 +128,9 @@ export class CursorOperation extends EditorOperation implements HasSubscription 
             }
             this.prevCursorPositionForRerender = this.cursorPosition;
         }
-        this.clickIntervals = [];
+        while (this.clickIntervals.back()) {
+            this.clickIntervals.popBack();
+        }
     }
 
     public dispose(): void {

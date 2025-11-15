@@ -13,7 +13,9 @@ export const config: DefaultEditorConfig = {
     cursorColor: 'black',
     cursorWidth: 1,
     tabSize: 4,
+    mouseInterval: 500,
     canPassthroughCharacters: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890_",
+    backgroundColor: "white",
 }
 
 export interface Vec2 {

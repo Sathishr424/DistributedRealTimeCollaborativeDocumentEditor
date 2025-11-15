@@ -27,10 +27,13 @@ export default function DocumentEditor() {
                 </div>
             </header>
             <div className="document-body bg-slate-100 overflow-auto">
-                <div className="w-full flex items-center justify-center">
-                    <div className="bg-white border-1 border-gray-200 m-10 p-4">
+                <div className="w-full flex flex-col items-center justify-center canvas-container">
+                    <div className="bg-white border-1 border-gray-200 m-10 p-10">
                         <canvas className="cursor-text" ref={canvasRef} width="595px" height="892px"></canvas>
                     </div>
+                    {/*<div className="bg-white border-1 border-gray-200 m-10 p-10">*/}
+                    {/*    <canvas className="cursor-text" ref={canvasRef} width="595px" height="892px"></canvas>*/}
+                    {/*</div>*/}
                 </div>
             </div>
         </main>
