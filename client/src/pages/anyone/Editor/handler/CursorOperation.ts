@@ -104,7 +104,6 @@ export class CursorOperation extends EditorOperation implements HasSubscription 
                 this.service.selectCurrentWord();
             }
         }
-        console.log(this.clickIntervals.size())
     }
 
     public setPrevCursorPosition(mousePos: Vec2) {

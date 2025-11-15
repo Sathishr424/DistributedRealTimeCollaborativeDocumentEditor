@@ -31,9 +31,6 @@ export default function DocumentEditor() {
                     <div className="bg-white border-1 border-gray-200 m-10 p-10">
                         <canvas className="cursor-text" ref={canvasRef} width="595px" height="892px"></canvas>
                     </div>
-                    {/*<div className="bg-white border-1 border-gray-200 m-10 p-10">*/}
-                    {/*    <canvas className="cursor-text" ref={canvasRef} width="595px" height="892px"></canvas>*/}
-                    {/*</div>*/}
                 </div>
             </div>
         </main>

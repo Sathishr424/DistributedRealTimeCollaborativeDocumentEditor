@@ -273,7 +273,7 @@ export class DocumentService implements HasSubscription {
 
     public moveCursorLeft() {
         this.editor.moveLeft(1);
-        console.log("Moved cursor left");
+        // console.log("Moved cursor left");
     }
 
     public moveCursorRight() {
@@ -312,7 +312,7 @@ export class DocumentService implements HasSubscription {
         this.updateCursorPosition(right);
         this.enableTextSelection();
         CursorUpdateSubscription.notifyForTextUpdate();
-        console.log("SELECT LINE")
+        // console.log("SELECT LINE")
     }
 
     public selectEntireLine() {
@@ -327,7 +327,7 @@ export class DocumentService implements HasSubscription {
         this.updatePrevCursorPosition(left);
         this.updateCursorPosition(right);
         CursorUpdateSubscription.notifyForTextUpdate();
-        console.log("SELECT LINE")
+        // console.log("SELECT LINE")
     }
 
     public checkIfCharIsInContinuous(char: string): boolean {
