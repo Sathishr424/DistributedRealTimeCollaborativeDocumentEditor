@@ -9,6 +9,7 @@ export class CursorOperation extends EditorOperation implements HasSubscription 
     private prevCursorPosition: Vec2 = {x: -1, y: -1};
     private isTextSelected = false;
     private isMouseDown = false;
+    private prevCursorPositionForRerender: Vec2 = {x: -1, y: -1};
 
     public getIsTextSelected(): boolean {
         return this.isTextSelected;
@@ -33,15 +34,23 @@ export class CursorOperation extends EditorOperation implements HasSubscription 
         if (usage === "CURSOR UPDATE") {
             this.service.clearCursor(this.cursorPosition);
             this.cursorPosition = this.service.getCursorPosition();
-            this.isTextSelected = false;
-        } if (usage === "KEY EVENT TEXT SELECTOR") {
+            if (this.isTextSelected) {
+                this.isTextSelected = false;
+                CursorUpdateSubscription.notifyForTextUpdate();
+            }
+        }else if (usage === "KEY EVENT TEXT SELECTION") {
             if (!this.isTextSelected) {
                 this.prevCursorPosition = this.cursorPosition;
                 this.isTextSelected = true;
             }
             this.cursorPosition = this.service.getCursorPosition();
+            if (!(this.cursorPosition.x === this.prevCursorPositionForRerender.x && this.cursorPosition.y === this.prevCursorPositionForRerender.y)) {
+                console.log("Selection:", this.prevCursorPositionForRerender, this.prevCursorPosition, this.cursorPosition, this.isTextSelected);
+                CursorUpdateSubscription.notifyForTextUpdate();
+            }
+            this.prevCursorPositionForRerender = this.cursorPosition;
         }
-     }
+    }
 
     private renderCursor() {
         if (!this.cursorToggle) {
@@ -79,8 +88,11 @@ export class CursorOperation extends EditorOperation implements HasSubscription 
             if (!this.isTextSelected && Math.abs(this.cursorPosition.x - this.prevCursorPosition.x) + Math.abs(this.cursorPosition.y - this.prevCursorPosition.y) > 0) {
                 this.isTextSelected = true;
             }
-            console.log("Selection:", this.prevCursorPosition, this.cursorPosition, this.isTextSelected);
-            CursorUpdateSubscription.notifyForTextUpdate();
+            if (this.isTextSelected && !(this.cursorPosition.x === this.prevCursorPositionForRerender.x && this.cursorPosition.y === this.prevCursorPositionForRerender.y)) {
+                console.log("Selection:", this.prevCursorPositionForRerender, this.prevCursorPosition, this.cursorPosition, this.isTextSelected);
+                CursorUpdateSubscription.notifyForTextUpdate();
+            }
+            this.prevCursorPositionForRerender = this.cursorPosition;
         }
     }
 

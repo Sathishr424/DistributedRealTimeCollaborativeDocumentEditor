@@ -6,4 +6,5 @@ export interface DefaultEditorConfig {
     cursorWidth: number;
     cursorColor: string;
     selectionColor: string;
+    tabSize: number;
 }

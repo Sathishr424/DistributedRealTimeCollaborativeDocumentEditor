@@ -18,18 +18,31 @@ export class KeyCombination extends KeyEventsParent implements KeyEvent{
             return false;
         }
         if (e.shiftKey) {
+            console.log("SHIFT PRESSED");
             e.preventDefault();
+            let isKeyCombination = true;
             switch (key) {
                 case "ArrowLeft":
-                    return false;
+                    this.service.handleArrowLeft();
+                    break;
                 case "ArrowUp":
-                    return false;
+                    this.service.handleArrowUp();
+                    break;
                 case "ArrowRight":
-                    return false;
+                    this.service.handleArrowRight();
+                    break;
                 case "ArrowDown":
-                    return false;
+                    this.service.handleArrowDown();
+                    break;
+                default:
+                    isKeyCombination = false;
+                    break;
             }
-            return false;
+
+            if (isKeyCombination) {
+                CursorUpdateSubscription.notifyForTextSelection();
+                return false;
+            }
         }
 
         return true;

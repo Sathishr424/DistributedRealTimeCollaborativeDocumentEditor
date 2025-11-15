@@ -10,7 +10,8 @@ export const config: DefaultEditorConfig = {
     selectionColor: "rgba(0,0,255,0.57)",
     lineHeight: 20,
     cursorColor: 'black',
-    cursorWidth: 1
+    cursorWidth: 1,
+    tabSize: 4
 }
 
 export interface Vec2 {

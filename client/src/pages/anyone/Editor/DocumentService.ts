@@ -1,6 +1,6 @@
 import {RawEditor} from "./RawEditor";
 import {DocumentRenderer} from "./DocumentRenderer";
-import {DocumentSizes, Vec2} from "./interfaces/interfaces";
+import {config, DocumentSizes, Vec2} from "./interfaces/interfaces";
 import {CursorOperation} from "./commands/CursorOperation";
 import {ALLKeyEvents} from "./commands/KeyEvents/ALLKeyEvents";
 import CursorUpdateSubscription from "./interfaces/CursorUpdateSubscription";
@@ -35,7 +35,7 @@ export class DocumentService implements HasSubscription {
 
     notify(usage: string): void {
         if (usage !== "TEXT OPERATION") return;
-        console.log(usage, this.cursorOperation.getIsTextSelected())
+
         if (this.cursorOperation.getIsTextSelected()) {
             let start = this.cursorOperation.getPrevCursorPosition();
             let end = this.cursorOperation.getCursorPosition()
@@ -43,7 +43,7 @@ export class DocumentService implements HasSubscription {
                 [start, end] = [end, start];
             }
 
-            this.renderer.renderTextWithSelection(start.y * this.sizes.cols + start.x, end.y * this.sizes.cols + end.x);
+            this.renderer.renderTextWithSelection(start.y * this.sizes.cols + start.x, end.y * this.sizes.cols + end.x - 1);
         } else {
             this.renderer.renderText();
         }
@@ -73,11 +73,21 @@ export class DocumentService implements HasSubscription {
     }
 
     public handleBackSpace() {
-        this.editor.backspace();
+        if (this.cursorOperation.getIsTextSelected()) {
+            this.delete(this.cursorOperation.getPrevCursorPosition());
+        } else {
+            this.editor.backspace();
+        }
     }
 
     public handleInsertChar(char: string) {
         this.editor.insert(char);
+    }
+
+    public handleInsertTab() {
+        for (let i=0; i<config.tabSize; i++) {
+            this.handleInsertChar(" ");
+        }
     }
 
     public handleInsertNewLine() {

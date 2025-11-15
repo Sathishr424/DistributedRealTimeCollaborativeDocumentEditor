@@ -35,6 +35,12 @@ class CursorUpdateSubscription {
         }
     }
 
+    notifyForTextSelection() {
+        for (let subscription of this.subscribers) {
+            subscription.notify("KEY EVENT TEXT SELECTION");
+        }
+    }
+
     clearAll() {
         this.subscribers = [];
     }

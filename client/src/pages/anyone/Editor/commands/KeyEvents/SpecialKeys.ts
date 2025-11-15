@@ -12,39 +12,50 @@ export class SpecialKeys extends KeyEventsParent implements KeyEvent{
     handle(e: KeyboardEvent): boolean {
         const key = e.key;
 
+        let keyPress = true;
         switch (key) {
             case "Backspace":
                 this.service.handleBackSpace();
-                CursorUpdateSubscription.notifyForTextAndCursorUpdate();
-                e.preventDefault();
-                return false;
+                break;
             case "Enter":
                 this.service.handleInsertNewLine();
-                CursorUpdateSubscription.notifyForTextAndCursorUpdate();
-                e.preventDefault();
-                return false;
+                break;
+            case "Tab":
+                this.service.handleInsertTab();
+                break;
+            default:
+                keyPress = false;
+                break;
+        }
+
+        if (keyPress) {
+            CursorUpdateSubscription.notifyForTextAndCursorUpdate();
+            e.preventDefault();
+            return false;
+        }
+        keyPress = true;
+        switch (key) {
             case "ArrowLeft":
                 this.service.handleArrowLeft();
-                CursorUpdateSubscription.notifyForCursorUpdate();
-                e.preventDefault();
-                return false;
+                break;
             case "ArrowUp":
                 this.service.handleArrowUp();
-                CursorUpdateSubscription.notifyForCursorUpdate();
-                e.preventDefault();
-                return false;
+                break
             case "ArrowRight":
                 this.service.handleArrowRight();
-                CursorUpdateSubscription.notifyForCursorUpdate();
-                e.preventDefault();
-                return false;
+                break
             case "ArrowDown":
                 this.service.handleArrowDown();
-                CursorUpdateSubscription.notifyForCursorUpdate();
-                e.preventDefault();
-                return false;
+                break
             default:
+                keyPress = false;
                 break;
+        }
+
+        if (keyPress) {
+            CursorUpdateSubscription.notifyForCursorUpdate();
+            e.preventDefault();
+            return false;
         }
 
         return true;

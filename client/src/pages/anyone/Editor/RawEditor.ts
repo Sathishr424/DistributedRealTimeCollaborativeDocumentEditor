@@ -28,6 +28,10 @@ export class RawEditor {
         return this.left;
     }
 
+    public getTotalCharsAfterCursor(): Deque<string> {
+        return this.right;
+    }
+
     public getRight(): Deque<string> {
         return this.right;
     }
@@ -78,7 +82,7 @@ export class RawEditor {
             } else {
                 this.newLines[this.lineIndex]--;
             }
-            k++;
+            k--;
         }
     }
 
