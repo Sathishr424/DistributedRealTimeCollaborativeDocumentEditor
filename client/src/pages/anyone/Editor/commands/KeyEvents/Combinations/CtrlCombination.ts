@@ -16,7 +16,6 @@ export class CtrlCombination extends KeyEventsParent implements KeyEvent {
 
         const key = e.key;
         let isKeyCombination = true;
-        return false;
 
         // TODO
         switch (key) {

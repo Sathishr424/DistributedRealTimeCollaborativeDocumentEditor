@@ -43,14 +43,14 @@ export class DocumentService implements HasSubscription {
         return [start, end];
     }
 
-    public getIsTextSelection(): boolean {
+    public isCursorInTextSelection(): boolean {
         return this.cursorOperation.getIsTextSelection();
     }
 
     notify(usage: string): void {
         if (usage !== "TEXT OPERATION") return;
 
-        if (this.getIsTextSelection()) {
+        if (this.isCursorInTextSelection()) {
             const [start, end] = this.getCursorPositionsStartAndEnd();
 
             this.renderer.renderTextWithSelection(start.y * this.sizes.cols + start.x, end.y * this.sizes.cols + end.x - 1);
@@ -82,12 +82,8 @@ export class DocumentService implements HasSubscription {
         this.keyEvents.handle(e);
     }
 
-    public isCursorInTextSelection(): boolean {
-        return this.getIsTextSelection();
-    }
-
     public processTextSelection() {
-        if (this.getIsTextSelection()) {
+        if (this.isCursorInTextSelection()) {
             this.delete(this.cursorOperation.getPrevCursorPosition());
             return true;
         }

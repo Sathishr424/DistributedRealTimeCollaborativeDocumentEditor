@@ -11,7 +11,7 @@ export class OnTextSelectionInProgress extends KeyEventsParent implements KeyEve
     }
 
     handle(e: KeyboardEvent): boolean {
-        if (!this.service.getIsTextSelection()) return false;
+        if (!this.service.isCursorInTextSelection()) return false;
         const key = e.key;
         let isKeyCombination = true;
         switch (key) {

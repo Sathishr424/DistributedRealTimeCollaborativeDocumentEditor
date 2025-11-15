@@ -11,7 +11,8 @@ export const config: DefaultEditorConfig = {
     lineHeight: 20,
     cursorColor: 'black',
     cursorWidth: 1,
-    tabSize: 4
+    tabSize: 4,
+    canPassthroughCharacters: "abcdefghijklmnopqrstABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890_",
 }
 
 export interface Vec2 {
