@@ -32,14 +32,19 @@ export class DocumentService implements HasSubscription {
     }
 
     private getCorrectPosition(x: number, y: number): Vec2 {
-        x -= this.sizes.left;
-        y -= this.sizes.top;
+        const {left, top} = this.renderer.getCanvasOffset();
+        x -= left;
+        y -= top;
         x += (x % this.sizes.charWidth);
         return {x: Math.floor(x / this.sizes.charWidth), y: Math.floor(y / this.sizes.height)};
     }
 
     public drawCursor(pos: Vec2): void {
         this.renderer.renderCursor(pos);
+    }
+
+    public clearCursor(pos: Vec2): void {
+        this.renderer.clearCursor(pos);
     }
 
     public getCursorPositionsStartAndEnd(): Vec2[] {
@@ -66,10 +71,6 @@ export class DocumentService implements HasSubscription {
         } else {
             this.renderer.renderText();
         }
-    }
-
-    public clearCursor(pos: Vec2): void {
-        this.renderer.clearCursor(pos);
     }
 
     public onMouseMove(e: MouseEvent) {
@@ -194,6 +195,16 @@ export class DocumentService implements HasSubscription {
         return true;
     }
 
+    public getLastCharPosition(): Vec2 {
+        let rows = 0;
+        for (let i=0; i<this.editor.getLinesLength(); i++) {
+            const chars = Math.max(this.sizes.cols, this.editor.getLineAtIndex(i));
+            rows += Math.ceil(chars / this.sizes.cols);
+        }
+        const colIndex = this.editor.getLastLine();
+        return {x: colIndex % this.sizes.cols, y: rows};
+    }
+
     public convertTo1DPosition(pos: Vec2) {
         let index = 0;
         let row = 0;
@@ -216,21 +227,6 @@ export class DocumentService implements HasSubscription {
         return index;
     }
 
-    public getLastCharPosition(): Vec2 {
-        let rows = 0;
-        for (let i=0; i<this.editor.getLinesLength(); i++) {
-            const chars = Math.max(this.sizes.cols, this.editor.getLineAtIndex(i));
-            rows += Math.ceil(chars / this.sizes.cols);
-        }
-        const colIndex = this.editor.getLastLine();
-        return {x: colIndex % this.sizes.cols, y: rows};
-    }
-
-    public moveCursorToEnd() {
-        const pos = this.getLastCharPosition();
-        this.moveCursor(pos);
-    }
-
     public getCursorPosition(): Vec2 {
         let rows = 0;
         for (let i=0; i<this.editor.getLogicalLineIndex(); i++) {
@@ -245,6 +241,11 @@ export class DocumentService implements HasSubscription {
 
         // console.log(this.sizes.cols, rows, colIndex, this.editor.getTotalCharsBeforeCursor().toArray(), this.editor.getLogicalLineLengths(), pos)
         return pos;
+    }
+
+    public moveCursorToEnd() {
+        const pos = this.getLastCharPosition();
+        this.moveCursor(pos);
     }
 
     public delete(newPos: Vec2) {
@@ -287,6 +288,49 @@ export class DocumentService implements HasSubscription {
     public moveCursorDown() {
         const pos = this.getCursorPosition();
         this.moveCursor({ x: pos.x, y: pos.y + 1 });
+    }
+
+    public selectCurrentWord() {
+        const left = this.continuousCharacterOnLeft();
+        const right = this.continuousCharacterOnRight();
+        console.log(left, right);
+
+        this.moveCursor(left);
+        this.moveCursor(right);
+        this.cursorOperation.enableTextSelection();
+        this.cursorOperation.setPrevCursorPosition(left);
+        this.cursorOperation.updateCursorPosition(right);
+        CursorUpdateSubscription.notifyForTextSelection();
+    }
+
+    public continuousCharacterOnLeft() {
+        let pos: Vec2 = this.getCursorPosition();
+
+        let node = this.editor.getTotalCharsBeforeCursor().getTail();
+        while (node && config.canPassthroughCharacters.includes(node.val)) {
+            if (pos.x == 0) {
+                pos.y--;
+                pos.x = this.sizes.cols;
+            } else pos.x--;
+            node = node.prev;
+        }
+
+        return pos;
+    }
+
+    public continuousCharacterOnRight() {
+        let pos: Vec2 = this.getCursorPosition();
+
+        let node = this.editor.getTotalCharsAfterCursor().getHead();
+        while (node && config.canPassthroughCharacters.includes(node.val)) {
+            if (pos.x == this.sizes.cols) {
+                pos.y++;
+                pos.x = 0;
+            } else pos.x++;
+            node = node.next;
+        }
+
+        return pos;
     }
 
     public dispose() {

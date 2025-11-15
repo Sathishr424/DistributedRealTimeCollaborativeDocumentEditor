@@ -10,7 +10,7 @@ export class CopyCommand extends ClipboardEventParent implements MyClipboardEven
 
     handle(e: ClipboardEvent) {
         const selectedText: string = this.service.getTextSelection();
-        console.log("Copy event:",  selectedText, e.clipboardData);
+        // console.log("Copy event:",  selectedText, e.clipboardData);
 
         if (e.clipboardData !== null && selectedText.length > 0) {
             e.preventDefault();

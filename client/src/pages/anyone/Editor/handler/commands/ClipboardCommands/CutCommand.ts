@@ -11,7 +11,7 @@ export class CutCommand extends ClipboardEventParent implements MyClipboardEvent
     handle(e: ClipboardEvent) {
         const selectedText: string = this.service.getTextSelection();
         this.service.deleteTextSelection();
-        console.log("Cut event:",  selectedText, e.clipboardData);
+        // console.log("Cut event:",  selectedText, e.clipboardData);
 
         if (e.clipboardData !== null && selectedText.length > 0) {
             e.preventDefault();

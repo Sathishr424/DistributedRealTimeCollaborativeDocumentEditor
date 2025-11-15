@@ -126,4 +126,8 @@ export class DocumentRenderer {
             this.drawSelectionRow(row, prevCol, Math.max(0, col - 1));
         }
     }
+
+    public getCanvasOffset(): DOMRect {
+        return this.canvas.getBoundingClientRect();
+    }
 }

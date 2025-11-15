@@ -10,9 +10,14 @@ export class CursorOperation extends EditorOperation implements HasSubscription 
     private isTextSelected = false;
     private isMouseDown = false;
     private prevCursorPositionForRerender: Vec2 = {x: -1, y: -1};
+    private clickIntervals: Vec2[] = [];
 
     public getIsTextSelection(): boolean {
         return this.isTextSelected;
+    }
+
+    public enableTextSelection(): void {
+        this.isTextSelected = true;
     }
 
     public getPrevCursorPosition(): Vec2 {
@@ -28,6 +33,11 @@ export class CursorOperation extends EditorOperation implements HasSubscription 
         this.cursorInterval = setInterval(this.renderCursor.bind(this), 300);
         this.cursorPosition = service.getCursorPosition();
         CursorUpdateSubscription.subscribe(this);
+    }
+
+    public updateCursorPosition(pos: Vec2) {
+        this.service.clearCursor(this.cursorPosition);
+        this.cursorPosition = pos;
     }
 
     notify(usage: string): void {
@@ -75,6 +85,16 @@ export class CursorOperation extends EditorOperation implements HasSubscription 
             this.isTextSelected = false;
             CursorUpdateSubscription.notifyForTextAndCursorUpdate();
         }
+        this.clickIntervals.push(this.cursorPosition);
+        if (this.clickIntervals.length == 3) {
+
+        } else if (this.clickIntervals.length == 2) {
+            this.service.selectCurrentWord();
+        }
+    }
+
+    public setPrevCursorPosition(mousePos: Vec2) {
+        this.prevCursorPosition = mousePos;
     }
 
     public handleOnMouseUp(mousePos: Vec2) {
@@ -94,6 +114,7 @@ export class CursorOperation extends EditorOperation implements HasSubscription 
             }
             this.prevCursorPositionForRerender = this.cursorPosition;
         }
+        this.clickIntervals = [];
     }
 
     public dispose(): void {

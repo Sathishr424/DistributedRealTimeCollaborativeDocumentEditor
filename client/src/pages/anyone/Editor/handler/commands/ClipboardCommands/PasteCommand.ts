@@ -14,9 +14,10 @@ export class PasteCommand extends ClipboardEventParent implements MyClipboardEve
         const clipboardData = e.clipboardData || (window as any).clipboardData;
         const pastedText: string = clipboardData.getData('text/plain');
 
-        console.log("Paste event:", clipboardData, pastedText);
+        // console.log("Paste event:", clipboardData, pastedText);
 
         if (pastedText.length > 0) {
+            this.service.deleteTextSelection();
             this.service.insertText(pastedText);
             CursorUpdateSubscription.notifyForTextAndCursorUpdate();
         }

@@ -26,13 +26,11 @@ class Editor {
 
         const charWidth = Math.ceil(this.ctx.measureText("a").width);
         const {width} = this.canvas.getBoundingClientRect();
-        const {left, top} = this.canvas.getBoundingClientRect();
+
         this.sizes = {
             charWidth: charWidth,
             height: config.lineHeight,
-            cols: Math.floor(width / charWidth),
-            left: left,
-            top: top
+            cols: Math.floor(width / charWidth)
         }
 
         this.editor = new RawEditor();

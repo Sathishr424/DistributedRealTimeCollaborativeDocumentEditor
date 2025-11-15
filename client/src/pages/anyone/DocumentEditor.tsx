@@ -4,7 +4,7 @@ import Editor from "./Editor/Editor";
 export default function DocumentEditor() {
     const canvasRef: RefObject<HTMLCanvasElement | null> =  useRef(null);
     const editorInstanceRef: RefObject<Editor | null> = useRef(null);
-
+``
     useEffect(() => {
         const canvasElement = canvasRef.current;
 

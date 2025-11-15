@@ -1,6 +1,4 @@
-import {RawEditor} from "../RawEditor";
 import {DefaultEditorConfig} from "../../../../interfaces/DefaultEditorConfig";
-import {DocumentRenderer} from "../DocumentRenderer";
 import {DocumentService} from "../DocumentService";
 import {KeyCommand} from "../handler/KeyCommand";
 
@@ -15,7 +13,7 @@ export const config: DefaultEditorConfig = {
     cursorColor: 'black',
     cursorWidth: 1,
     tabSize: 4,
-    canPassthroughCharacters: "abcdefghijklmnopqrstABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890_",
+    canPassthroughCharacters: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890_",
 }
 
 export interface Vec2 {
@@ -27,8 +25,6 @@ export interface DocumentSizes {
     cols: number;
     charWidth: number
     height: number;
-    left: number;
-    top: number;
 }
 
 export class EditorOperation {
