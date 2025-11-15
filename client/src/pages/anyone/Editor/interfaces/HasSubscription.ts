@@ -1,3 +1,3 @@
 interface HasSubscription {
-    notify(): void;
+    notify(type: string): void;
 }

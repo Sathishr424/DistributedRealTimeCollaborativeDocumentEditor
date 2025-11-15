@@ -7,6 +7,7 @@ export const config: DefaultEditorConfig = {
     font: "monospace",
     fontSize: 16,
     color: "black",
+    selectionColor: "rgba(0,0,255,0.57)",
     lineHeight: 20,
     cursorColor: 'black',
     cursorWidth: 1

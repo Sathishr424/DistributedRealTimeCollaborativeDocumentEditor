@@ -23,7 +23,7 @@ class Editor {
         this.canvas = canvas;
         this.ctx = <CanvasRenderingContext2D>canvas.getContext('2d');
 
-        const charWidth = this.ctx.measureText("a").width;
+        const charWidth = Math.ceil(this.ctx.measureText("a").width);
         const {width} = this.canvas.getBoundingClientRect();
         const {left, top} = this.canvas.getBoundingClientRect();
         this.sizes = {
@@ -33,6 +33,7 @@ class Editor {
             left: left,
             top: top
         }
+        console.log(this.sizes)
 
         this.editor = new RawEditor();
         this.renderer = new DocumentRenderer(this.ctx, this.canvas, this.editor, this.sizes);

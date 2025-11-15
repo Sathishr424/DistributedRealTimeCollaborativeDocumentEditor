@@ -10,14 +10,13 @@ export class ALLKeyEvents {
 
     constructor(service: DocumentService) {
         this.events.push(new KeyCombination(service));
-        this.events.push(new TextKey(service));
         this.events.push(new SpecialKeys(service));
+        this.events.push(new TextKey(service));
     }
 
     handle(e: KeyboardEvent) {
         for (let event of this.events) {
             if (!event.handle(e)) {
-                CursorUpdateSubscription.notifyAll("KEY EVENT");
                 break;
             }
         }

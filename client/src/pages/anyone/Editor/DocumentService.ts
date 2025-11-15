@@ -3,8 +3,9 @@ import {DocumentRenderer} from "./DocumentRenderer";
 import {DocumentSizes, Vec2} from "./interfaces/interfaces";
 import {CursorOperation} from "./commands/CursorOperation";
 import {ALLKeyEvents} from "./commands/KeyEvents/ALLKeyEvents";
+import CursorUpdateSubscription from "./interfaces/CursorUpdateSubscription";
 
-export class DocumentService {
+export class DocumentService implements HasSubscription {
     private renderer: DocumentRenderer;
     private editor: RawEditor
     private cursorOperation: CursorOperation;
@@ -18,6 +19,7 @@ export class DocumentService {
 
         this.cursorOperation = new CursorOperation(this);
         this.keyEvents = new ALLKeyEvents(this);
+        CursorUpdateSubscription.subscribe(this);
     }
 
     private getCorrectPosition(x: number, y: number): Vec2 {
@@ -29,6 +31,22 @@ export class DocumentService {
 
     public drawCursor(pos: Vec2): void {
         this.renderer.renderCursor(pos);
+    }
+
+    notify(usage: string): void {
+        if (usage !== "TEXT OPERATION") return;
+        console.log(usage, this.cursorOperation.getIsTextSelected())
+        if (this.cursorOperation.getIsTextSelected()) {
+            let start = this.cursorOperation.getPrevCursorPosition();
+            let end = this.cursorOperation.getCursorPosition()
+            if (start.y > end.y || (start.y == end.y && start.x > end.x)) {
+                [start, end] = [end, start];
+            }
+
+            this.renderer.renderTextWithSelection(start.y * this.sizes.cols + start.x, end.y * this.sizes.cols + end.x);
+        } else {
+            this.renderer.renderText();
+        }
     }
 
     public clearCursor(pos: Vec2): void {
@@ -131,7 +149,7 @@ export class DocumentService {
 
     public moveCursor(newPos: Vec2) {
         let realPos = this.convertTo1DPosition(newPos);
-        console.log("MovePOS:", newPos, "1DPos:", realPos);
+        // console.log("MovePOS:", newPos, "1DPos:", realPos);
         let diff = this.editor.getTotalCharsBeforeCursor().size() - realPos;
 
         if (diff > 0) {

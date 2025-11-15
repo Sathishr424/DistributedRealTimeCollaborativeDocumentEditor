@@ -10,9 +10,28 @@ class CursorUpdateSubscription {
         this.subscribers = this.subscribers.filter(subscription => subscription !== subscription);
     }
 
-    notifyAll(from = "unknown") {
+    notifyAll(usage = "unknown") {
         for (let subscription of this.subscribers) {
-            subscription.notify();
+            subscription.notify(usage);
+        }
+    }
+
+    notifyForCursorUpdate() {
+        for (let subscription of this.subscribers) {
+            subscription.notify("CURSOR UPDATE");
+        }
+    }
+
+    notifyForTextUpdate() {
+        for (let subscription of this.subscribers) {
+            subscription.notify("TEXT OPERATION");
+        }
+    }
+
+    notifyForTextAndCursorUpdate() {
+        for (let subscription of this.subscribers) {
+            subscription.notify("CURSOR UPDATE");
+            subscription.notify("TEXT OPERATION");
         }
     }
 

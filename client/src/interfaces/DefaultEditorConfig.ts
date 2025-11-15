@@ -5,4 +5,5 @@ export interface DefaultEditorConfig {
     lineHeight: number;
     cursorWidth: number;
     cursorColor: string;
+    selectionColor: string;
 }
