@@ -1,5 +1,5 @@
-import {KeyEventsParent} from "./KeyEventsParent";
-import {KeyEvent} from "./KeyEvent";
+import {KeyEventsParent} from "../../interfaces/KeyEventsParent";
+import {KeyEvent} from "../../interfaces/KeyEvent";
 import {DocumentService} from "../../DocumentService";
 import CursorUpdateSubscription from "../../interfaces/CursorUpdateSubscription";
 
@@ -15,8 +15,6 @@ export class TextKey extends KeyEventsParent implements KeyEvent{
         if (key.length === 1) {
             e.preventDefault();
             this.service.handleInsertChar(key);
-            CursorUpdateSubscription.notifyForTextAndCursorUpdate();
-            console.log("INSERT TEXT")
             return true;
         }
 

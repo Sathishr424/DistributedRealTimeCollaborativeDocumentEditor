@@ -1,9 +1,10 @@
 import {RawEditor} from "./RawEditor";
 import {DocumentRenderer} from "./DocumentRenderer";
-import {config, DocumentSizes, Vec2} from "./interfaces/interfaces";
-import {CursorOperation} from "./commands/CursorOperation";
-import {ALLKeyEvents} from "./commands/KeyEvents/ALLKeyEvents";
+import {CommandMap, config, DocumentSizes, Vec2} from "./interfaces/interfaces";
+import {CursorOperation} from "./handler/CursorOperation";
+import {ALLKeyEvents} from "./handler/KeyEvents/ALLKeyEvents";
 import CursorUpdateSubscription from "./interfaces/CursorUpdateSubscription";
+import {initializeCommands} from "./CommandRegistry";
 
 export class DocumentService implements HasSubscription {
     private renderer: DocumentRenderer;
@@ -11,6 +12,11 @@ export class DocumentService implements HasSubscription {
     private cursorOperation: CursorOperation;
     private keyEvents: ALLKeyEvents;
     private sizes: DocumentSizes;
+    private readonly commands: CommandMap = initializeCommands(this);
+
+    public getCommands(): CommandMap {
+        return this.commands;
+    }
 
     constructor(renderer: DocumentRenderer, editor: RawEditor, sizes: DocumentSizes) {
         this.renderer = renderer;
@@ -82,72 +88,93 @@ export class DocumentService implements HasSubscription {
         this.keyEvents.handle(e);
     }
 
-    public processTextSelection() {
+    public deleteTextSelection() {
         if (this.isCursorInTextSelection()) {
             this.delete(this.cursorOperation.getPrevCursorPosition());
+            CursorUpdateSubscription.notifyForTextAndCursorUpdate();
             return true;
         }
         return false;
     }
 
     public handleBackSpace() {
-        if (this.processTextSelection()) return;
-        this.editor.backspace();
+        if (!this.deleteTextSelection()) this.editor.backspace();
+        CursorUpdateSubscription.notifyForTextAndCursorUpdate();
     }
 
     public handleInsertChar(char: string) {
-        this.processTextSelection()
+        this.deleteTextSelection()
         this.editor.insert(char);
+        CursorUpdateSubscription.notifyForTextAndCursorUpdate();
     }
 
     public handleInsertTab() {
-        this.processTextSelection()
+        this.deleteTextSelection()
         for (let i=0; i<config.tabSize; i++) {
             this.handleInsertChar(" ");
         }
+        CursorUpdateSubscription.notifyForTextAndCursorUpdate();
     }
 
     public handleInsertNewLine() {
-        this.processTextSelection()
+        this.deleteTextSelection()
         this.editor.insertNewLine();
+        CursorUpdateSubscription.notifyForTextAndCursorUpdate();
     }
 
     public handleArrowLeft() {
-        this.editor.moveLeft(1);
+        if (this.isCursorInTextSelection()) return this.handleArrowLeftOnSelectionEnd();
+        CursorUpdateSubscription.notifyForCursorUpdate();
     }
 
     public handleArrowRight() {
-        this.editor.moveRight(1);
+        if (this.isCursorInTextSelection()) return this.handleArrowRightOnSelectionEnd();
+        CursorUpdateSubscription.notifyForCursorUpdate();
     }
 
     public handleArrowUp() {
+        if (this.isCursorInTextSelection()) return this.handleArrowUpOnSelectionEnd();
         this.moveCursorUp();
+        CursorUpdateSubscription.notifyForCursorUpdate();
     }
 
     public handleArrowDown() {
+        if (this.isCursorInTextSelection()) return this.handleArrowDownOnSelectionEnd();
         this.moveCursorDown();
+        CursorUpdateSubscription.notifyForCursorUpdate();
     }
 
     public handleArrowLeftOnSelectionEnd() {
         const [start, end] = this.getCursorPositionsStartAndEnd();
         this.moveCursor(start);
+        CursorUpdateSubscription.notifyForTextAndCursorUpdate();
     }
 
     public handleArrowRightOnSelectionEnd() {
         const [start, end] = this.getCursorPositionsStartAndEnd();
         this.moveCursor(end);
+        CursorUpdateSubscription.notifyForTextAndCursorUpdate();
     }
 
     public handleArrowUpOnSelectionEnd() {
         const [start, end] = this.getCursorPositionsStartAndEnd();
         this.moveCursor(start);
         this.handleArrowUp();
+        CursorUpdateSubscription.notifyForTextAndCursorUpdate();
     }
 
     public handleArrowDownOnSelectionEnd() {
         const [start, end] = this.getCursorPositionsStartAndEnd();
         this.moveCursor(end);
         this.handleArrowDown();
+        CursorUpdateSubscription.notifyForTextAndCursorUpdate();
+    }
+
+    public executeCommand(key: string) {
+        if (this.commands[key] === undefined) return false;
+        console.log(key, 'command found');
+        this.commands[key].execute();
+        return true;
     }
 
     public convertTo1DPosition(pos: Vec2) {
@@ -211,9 +238,17 @@ export class DocumentService implements HasSubscription {
         }
     }
 
+    public moveCursorLeft() {
+        this.editor.moveLeft(1);
+        console.log("Moved cursor left");
+    }
+
+    public moveCursorRight() {
+        this.editor.moveRight(1);
+    }
+
     public moveCursorUp() {
         const pos = this.getCursorPosition();
-        console.log(pos)
         this.moveCursor({ x: pos.x, y: pos.y - 1 });
     }
 

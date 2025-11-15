@@ -48,7 +48,7 @@ export class DocumentRenderer {
     }
 
     private drawSelectionRow(row: number, colStart: number, colEnd: number) {
-        console.log("Drawing selection...", [row, colStart, colEnd]);
+        // console.log("Drawing selection...", [row, colStart, colEnd]);
         this.ctx.fillStyle = config.selectionColor;
         const start = colStart * this.sizes.charWidth;
         this.ctx.fillRect(start, row * this.sizes.height, (colEnd - colStart + 1) * this.sizes.charWidth, this.sizes.height + Math.floor(this.sizes.charWidth / 2));
@@ -62,7 +62,7 @@ export class DocumentRenderer {
     }
 
     public renderText() {
-        console.log("Rerendering text");
+        // console.log("Rerendering text");
         this.clearArea();
         let row = 0;
         let col = 0;
@@ -81,7 +81,7 @@ export class DocumentRenderer {
     }
 
     public renderTextWithSelection(start: number, end: number) {
-        console.log("Rerendering text with selection:", start, end);
+        // console.log("Rerendering text with selection:", start, end);
 
         this.clearArea();
         let row = 0;

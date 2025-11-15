@@ -1,8 +1,6 @@
-import {KeyEvent} from "./KeyEvent";
+import {KeyEvent} from "../../interfaces/KeyEvent";
 import {KeyCombination} from "./KeyCombination";
 import {TextKey} from "./TextKey";
-import {SpecialKeys} from "./SpecialKeys";
-import CursorUpdateSubscription from "../../interfaces/CursorUpdateSubscription";
 import {DocumentService} from "../../DocumentService";
 
 export class ALLKeyEvents {
@@ -10,7 +8,6 @@ export class ALLKeyEvents {
 
     constructor(service: DocumentService) {
         this.events.push(new KeyCombination(service));
-        this.events.push(new SpecialKeys(service));
         this.events.push(new TextKey(service));
     }
 

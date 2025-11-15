@@ -1,4 +1,4 @@
-import {DocumentService} from "../../DocumentService";
+import {DocumentService} from "../DocumentService";
 
 export class KeyEventsParent {
     protected service: DocumentService

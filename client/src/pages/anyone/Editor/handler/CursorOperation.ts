@@ -45,7 +45,7 @@ export class CursorOperation extends EditorOperation implements HasSubscription 
             }
             this.cursorPosition = this.service.getCursorPosition();
             if (!(this.cursorPosition.x === this.prevCursorPositionForRerender.x && this.cursorPosition.y === this.prevCursorPositionForRerender.y)) {
-                console.log("Selection:", this.prevCursorPositionForRerender, this.prevCursorPosition, this.cursorPosition, this.isTextSelected);
+                // console.log("Selection:", this.prevCursorPositionForRerender, this.prevCursorPosition, this.cursorPosition, this.isTextSelected);
                 CursorUpdateSubscription.notifyForTextUpdate();
             }
             this.prevCursorPositionForRerender = this.cursorPosition;

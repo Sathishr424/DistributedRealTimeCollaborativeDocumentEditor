@@ -2,6 +2,9 @@ import {RawEditor} from "../RawEditor";
 import {DefaultEditorConfig} from "../../../../interfaces/DefaultEditorConfig";
 import {DocumentRenderer} from "../DocumentRenderer";
 import {DocumentService} from "../DocumentService";
+import {KeyCommand} from "../handler/KeyCommand";
+
+export type CommandMap = Record<string, KeyCommand>;
 
 export const config: DefaultEditorConfig = {
     font: "monospace",
