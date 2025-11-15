@@ -2,17 +2,19 @@ import {RawEditor} from "./RawEditor";
 import {DocumentRenderer} from "./DocumentRenderer";
 import {CommandMap, config, DocumentSizes, Vec2} from "./interfaces/interfaces";
 import {CursorOperation} from "./handler/CursorOperation";
-import {ALLKeyEvents} from "./handler/KeyEvents/ALLKeyEvents";
+import {KeyEvents} from "./handler/KeyEvents/KeyEvents";
 import CursorUpdateSubscription from "./interfaces/CursorUpdateSubscription";
 import {initializeCommands} from "./CommandRegistry";
+import {ClipboardEvents} from "./handler/KeyEvents/ClipboardEvents";
 
 export class DocumentService implements HasSubscription {
     private renderer: DocumentRenderer;
     private editor: RawEditor
     private cursorOperation: CursorOperation;
-    private keyEvents: ALLKeyEvents;
+    private keyEvents: KeyEvents;
     private sizes: DocumentSizes;
     private readonly commands: CommandMap = initializeCommands(this);
+    private clipboardEvents: ClipboardEvents;
 
     public getCommands(): CommandMap {
         return this.commands;
@@ -24,7 +26,8 @@ export class DocumentService implements HasSubscription {
         this.sizes = sizes;
 
         this.cursorOperation = new CursorOperation(this);
-        this.keyEvents = new ALLKeyEvents(this);
+        this.keyEvents = new KeyEvents(this);
+        this.clipboardEvents = new ClipboardEvents(this);
         CursorUpdateSubscription.subscribe(this);
     }
 
@@ -88,6 +91,14 @@ export class DocumentService implements HasSubscription {
         this.keyEvents.handle(e);
     }
 
+    public onPaste(e: ClipboardEvent) {
+        this.clipboardEvents.executePasteCommand(e);
+    }
+
+    public onCopy(e: ClipboardEvent) {
+        this.clipboardEvents.executeCopyCommand(e);
+    }
+
     public deleteTextSelection() {
         if (this.isCursorInTextSelection()) {
             this.delete(this.cursorOperation.getPrevCursorPosition());
@@ -124,11 +135,13 @@ export class DocumentService implements HasSubscription {
 
     public handleArrowLeft() {
         if (this.isCursorInTextSelection()) return this.handleArrowLeftOnSelectionEnd();
+        this.moveCursorLeft();
         CursorUpdateSubscription.notifyForCursorUpdate();
     }
 
     public handleArrowRight() {
         if (this.isCursorInTextSelection()) return this.handleArrowRightOnSelectionEnd();
+        this.moveCursorRight();
         CursorUpdateSubscription.notifyForCursorUpdate();
     }
 
@@ -259,5 +272,14 @@ export class DocumentService implements HasSubscription {
 
     public dispose() {
         this.cursorOperation.dispose();
+    }
+
+    public insertText(text: string) {
+        this.editor.insertText(text);
+    }
+
+    public getTextSelection(): string {
+        let pos = this.convertTo1DPosition(this.cursorOperation.getPrevCursorPosition());
+        return this.editor.getTextUntilPos(pos);
     }
 }

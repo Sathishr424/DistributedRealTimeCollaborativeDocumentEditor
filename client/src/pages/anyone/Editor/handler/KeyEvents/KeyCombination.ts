@@ -26,7 +26,6 @@ export class KeyCombination extends KeyEventsParent implements KeyEvent{
         }
         command += add + key;
 
-        console.log(command)
         if (this.service.executeCommand(command)) {
             e.preventDefault();
             return true;

@@ -14,6 +14,10 @@ export class Deque<T> {
         return this._front;
     }
 
+    public getTail() {
+        return this._back;
+    }
+
     public size(): number {
         return this._size;
     }

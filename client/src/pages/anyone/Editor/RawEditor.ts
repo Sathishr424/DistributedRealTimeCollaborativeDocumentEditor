@@ -66,6 +66,40 @@ export class RawEditor {
         this.columnIndex = 0;
     }
 
+    public getTextUntilPos(pos: number) {
+        let diff = this.left.size() - pos;
+
+        if (diff < 0) {
+            return this.getTextFromRight(-diff);
+        } else {
+            return this.getTextFromLeft(diff)
+        }
+    }
+
+    private getTextFromLeft(k: number) {
+        let chars = [];
+        let node = this.left.getTail();
+        while (node && k) {
+            chars.push(node.val);
+            node = node.prev;
+            k--;
+        }
+
+        return chars.reverse().join('');
+    }
+
+    private getTextFromRight(k: number) {
+        let chars = [];
+        let node = this.right.getHead();
+        while (node && k) {
+            chars.push(node.val);
+            node = node.next;
+            k--;
+        }
+
+        return chars.join('');
+    }
+
     public backspace() {
         this.deleteLeft(1);
     }
@@ -123,6 +157,12 @@ export class RawEditor {
             this.columnIndex++;
             this.left.pushBack(<string>char);
             k--;
+        }
+    }
+
+    insertText(pastedText: string) {
+        for (let char of pastedText) {
+            this.insert(char);
         }
     }
 }

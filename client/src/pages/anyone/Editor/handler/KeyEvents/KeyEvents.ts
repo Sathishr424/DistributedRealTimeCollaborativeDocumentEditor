@@ -3,7 +3,7 @@ import {KeyCombination} from "./KeyCombination";
 import {TextKey} from "./TextKey";
 import {DocumentService} from "../../DocumentService";
 
-export class ALLKeyEvents {
+export class KeyEvents {
     private events: KeyEvent[] = [];
 
     constructor(service: DocumentService) {
