@@ -18,6 +18,7 @@ export class DocumentRenderer {
 
         this.ctx.fillStyle = config.color;
         this.ctx.font = `${config.fontSize}px ${config.font}`;
+        this.renderText();
     }
 
     public getCursorPositionOnCanvas(pos: Vec2): Vec2 {

@@ -16,7 +16,7 @@ export class ALLKeyEvents {
 
     handle(e: KeyboardEvent) {
         for (let event of this.events) {
-            if (!event.handle(e)) {
+            if (event.handle(e)) {
                 break;
             }
         }

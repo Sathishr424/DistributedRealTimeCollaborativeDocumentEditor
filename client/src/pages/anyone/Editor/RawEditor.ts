@@ -1,5 +1,12 @@
 import {Deque} from "@utils/Deque";
 
+const sampleText = "🗄️ 3. Extract Utility and Helper Logic\n" +
+    "Any code that is reusable or purely supporting the primary function of the class should be moved out.\n" +
+    "\n" +
+    "Helper Classes/Modules: Move complex calculations, formatting logic, or validation routines into dedicated, static helper classes or utility modules.\n" +
+    "\n" +
+    "Example: Your getCorrectPosition logic in DocumentService is essential, but if it grew too complex, you might move the visual-to-logical translation into a CoordinateConverter class, leaving the Service cleaner.";
+
 export class RawEditor {
     private left: Deque<string>;
     private right: Deque<string>;
@@ -10,6 +17,12 @@ export class RawEditor {
     constructor() {
         this.left = new Deque<string>();
         this.right = new Deque<string>();
+
+        for (let char of sampleText) {
+            this.insert(char);
+        }
+
+        console.log(this.left.toArray(), this.lineIndex, this.newLines, this.columnIndex);
     }
 
     public getLogicalLineLengths(): number[] {
@@ -37,7 +50,7 @@ export class RawEditor {
     }
 
     public insert(char: string) {
-        if (char == '\n') return this.insertNewLine();
+        if (char === '\n') return this.insertNewLine();
         this.left.pushBack(char);
         this.newLines[this.lineIndex]++;
         this.columnIndex++;

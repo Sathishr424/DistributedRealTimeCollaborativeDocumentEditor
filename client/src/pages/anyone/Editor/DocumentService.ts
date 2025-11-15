@@ -33,15 +33,25 @@ export class DocumentService implements HasSubscription {
         this.renderer.renderCursor(pos);
     }
 
+    public getCursorPositionsStartAndEnd(): Vec2[] {
+        let start = this.cursorOperation.getPrevCursorPosition();
+        let end = this.cursorOperation.getCursorPosition()
+        if (start.y > end.y || (start.y == end.y && start.x > end.x)) {
+            [start, end] = [end, start];
+        }
+
+        return [start, end];
+    }
+
+    public getIsTextSelection(): boolean {
+        return this.cursorOperation.getIsTextSelection();
+    }
+
     notify(usage: string): void {
         if (usage !== "TEXT OPERATION") return;
 
-        if (this.cursorOperation.getIsTextSelected()) {
-            let start = this.cursorOperation.getPrevCursorPosition();
-            let end = this.cursorOperation.getCursorPosition()
-            if (start.y > end.y || (start.y == end.y && start.x > end.x)) {
-                [start, end] = [end, start];
-            }
+        if (this.getIsTextSelection()) {
+            const [start, end] = this.getCursorPositionsStartAndEnd();
 
             this.renderer.renderTextWithSelection(start.y * this.sizes.cols + start.x, end.y * this.sizes.cols + end.x - 1);
         } else {
@@ -72,25 +82,37 @@ export class DocumentService implements HasSubscription {
         this.keyEvents.handle(e);
     }
 
-    public handleBackSpace() {
-        if (this.cursorOperation.getIsTextSelected()) {
+    public isCursorInTextSelection(): boolean {
+        return this.getIsTextSelection();
+    }
+
+    public processTextSelection() {
+        if (this.getIsTextSelection()) {
             this.delete(this.cursorOperation.getPrevCursorPosition());
-        } else {
-            this.editor.backspace();
+            return true;
         }
+        return false;
+    }
+
+    public handleBackSpace() {
+        if (this.processTextSelection()) return;
+        this.editor.backspace();
     }
 
     public handleInsertChar(char: string) {
+        this.processTextSelection()
         this.editor.insert(char);
     }
 
     public handleInsertTab() {
+        this.processTextSelection()
         for (let i=0; i<config.tabSize; i++) {
             this.handleInsertChar(" ");
         }
     }
 
     public handleInsertNewLine() {
+        this.processTextSelection()
         this.editor.insertNewLine();
     }
 
@@ -108,6 +130,28 @@ export class DocumentService implements HasSubscription {
 
     public handleArrowDown() {
         this.moveCursorDown();
+    }
+
+    public handleArrowLeftOnSelectionEnd() {
+        const [start, end] = this.getCursorPositionsStartAndEnd();
+        this.moveCursor(start);
+    }
+
+    public handleArrowRightOnSelectionEnd() {
+        const [start, end] = this.getCursorPositionsStartAndEnd();
+        this.moveCursor(end);
+    }
+
+    public handleArrowUpOnSelectionEnd() {
+        const [start, end] = this.getCursorPositionsStartAndEnd();
+        this.moveCursor(start);
+        this.handleArrowUp();
+    }
+
+    public handleArrowDownOnSelectionEnd() {
+        const [start, end] = this.getCursorPositionsStartAndEnd();
+        this.moveCursor(end);
+        this.handleArrowDown();
     }
 
     public convertTo1DPosition(pos: Vec2) {
@@ -133,16 +177,18 @@ export class DocumentService implements HasSubscription {
     }
 
     public getCursorPosition(): Vec2 {
-        let chars = 0;
+        let rows = 0;
         for (let i=0; i<this.editor.getLogicalLineIndex(); i++) {
-            chars += Math.max(this.sizes.cols, this.editor.getLogicalLineLengths()[i]);
+            const chars = Math.max(this.sizes.cols, this.editor.getLogicalLineLengths()[i]);
+            rows += Math.ceil(chars / this.sizes.cols);
         }
-        let rows = Math.ceil(chars / this.sizes.cols);
         const colIndex = this.editor.getLogicalColumnIndex();
         const pos: Vec2 = { x: colIndex, y: rows }
-        pos.x = pos.x % this.sizes.cols;
+
+        pos.x %= this.sizes.cols;
         pos.y = pos.y + Math.floor(colIndex / this.sizes.cols);
-        // console.log(this.editor.getTotalCharsBeforeCursor().toArray(), this.editor.getLogicalLineLengths(), pos)
+
+        // console.log(this.sizes.cols, rows, colIndex, this.editor.getTotalCharsBeforeCursor().toArray(), this.editor.getLogicalLineLengths(), pos)
         return pos;
     }
 

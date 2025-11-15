@@ -4,8 +4,6 @@ import {DocumentService} from "./DocumentService";
 import {DocumentRenderer} from "./DocumentRenderer";
 import CursorUpdateSubscription from "./interfaces/CursorUpdateSubscription";
 
-const sampleText: string = "class Solution {\npublic:\n    int maxOperations(string s) {\n        int n = s.length();\n        int ans = 0;\n        int i = n-1;\n        while (i >= 0 && s[i] == '1') {\n            i--;\n        }\n        bool first = true;\n        int ones = 0;\n        while (i >= 0) {\n            if (s[i] == '1') {\n                int add = 0;\n                if (s[i + 1] == '0') add++;\n                while (i >= 0 && s[i] == '1') {\n                    ans+=ones + 1;\n                    i--;\n                }\n                ones += add;\n            }\n            i--;\n        }\n\n        return ans;\n    }\n}";
-
 class Editor {
     private canvas: HTMLCanvasElement;
     private ctx: CanvasRenderingContext2D;

@@ -16,9 +16,10 @@ export class TextKey extends KeyEventsParent implements KeyEvent{
             e.preventDefault();
             this.service.handleInsertChar(key);
             CursorUpdateSubscription.notifyForTextAndCursorUpdate();
-            return false;
+            console.log("INSERT TEXT")
+            return true;
         }
 
-        return true;
+        return false;
     }
 }

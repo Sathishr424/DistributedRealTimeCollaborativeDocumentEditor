@@ -11,7 +11,7 @@ export class CursorOperation extends EditorOperation implements HasSubscription 
     private isMouseDown = false;
     private prevCursorPositionForRerender: Vec2 = {x: -1, y: -1};
 
-    public getIsTextSelected(): boolean {
+    public getIsTextSelection(): boolean {
         return this.isTextSelected;
     }
 

@@ -31,8 +31,9 @@ export class SpecialKeys extends KeyEventsParent implements KeyEvent{
         if (keyPress) {
             CursorUpdateSubscription.notifyForTextAndCursorUpdate();
             e.preventDefault();
-            return false;
+            return true;
         }
+
         keyPress = true;
         switch (key) {
             case "ArrowLeft":
@@ -55,9 +56,9 @@ export class SpecialKeys extends KeyEventsParent implements KeyEvent{
         if (keyPress) {
             CursorUpdateSubscription.notifyForCursorUpdate();
             e.preventDefault();
-            return false;
+            return true;
         }
 
-        return true;
+        return false;
     }
 }
