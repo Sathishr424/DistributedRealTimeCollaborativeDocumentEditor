@@ -27,6 +27,7 @@ export interface DocumentSizes {
     cols: number;
     charWidth: number
     height: number;
+    rows: number;
 }
 
 export class EditorOperation {

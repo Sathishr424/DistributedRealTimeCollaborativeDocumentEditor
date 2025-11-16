@@ -1,15 +1,16 @@
-import { useEffect, useState } from "react"
+import React, { useEffect, useState } from "react"
+import {AlertContextType, AlertItem} from "../interfaces/Alerts";
 
-export default function Alert({ alertsState, setAlertsState }) {
-    const [onQueue, setOnQueue] = useState([]);
+export default function Alert({ alertsState, setAlertsState }: {alertsState: AlertItem[], setAlertsState:  React.Dispatch<React.SetStateAction<AlertItem[]>>}) {
+    const [onQueue, setOnQueue] = useState<string[]>([]);
 
-    const autoHide = (id) => {
+    const autoHide = (id: string) => {
         setAlertsState(prev => prev.filter(a => a.id !== id));
         setOnQueue(prev => prev.filter(a => a !== id));
     }
 
     useEffect(() => {
-        alertsState.forEach(a => {
+        alertsState.forEach((a: AlertItem) => {
             if (!onQueue.includes(a.id)) {
                 setOnQueue(prev => [...prev, a.id]);
                 setTimeout(autoHide, 2000, a.id);

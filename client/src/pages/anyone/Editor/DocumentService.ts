@@ -6,8 +6,11 @@ import {KeyEvents} from "./handler/KeyEvents/KeyEvents";
 import CursorUpdateSubscription from "./interfaces/CursorUpdateSubscription";
 import {initializeCommands} from "./CommandRegistry";
 import {ClipboardEvents} from "./handler/KeyEvents/ClipboardEvents";
+import {CanvasContainer} from "./CanvasContainer";
+import SubscriptionForPageCreation from "./SubscriptionForPageCreation";
 
 export class DocumentService implements HasSubscription {
+    private canvasContainer: CanvasContainer;
     private renderer: DocumentRenderer;
     private editor: RawEditor
     private cursorOperation: CursorOperation;
@@ -20,7 +23,8 @@ export class DocumentService implements HasSubscription {
         return this.commands;
     }
 
-    constructor(renderer: DocumentRenderer, editor: RawEditor, sizes: DocumentSizes) {
+    constructor(canvasContainer: CanvasContainer, renderer: DocumentRenderer, editor: RawEditor, sizes: DocumentSizes) {
+        this.canvasContainer = canvasContainer;
         this.renderer = renderer;
         this.editor = editor;
         this.sizes = sizes;
@@ -31,12 +35,14 @@ export class DocumentService implements HasSubscription {
         CursorUpdateSubscription.subscribe(this);
     }
 
-    private getCorrectPosition(x: number, y: number): Vec2 {
-        const {left, top} = this.renderer.getCanvasOffset();
+    private getCorrectPosition(x: number, y: number, e: MouseEvent): Vec2 {
+        // @ts-ignore
+        const page = e.target.getAttribute("page");
+        const {left, top} = this.renderer.getCanvasOffset(page);
         x -= left;
         y -= top;
         x += (x % this.sizes.charWidth);
-        return {x: Math.floor(x / this.sizes.charWidth), y: Math.floor(y / this.sizes.height)};
+        return {x: Math.floor(x / this.sizes.charWidth), y: Math.floor(y / this.sizes.height) + (page * this.sizes.rows)};
     }
 
     public drawCursor(pos: Vec2): void {
@@ -71,20 +77,21 @@ export class DocumentService implements HasSubscription {
         } else {
             this.renderer.renderText();
         }
+        this.handlePages();
     }
 
     public onMouseMove(e: MouseEvent) {
-        const pos = this.getCorrectPosition(e.clientX, e.clientY);
+        const pos = this.getCorrectPosition(e.clientX, e.clientY, e);
         this.cursorOperation.handleOnMouseMove(pos);
     }
 
     public onMouseUp(e: MouseEvent) {
-        const pos = this.getCorrectPosition(e.clientX, e.clientY);
+        const pos = this.getCorrectPosition(e.clientX, e.clientY, e);
         this.cursorOperation.handleOnMouseUp(pos);
     }
 
     public onMouseDown(e: MouseEvent) {
-        const pos = this.getCorrectPosition(e.clientX, e.clientY);
+        const pos = this.getCorrectPosition(e.clientX, e.clientY, e);
         this.cursorOperation.handleOnMouseDown(pos);
     }
 
@@ -118,6 +125,16 @@ export class DocumentService implements HasSubscription {
         CursorUpdateSubscription.notifyForTextAndCursorUpdate();
     }
 
+    public handlePages() {
+        const pos = this.getLastCharPosition();
+        const pages = Math.ceil(pos.y / this.sizes.rows);
+        if (pages !== this.canvasContainer.getCanvasesTotal()) {
+            this.canvasContainer.clearCanvases();
+            SubscriptionForPageCreation.notifySubscribersForCanvas(pages);
+        }
+    }
+
+    // Update logic for pages
     public handleInsertChar(char: string) {
         this.deleteTextSelection()
         this.editor.insert(char);
@@ -137,6 +154,7 @@ export class DocumentService implements HasSubscription {
         this.editor.insertNewLine();
         CursorUpdateSubscription.notifyForTextAndCursorUpdate();
     }
+    // Update logic for pages
 
     public handleArrowLeft() {
         if (this.isCursorInTextSelection()) return this.handleArrowLeftOnSelectionEnd();

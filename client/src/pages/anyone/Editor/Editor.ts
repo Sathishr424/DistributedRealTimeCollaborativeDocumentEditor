@@ -3,10 +3,11 @@ import {config, DocumentSizes} from "./interfaces/interfaces";
 import {DocumentService} from "./DocumentService";
 import {DocumentRenderer} from "./DocumentRenderer";
 import CursorUpdateSubscription from "./interfaces/CursorUpdateSubscription";
+import {CanvasContainer} from "./CanvasContainer";
 
 class Editor {
-    private canvas: HTMLCanvasElement;
-    private ctx: CanvasRenderingContext2D;
+    private canvasContainer: CanvasContainer;
+    private container: HTMLDivElement;
     private editor: RawEditor;
     private renderer: DocumentRenderer;
     private service: DocumentService;
@@ -20,22 +21,25 @@ class Editor {
     private boundCut: (e: ClipboardEvent) => void;
     private boundPaste: (e: ClipboardEvent) => void;
 
-    constructor(canvas: HTMLCanvasElement) {
-        this.canvas = canvas;
-        this.ctx = <CanvasRenderingContext2D>canvas.getContext('2d');
+    constructor(canvas: HTMLCanvasElement, container: HTMLDivElement, canvasContainer: CanvasContainer) {
+        this.container = container;
+        this.canvasContainer = canvasContainer;
+        console.log(container, canvas)
+        const ctx = <CanvasRenderingContext2D>canvas.getContext('2d');
 
-        const charWidth = Math.ceil(this.ctx.measureText("a").width);
-        const {width} = this.canvas.getBoundingClientRect();
+        const charWidth = Math.ceil(ctx.measureText("a").width);
+        const {width, height} = canvas.getBoundingClientRect();
 
         this.sizes = {
             charWidth: charWidth,
             height: config.lineHeight,
-            cols: Math.floor(width / charWidth)
+            cols: Math.floor(width / charWidth),
+            rows: Math.floor(height / config.lineHeight),
         }
 
         this.editor = new RawEditor();
-        this.renderer = new DocumentRenderer(this.ctx, this.canvas, this.editor, this.sizes);
-        this.service = new DocumentService(this.renderer, this.editor, this.sizes);
+        this.renderer = new DocumentRenderer(this.canvasContainer, this.editor, this.sizes);
+        this.service = new DocumentService(this.canvasContainer, this.renderer, this.editor, this.sizes);
 
         this.boundMouseMove = this.service.onMouseMove.bind(this.service);
         this.boundMouseUp = this.service.onMouseUp.bind(this.service);
@@ -49,9 +53,9 @@ class Editor {
     }
 
     public attachEvents() {
-        this.canvas.addEventListener('mousemove', this.boundMouseMove);
-        this.canvas.addEventListener('mouseup', this.boundMouseUp);
-        this.canvas.addEventListener('mousedown', this.boundMouseDown);
+        this.container.addEventListener('mousemove', this.boundMouseMove);
+        this.container.addEventListener('mouseup', this.boundMouseUp);
+        this.container.addEventListener('mousedown', this.boundMouseDown);
         document.addEventListener('keydown', this.boundKeyDown);
         document.addEventListener('copy', this.boundCopy);
         document.addEventListener('cut', this.boundCut);
@@ -59,9 +63,9 @@ class Editor {
     }
 
     public dispose() {
-        this.canvas.removeEventListener('mousemove', this.boundMouseMove);
-        this.canvas.removeEventListener('mouseup', this.boundMouseUp);
-        this.canvas.removeEventListener('mousedown', this.boundMouseDown);
+        this.container.removeEventListener('mousemove', this.boundMouseMove);
+        this.container.removeEventListener('mouseup', this.boundMouseUp);
+        this.container.removeEventListener('mousedown', this.boundMouseDown);
         document.removeEventListener('keydown', this.boundKeyDown);
         document.removeEventListener('copy', this.boundCopy);
         document.removeEventListener('cut', this.boundCut);
