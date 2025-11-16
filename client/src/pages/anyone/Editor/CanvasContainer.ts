@@ -22,7 +22,6 @@ export class CanvasContainer {
     }
 
     public getCanvas(index: number): HTMLCanvasElement {
-        // console.log(index, this.canvasObjects.length);
         return this.canvasObjects[index].canvas;
     }
 
@@ -32,26 +31,26 @@ export class CanvasContainer {
         }
     }
 
-    private loadConfig(canvas: HTMLCanvasElement) {
-        const ctx = <CanvasRenderingContext2D>canvas.getContext('2d');
-
+    public configCanvas(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D): void {
         canvas.style.backgroundColor = config.backgroundColor;
         ctx.fillStyle = config.color;
         ctx.font = `${config.fontSize}px ${config.font}`;
     }
 
+    private loadConfig(canvas: HTMLCanvasElement) {
+        const ctx = <CanvasRenderingContext2D>canvas.getContext('2d');
+        this.configCanvas(canvas, ctx);
+    }
+
     public appendCanvasNew(service: DocumentService): void {
         const canvas = getNewCanvasElement();
-        this.loadConfig(canvas);
-        canvas.setAttribute("page", this.getCanvasesTotal().toString());
-        const canvasObject: CanvasObject = {canvas: canvas, events: this.attachEvents(canvas, service)};
-        this.canvasObjects.push(canvasObject);
+        this.appendCanvas(canvas, service);
     }
 
     public appendCanvas(canvas: HTMLCanvasElement, service: DocumentService): void {
         this.loadConfig(canvas);
         canvas.setAttribute("page", this.getCanvasesTotal().toString());
-        const canvasObject: CanvasObject = {canvas: canvas, events: this.attachEvents(canvas, service)};
+        const canvasObject: CanvasObject = {canvas: canvas, events: this.attachAndReturnEvents(canvas, service)};
         this.canvasObjects.push(canvasObject);
     }
 
@@ -63,20 +62,15 @@ export class CanvasContainer {
         }
     }
 
-    public attachEvents(canvas: HTMLCanvasElement, service: DocumentService): CanvasEvent {
-        console.log(service);
-        const boundMouseMove = service.onMouseMove.bind(service);
-        const boundMouseUp = service.onMouseUp.bind(service);
-        const boundMouseDown = service.onMouseDown.bind(service);
-
-        canvas.addEventListener('mousemove', boundMouseMove);
-        canvas.addEventListener('mouseup', boundMouseUp);
-        canvas.addEventListener('mousedown', boundMouseDown);
-
+    public attachAndReturnEvents(canvas: HTMLCanvasElement, service: DocumentService): CanvasEvent {
         const events: CanvasEvent = {};
-        events["mousemove"] = boundMouseMove;
-        events["mouseup"] = boundMouseUp;
-        events["mousedown"] = boundMouseDown;
+        events["mousemove"] = service.onMouseMove.bind(service);
+        events["mouseup"] = service.onMouseUp.bind(service);
+        events["mousedown"] = service.onMouseDown.bind(service);
+
+        canvas.addEventListener('mousemove', events["mousemove"]);
+        canvas.addEventListener('mouseup', events["mouseup"]);
+        canvas.addEventListener('mousedown', events["mousedown"]);
 
         return events;
     }

@@ -4,7 +4,6 @@ import {DocumentService} from "./DocumentService";
 import {DocumentRenderer} from "./DocumentRenderer";
 import CursorUpdateSubscription from "./interfaces/CursorUpdateSubscription";
 import {CanvasContainer} from "./CanvasContainer";
-import SubscriptionForPageCreation from "./SubscriptionForPageCreation";
 import {getElementPadding, getNewCanvasElement} from "./Helpers";
 
 class Editor {
@@ -20,11 +19,13 @@ class Editor {
     private boundPaste: (e: ClipboardEvent) => void;
 
     constructor() {
+        this.canvasContainer = new CanvasContainer();
         const canvas = getNewCanvasElement();
         const ctx = <CanvasRenderingContext2D>canvas.getContext('2d');
+        this.canvasContainer.configCanvas(canvas, ctx);
 
         const charWidth = Math.ceil(ctx.measureText("A").width);
-        const {width, height} = canvas.getBoundingClientRect();
+        let {width, height} = canvas.getBoundingClientRect();
 
         const padding = getElementPadding(canvas);
 
@@ -35,7 +36,6 @@ class Editor {
             rows: Math.floor((height - padding.x * 2) / config.lineHeight),
         }
 
-        this.canvasContainer = new CanvasContainer();
         this.editor = new RawEditor();
         this.renderer = new DocumentRenderer(this.editor, this.sizes, this.canvasContainer);
         this.service = new DocumentService(this.canvasContainer, this.renderer, this.editor, this.sizes);
@@ -58,12 +58,6 @@ class Editor {
         document.addEventListener('copy', this.boundCopy);
         document.addEventListener('cut', this.boundCut);
         document.addEventListener('paste', this.boundPaste);
-    }
-
-    public appendCanvas(canvas: HTMLCanvasElement): void {
-        if (this.service) {
-            this.canvasContainer.appendCanvas(canvas, this.service);
-        }
     }
 
     public dispose(): void {

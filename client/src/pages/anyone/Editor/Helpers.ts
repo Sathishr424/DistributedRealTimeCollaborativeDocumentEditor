@@ -21,6 +21,5 @@ export function getNewCanvasElement() {
     canvasElement.classList.add("m-4");
     canvasElement.classList.add("p-6");
 
-    // <canvas ref={canvasRef} className="cursor-text" width="595px" height="892px"></canvas>
     return canvasElement;
 }
