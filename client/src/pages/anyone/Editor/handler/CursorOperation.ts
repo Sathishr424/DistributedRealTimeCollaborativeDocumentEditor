@@ -6,7 +6,7 @@ import {Deque} from "@utils/Deque";
 export class CursorOperation extends EditorOperation implements HasSubscription {
     private cursorInterval: any;
     private cursorToggle: boolean = false;
-    private cursorPosition: Vec2;
+    private cursorPosition: Vec2 = {x: 0, y: 0};
     private prevCursorPosition: Vec2 = {x: -1, y: -1};
     private isTextSelected = false;
     private isMouseDown = false;
@@ -32,9 +32,13 @@ export class CursorOperation extends EditorOperation implements HasSubscription 
     constructor(service: DocumentService) {
         super(service);
         this.clickIntervals = new Deque<number>();
-        this.cursorInterval = setInterval(this.renderCursor.bind(this), 300);
-        this.cursorPosition = service.getCursorPosition();
+        this.ready();
         CursorUpdateSubscription.subscribe(this);
+    }
+
+    public ready(): void {
+        this.cursorInterval = setInterval(this.renderCursor.bind(this), 300);
+        this.cursorPosition = this.service.getCursorPosition();
     }
 
     public updateCursorPosition(pos: Vec2) {

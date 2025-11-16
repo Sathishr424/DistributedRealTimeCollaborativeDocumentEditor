@@ -4,62 +4,60 @@ import {Vec2} from "./interfaces/interfaces";
 import {CanvasContainer} from "./CanvasContainer";
 
 export class DocumentRenderer {
-    private canvasContainer: CanvasContainer;
     private editor: RawEditor;
     private sizes: DocumentSizes;
+    private canvasContainer: CanvasContainer;
 
 
-    constructor(canvasContainer: CanvasContainer, editor: RawEditor, sizes: DocumentSizes) {
-        this.canvasContainer = canvasContainer;
+    constructor(editor: RawEditor, sizes: DocumentSizes, canvasContainer: CanvasContainer) {
         this.editor = editor;
         this.sizes = sizes;
-
-        this.renderText();
+        this.canvasContainer = canvasContainer;
     }
 
-    public getCtx(pos: Vec2): CanvasRenderingContext2D {
-        let page = Math.floor(pos.y / this.sizes.rows);
+    public getCtx(row: number): CanvasRenderingContext2D {
+        let page = Math.floor(row / this.sizes.rows);
         let canvas = this.canvasContainer.getCanvas(page);
-        // console.log(pos, this.canvasContainer.getCanvasesTotal(), page, canvas);
+
         // @ts-ignore
         return canvas.getContext("2d");
     }
 
     public clearAllPage(): void {
-        for (let i = 1; i < this.canvasContainer.getCanvasesTotal(); i++) {
+        for (let i = 0; i < this.canvasContainer.getCanvasesTotal(); i++) {
             // @ts-ignore
             const ctx = this.canvasContainer.getCanvas(i).getContext('2d');
             // @ts-ignore
-            ctx.clearRect(0, 0, this.sizes.rows * this.sizes.height, this.sizes.cols * this.sizes.charWidth);
+            ctx.clearRect(0, 0, this.canvasContainer.getCanvas(i).width, this.canvasContainer.getCanvas(i).height);
         }
     }
 
     public getTheCanvasPos(pos: Vec2): Vec2 {
-        const row = Math.floor(pos.y / this.sizes.rows);
-        return { x: pos.x * this.sizes.charWidth, y: (pos.y - (row * this.sizes.rows))  * this.sizes.height };
+        const row = pos.y % this.sizes.rows;
+        return { x: pos.x * this.sizes.charWidth, y: row * this.sizes.height };
     }
 
     public clearCursor(pos: Vec2): void {
         let newPos = this.getTheCanvasPos(pos);
-        const ctx = this.getCtx(pos);
+        const ctx = this.getCtx(pos.y);
         ctx.clearRect(newPos.x-1, newPos.y, config.cursorWidth + 2, this.sizes.height);
     }
 
     public renderCursor(pos: Vec2): void {
         let newPos = this.getTheCanvasPos(pos);
-        const ctx = this.getCtx(pos);
+        const ctx = this.getCtx(pos.y);
         ctx.fillRect(newPos.x, newPos.y, config.cursorWidth, this.sizes.height);
     }
 
     private drawText(text: string, pos: Vec2) {
         const updatedPos = this.getTheCanvasPos(pos);
-        const ctx = this.getCtx(pos);
+        const ctx = this.getCtx(pos.y);
         ctx.fillText(text, updatedPos.x, updatedPos.y + this.sizes.height, this.sizes.charWidth);
     }
 
     private drawSelectionRow(row: number, colStart: number, colEnd: number) {
-        const ctx = this.getCtx({y: row, x: colStart});
-        row = Math.floor(row / this.sizes.rows);
+        const ctx = this.getCtx(row);
+        row = row % this.sizes.rows;
 
         ctx.fillStyle = config.selectionColor;
         const start = colStart * this.sizes.charWidth;
@@ -125,6 +123,7 @@ export class DocumentRenderer {
     }
 
     public getCanvasOffset(page: number): DOMRect {
+        // console.log(page, this.canvasContainer.getCanvasesTotal())
         return this.canvasContainer.getCanvas(page).getBoundingClientRect();
     }
 }

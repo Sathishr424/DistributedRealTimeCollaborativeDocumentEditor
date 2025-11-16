@@ -6,7 +6,7 @@ export type CommandMap = Record<string, KeyCommand>;
 
 export const config: DefaultEditorConfig = {
     font: "monospace",
-    fontSize: 16,
+    fontSize: 18,
     color: "black",
     selectionColor: "rgba(0,0,255,0.57)",
     lineHeight: 20,

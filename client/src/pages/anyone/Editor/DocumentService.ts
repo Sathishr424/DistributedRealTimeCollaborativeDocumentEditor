@@ -8,6 +8,7 @@ import {initializeCommands} from "./CommandRegistry";
 import {ClipboardEvents} from "./handler/KeyEvents/ClipboardEvents";
 import {CanvasContainer} from "./CanvasContainer";
 import SubscriptionForPageCreation from "./SubscriptionForPageCreation";
+import {getElementPadding} from "./Helpers";
 
 export class DocumentService implements HasSubscription {
     private canvasContainer: CanvasContainer;
@@ -35,13 +36,24 @@ export class DocumentService implements HasSubscription {
         CursorUpdateSubscription.subscribe(this);
     }
 
-    private getCorrectPosition(x: number, y: number, e: MouseEvent): Vec2 {
+    private getCorrectPosition(e: MouseEvent): Vec2 {
+        let x = e.clientX;
+        let y = e.clientY;
+        const pos = { x: e.clientX, y: e.clientY };
+
         // @ts-ignore
-        const page = e.target.getAttribute("page");
-        const {left, top} = this.renderer.getCanvasOffset(page);
-        x -= left;
-        y -= top;
+        let page = parseInt(e.target.getAttribute('page'));
+        const canvas = this.canvasContainer.getCanvas(page);
+
+        const {left, top} = canvas.getBoundingClientRect();
+        const padding = getElementPadding(canvas);
+
+        x -= left + padding.x;
+        y -= top + padding.y;
         x += (x % this.sizes.charWidth);
+
+        // console.log({x, y}, pos, {left, top});
+
         return {x: Math.floor(x / this.sizes.charWidth), y: Math.floor(y / this.sizes.height) + (page * this.sizes.rows)};
     }
 
@@ -68,7 +80,9 @@ export class DocumentService implements HasSubscription {
     }
 
     notify(usage: string): void {
+        // console.log("Usage: ", usage);
         if (usage !== "TEXT OPERATION") return;
+        this.handlePages();
 
         if (this.isCursorInTextSelection()) {
             const [start, end] = this.getCursorPositionsStartAndEnd();
@@ -77,21 +91,20 @@ export class DocumentService implements HasSubscription {
         } else {
             this.renderer.renderText();
         }
-        this.handlePages();
     }
 
     public onMouseMove(e: MouseEvent) {
-        const pos = this.getCorrectPosition(e.clientX, e.clientY, e);
+        const pos = this.getCorrectPosition(e);
         this.cursorOperation.handleOnMouseMove(pos);
     }
 
     public onMouseUp(e: MouseEvent) {
-        const pos = this.getCorrectPosition(e.clientX, e.clientY, e);
+        const pos = this.getCorrectPosition(e);
         this.cursorOperation.handleOnMouseUp(pos);
     }
 
     public onMouseDown(e: MouseEvent) {
-        const pos = this.getCorrectPosition(e.clientX, e.clientY, e);
+        const pos = this.getCorrectPosition(e);
         this.cursorOperation.handleOnMouseDown(pos);
     }
 
@@ -127,10 +140,15 @@ export class DocumentService implements HasSubscription {
 
     public handlePages() {
         const pos = this.getLastCharPosition();
-        const pages = Math.ceil(pos.y / this.sizes.rows);
-        if (pages !== this.canvasContainer.getCanvasesTotal()) {
-            this.canvasContainer.clearCanvases();
-            SubscriptionForPageCreation.notifySubscribersForCanvas(pages);
+        const pages = Math.floor(pos.y / this.sizes.rows);
+
+        // console.log("PAGES:", pos, pages, this.canvasContainer.getCanvasesTotal())
+
+        while (this.canvasContainer.getCanvasesTotal() <= pages) {
+            this.canvasContainer.appendCanvasNew(this);
+        }
+        while (this.canvasContainer.getCanvasesTotal() > pages + 1) {
+            this.canvasContainer.popCanvas();
         }
     }
 
@@ -279,7 +297,6 @@ export class DocumentService implements HasSubscription {
 
     public moveCursor(newPos: Vec2) {
         let realPos = this.convertTo1DPosition(newPos);
-        // console.log("MovePOS:", newPos, "1DPos:", realPos);
         let diff = this.editor.getTotalCharsBeforeCursor().size() - realPos;
 
         if (diff > 0) {
