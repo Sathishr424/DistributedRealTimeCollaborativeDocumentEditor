@@ -61,7 +61,11 @@ export class DocumentRenderer {
 
         ctx.fillStyle = config.selectionColor;
         const start = colStart * this.sizes.charWidth;
-        ctx.fillRect(start, row * this.sizes.height, (colEnd - colStart + 1) * this.sizes.charWidth, this.sizes.height + Math.floor(this.sizes.charWidth / 2));
+
+        const padding = Math.floor(this.sizes.height * (config.selectionHorizontalPadding / 100));
+
+        ctx.fillRect(start, row * config.lineHeight + padding, (colEnd - colStart + 1) * this.sizes.charWidth, config.lineHeight);
+
         ctx.fillStyle = config.color;
     }
 

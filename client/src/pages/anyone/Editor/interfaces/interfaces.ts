@@ -5,10 +5,11 @@ import {KeyCommand} from "../handler/KeyCommand";
 export type CommandMap = Record<string, KeyCommand>;
 
 export const config: DefaultEditorConfig = {
-    font: "monospace",
+    font: "JetBrains Mono",
     fontSize: 16,
     color: "black",
     selectionColor: "rgba(0,0,255,0.57)",
+    selectionHorizontalPadding: 20,
     lineHeight: 20,
     cursorColor: 'black',
     cursorWidth: 1,
