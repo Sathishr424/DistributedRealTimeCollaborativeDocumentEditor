@@ -16,6 +16,6 @@ export class InsertOperation implements HistoryOperation {
 
     handle(service: DocumentService): void {
         service.moveToPosition(this.position);
-        service.insertText(this.text, false, true);
+        service.insertTextFromUndoOrRedo(this.text);
     }
 }

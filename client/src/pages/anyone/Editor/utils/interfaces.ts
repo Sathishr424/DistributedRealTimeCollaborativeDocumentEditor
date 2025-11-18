@@ -6,11 +6,11 @@ export type CommandMap = Record<string, KeyCommand>;
 
 export const config: DefaultEditorConfig = {
     font: "JetBrains Mono",
-    fontSize: 16,
+    fontSize: 14,
     color: "black",
     selectionColor: "rgba(0,0,255,0.57)",
     selectionHorizontalPadding: 20,
-    lineHeight: 20,
+    lineHeight: 16,
     cursorColor: 'black',
     cursorWidth: 1,
     tabSize: 4,

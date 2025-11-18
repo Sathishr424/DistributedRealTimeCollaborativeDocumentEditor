@@ -478,6 +478,12 @@ export class DocumentService implements HasSubscription {
         CursorUpdateSubscription.notifyForTextAndCursorUpdate();
     }
 
+    public insertTextFromUndoOrRedo(text: string) {
+        this.editor.insertText(text);
+        this.handlePages();
+        CursorUpdateSubscription.notifyForTextAndCursorUpdate();
+    }
+
     public insertText(text: string, chain=false, isUndo=false) {
         this.editor.insertText(text);
         if (!isUndo && text.length > 0) {
