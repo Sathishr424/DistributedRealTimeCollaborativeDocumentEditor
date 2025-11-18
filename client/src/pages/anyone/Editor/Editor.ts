@@ -44,6 +44,7 @@ class Editor {
             cols: Math.floor((width - padding.x * 2) / charWidth),
             rows: Math.floor((height - padding.x * 2) / config.lineHeight),
         }
+        console.log(this.sizes);
 
         this.editor = new RawEditor();
         this.renderer = new DocumentRenderer(this.editor, this.sizes, this.canvasContainer);

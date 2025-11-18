@@ -78,6 +78,9 @@ export class DocumentRenderer {
             while (node) {
                 this.drawText(node.val, {x: col, y: row});
                 if (node.val === '\n' || col + 1 == this.sizes.cols) {
+                    if (col + 1 == this.sizes.cols && node.next && node.next.val === '\n') {
+                        node = node.next
+                    }
                     row++;
                     col = 0;
                 } else {
@@ -109,6 +112,9 @@ export class DocumentRenderer {
                     if (onSelection) {
                         this.drawSelectionRow(row, row == start.y ? start.x : 0, col);
                         onSelection = row < end.y;
+                    }
+                    if (col + 1 == this.sizes.cols && node.next && node.next.val === '\n') {
+                        node = node.next
                     }
                     row++;
                     col = 0;
