@@ -5,7 +5,7 @@ export class CtrlBackspaceCommand extends KeyCommandParent implements KeyCommand
     execute(): void {
         const pos = this.layout.continuousCharacterOnLeftWithPaddingPos();
         this.textController.delete(pos);
-        this.layout.handlePages();
+        this.textController.checkPages();
         CursorUpdateSubscription.notifyForTextAndCursorUpdate();
     }
 }

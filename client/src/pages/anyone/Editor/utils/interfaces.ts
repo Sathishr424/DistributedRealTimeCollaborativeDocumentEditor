@@ -3,6 +3,7 @@ import {DocumentService} from "../DocumentService";
 import {KeyCommand} from "../handler/KeyCommand";
 import {LayoutEngine} from "../ServiceClasses/LayoutEngine";
 import {TextController} from "../ServiceClasses/TextController";
+import {CursorOperation} from "../ServiceClasses/CursorOperation";
 
 export type CommandMap = Record<string, KeyCommand>;
 
@@ -40,13 +41,5 @@ export interface HistoryOperation {
     chain: boolean;
     position: number;
     text: string;
-    handle(layout: LayoutEngine, textController: TextController): void;
-}
-
-export class EditorOperation {
-    protected service: DocumentService;
-
-    constructor(service: DocumentService) {
-        this.service = service;
-    }
+    handle(cursorOperation: CursorOperation, textController: TextController): void;
 }

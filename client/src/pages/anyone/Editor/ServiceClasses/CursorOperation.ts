@@ -1,13 +1,14 @@
-import {Vec2, EditorOperation, config} from "../utils/interfaces";
+import {config, Vec2} from "../utils/interfaces";
 import CursorUpdateSubscription from "../utils/CursorUpdateSubscription";
 import {DocumentService} from "../DocumentService";
 import {Deque} from "@utils/Deque";
-import {TextController} from "../ServiceClasses/TextController";
-import {LayoutEngine} from "../ServiceClasses/LayoutEngine";
+import {LayoutEngine} from "./LayoutEngine";
+import {RawEditor} from "../RawEditor";
 
 export class CursorOperation implements HasSubscription {
     private service: DocumentService;
     private layout: LayoutEngine;
+    private editor: RawEditor;
 
     private cursorInterval: any;
     private cursorToggle: boolean = true;
@@ -19,9 +20,11 @@ export class CursorOperation implements HasSubscription {
     private clickIntervals: Deque<number>;
     private cursorOnUse = Date.now();
 
-    constructor(service: DocumentService, layout: LayoutEngine) {
+    constructor(service: DocumentService, layout: LayoutEngine, editor: RawEditor) {
         this.service = service;
         this.layout = layout;
+        this.editor = editor;
+
         this.mousePosStack = new Deque<Vec2>();
         this.clickIntervals = new Deque<number>();
         this.ready();
@@ -38,6 +41,16 @@ export class CursorOperation implements HasSubscription {
 
     public disableTextSelection(): void {
         this.isTextSelected = false;
+    }
+
+    public getCursorPositionsStartAndEnd(): Vec2[] {
+        let start = this.getPrevCursorPosition();
+        let end = this.layout.calculateCursorPosition();
+        if (start.y > end.y || (start.y == end.y && start.x > end.x)) {
+            [start, end] = [end, start];
+        }
+
+        return [start, end];
     }
 
     public setCursorWithinARange(left: Vec2, right: Vec2) {
@@ -61,12 +74,12 @@ export class CursorOperation implements HasSubscription {
     }
 
     public ready(): void {
-        this.mousePosStack.pushBack(this.layout.getCursorPosition());
+        this.mousePosStack.pushBack(this.layout.calculateCursorPosition());
         this.cursorInterval = setInterval(this.renderCursor.bind(this), 300);
     }
 
     public updateLiveCursorPosition() {
-        this.updateCursorPosition(this.layout.getCursorPosition(), false);
+        this.updateCursorPosition(this.layout.calculateCursorPosition(), false);
     }
 
     public isTwoCursorPosDifferent(a: Vec2, b: Vec2): boolean {
@@ -91,7 +104,7 @@ export class CursorOperation implements HasSubscription {
 
     notify(usage: string): void {
         if (usage === "CURSOR UPDATE") {
-            this.updateCursorPosition(this.layout.getCursorPosition())
+            this.updateCursorPosition(this.layout.calculateCursorPosition())
             if (this.isTextSelected) {
                 this.disableTextSelection()
                 CursorUpdateSubscription.notifyForTextUpdate();
@@ -100,7 +113,7 @@ export class CursorOperation implements HasSubscription {
             this.cursorToggle = true;
         } else if (usage === "KEY EVENT TEXT SELECTION") {
             const prev = this.getCursorPosition();
-            this.updateCursorPosition(this.layout.getCursorPosition());
+            this.updateCursorPosition(this.layout.calculateCursorPosition());
             if (!this.isTextSelected) {
                 this.enableTextSelection()
             }
@@ -122,13 +135,13 @@ export class CursorOperation implements HasSubscription {
 
     public processMoveCursor(mousePos: Vec2) {
         this.service.clearCursor(this.getCursorPosition());
-        this.layout.moveCursor(mousePos);
+        this.moveCursor(mousePos);
     }
 
     public handleOnMouseDown(mousePos: Vec2) {
         this.processMoveCursor(mousePos);
         this.isMouseDown = true;
-        const newPos = this.layout.getCursorPosition();
+        const newPos = this.layout.calculateCursorPosition();
         this.updateCursorPosition(newPos);
         if (this.service.isCombinationKeyEnabled('shift')) {
             this.enableTextSelection()
@@ -168,7 +181,7 @@ export class CursorOperation implements HasSubscription {
             // If left mouse is in pressed state, we check if current and previous recorded mouse position is different and proceed
             if (this.isTwoCursorPosDifferent(this.getCursorPosition(), mousePos)) {
                 this.processMoveCursor(mousePos);
-                this.updateCursorPosition(this.layout.getCursorPosition());
+                this.updateCursorPosition(this.layout.calculateCursorPosition());
 
                 if (!this.isTextSelected) {
                     this.enableTextSelection();
@@ -181,6 +194,50 @@ export class CursorOperation implements HasSubscription {
         while (this.clickIntervals.back()) {
             this.clickIntervals.popBack();
         }
+    }
+
+    public moveToPosition(pos: number) {
+        let diff = this.editor.getCursorPosition() - pos;
+
+        if (diff > 0) {
+            this.editor.moveLeft(diff);
+        } else {
+            this.editor.moveRight(diff * -1);
+        }
+    }
+
+    public moveCursorToEnd() {
+        const pos = this.layout.getLastCharPosition();
+        this.moveCursor(pos);
+    }
+
+    public moveCursor(newPos: Vec2) {
+        let realPos = this.layout.convertTo1DPosition(newPos);
+        let diff = this.editor.getTotalCharsBeforeCursor().size() - realPos;
+
+        if (diff > 0) {
+            this.editor.moveLeft(diff);
+        } else {
+            this.editor.moveRight(diff * -1);
+        }
+    }
+
+    public moveCursorLeft() {
+        this.editor.moveLeft(1);
+    }
+
+    public moveCursorRight() {
+        this.editor.moveRight(1);
+    }
+
+    public moveCursorUp() {
+        const pos = this.layout.calculateCursorPosition();
+        this.moveCursor({ x: pos.x, y: pos.y - 1 });
+    }
+
+    public moveCursorDown() {
+        const pos = this.layout.calculateCursorPosition();
+        this.moveCursor({ x: pos.x, y: pos.y + 1 });
     }
 
     public dispose(): void {

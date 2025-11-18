@@ -4,26 +4,29 @@ import {LayoutEngine} from "./LayoutEngine";
 import {TextController} from "./TextController";
 import {initializeCommands} from "../CommandRegistry";
 import {CombinationKeyState} from "../utils/CombinationKeyState";
+import {CursorOperation} from "./CursorOperation";
 
 export class InputController {
     private layout: LayoutEngine;
     private textController: TextController;
+    private cursorOperation: CursorOperation;
     private readonly commands: CommandMap;
     private combinationKeyState: CombinationKeyState;
 
-    constructor(layout: LayoutEngine, textController: TextController) {
+    constructor(layout: LayoutEngine, textController: TextController, cursorOperation: CursorOperation) {
         this.layout = layout;
         this.textController = textController;
+        this.cursorOperation = cursorOperation;
         this.combinationKeyState = new CombinationKeyState();
 
-        this.commands = initializeCommands(this, this.layout, this.textController);
+        this.commands = initializeCommands(this, this.layout, this.textController, this.cursorOperation);
     }
 
     public handleBackSpace() {
         if (!this.textController.deleteTextSelection()) {
             this.textController.backspace();
         }
-        this.layout.handlePages();
+        this.textController.checkPages();
         CursorUpdateSubscription.notifyForTextAndCursorUpdate();
     }
 
@@ -44,25 +47,25 @@ export class InputController {
 
     public handleArrowLeft() {
         if (this.textController.isCursorInTextSelection()) return this.handleArrowLeftOnSelectionEnd();
-        this.layout.moveCursorLeft();
+        this.cursorOperation.moveCursorLeft();
         CursorUpdateSubscription.notifyForCursorUpdate();
     }
 
     public handleArrowRight() {
         if (this.textController.isCursorInTextSelection()) return this.handleArrowRightOnSelectionEnd();
-        this.layout.moveCursorRight();
+        this.cursorOperation.moveCursorRight();
         CursorUpdateSubscription.notifyForCursorUpdate();
     }
 
     public handleArrowUp() {
         if (this.textController.isCursorInTextSelection()) return this.handleArrowUpOnSelectionEnd();
-        this.layout.moveCursorUp();
+        this.cursorOperation.moveCursorUp();
         CursorUpdateSubscription.notifyForCursorUpdate();
     }
 
     public handleArrowDown() {
         if (this.textController.isCursorInTextSelection()) return this.handleArrowDownOnSelectionEnd();
-        this.layout.moveCursorDown();
+        this.cursorOperation.moveCursorDown();
         CursorUpdateSubscription.notifyForCursorUpdate();
     }
 
@@ -74,28 +77,28 @@ export class InputController {
     }
 
     public handleArrowLeftOnSelectionEnd() {
-        const [start, end] = this.layout.getCursorPositionsStartAndEnd();
-        this.layout.moveCursor(start);
+        const [start, end] = this.cursorOperation.getCursorPositionsStartAndEnd();
+        this.cursorOperation.moveCursor(start);
         CursorUpdateSubscription.notifyForTextAndCursorUpdate();
     }
 
     public handleArrowRightOnSelectionEnd() {
-        const [start, end] = this.layout.getCursorPositionsStartAndEnd();
-        this.layout.moveCursor(end);
+        const [start, end] = this.cursorOperation.getCursorPositionsStartAndEnd();
+        this.cursorOperation.moveCursor(end);
         CursorUpdateSubscription.notifyForTextAndCursorUpdate();
     }
 
     public handleArrowUpOnSelectionEnd() {
-        const [start, end] = this.layout.getCursorPositionsStartAndEnd();
-        this.layout.moveCursor(start);
-        this.handleArrowUp();
+        const [start, end] = this.cursorOperation.getCursorPositionsStartAndEnd();
+        this.cursorOperation.moveCursor(start);
+        this.cursorOperation.moveCursorUp();
         CursorUpdateSubscription.notifyForTextAndCursorUpdate();
     }
 
     public handleArrowDownOnSelectionEnd() {
-        const [start, end] = this.layout.getCursorPositionsStartAndEnd();
-        this.layout.moveCursor(end);
-        this.handleArrowDown();
+        const [start, end] = this.cursorOperation.getCursorPositionsStartAndEnd();
+        this.cursorOperation.moveCursor(end);
+        this.cursorOperation.moveCursorDown();
         CursorUpdateSubscription.notifyForTextAndCursorUpdate();
     }
 

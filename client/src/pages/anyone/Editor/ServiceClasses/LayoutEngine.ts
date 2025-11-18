@@ -6,58 +6,12 @@ import {RawEditor} from "../RawEditor";
 import {DoublyLinkedList} from "@utils/DoublyLinkedList";
 
 export class LayoutEngine {
-    private service: DocumentService;
-    private canvasContainer: CanvasContainer;
     private editor: RawEditor;
     readonly sizes: DocumentSizes;
 
-    constructor(service: DocumentService, canvasContainer: CanvasContainer, editor: RawEditor, sizes: DocumentSizes) {
-        this.service = service;
-        this.canvasContainer = canvasContainer;
+    constructor(editor: RawEditor, sizes: DocumentSizes) {
         this.editor = editor;
         this.sizes = sizes;
-    }
-
-    public handlePages() {
-        const pos = this.getLastCharPosition();
-        const pages = Math.floor(pos.y / this.sizes.rows);
-        // console.log("PAGES:", pos, pages, this.canvasContainer.getCanvasesTotal())
-
-        while (this.canvasContainer.getCanvasesTotal() <= pages) {
-            this.canvasContainer.appendCanvasNew(this.service);
-        }
-        while (this.canvasContainer.getCanvasesTotal() > pages + 1) {
-            this.canvasContainer.popCanvas();
-        }
-        this.service.updateLiveCursorPosition();
-    }
-
-    public getCursorPositionsStartAndEnd(): Vec2[] {
-        let start = this.service.getPrevCursorPosition();
-        let end = this.getCursorPosition();
-        if (start.y > end.y || (start.y == end.y && start.x > end.x)) {
-            [start, end] = [end, start];
-        }
-
-        return [start, end];
-    }
-
-    public getCorrectPosition(e: MouseEvent): Vec2 {
-        let x = e.clientX;
-        let y = e.clientY;
-
-        // @ts-ignore
-        let page = parseInt(e.target.getAttribute('page'));
-        const canvas = this.canvasContainer.getCanvas(page);
-
-        const {left, top} = canvas.getBoundingClientRect();
-        const padding = getElementPadding(canvas);
-
-        x -= left + padding.x;
-        y -= top + padding.y;
-        x += (x % this.sizes.charWidth);
-
-        return {x: Math.max(0, Math.floor(x / this.sizes.charWidth)), y: Math.floor(y / this.sizes.height) + (page * this.sizes.rows)};
     }
 
     public convertTo1DPosition(pos: Vec2) {
@@ -82,7 +36,7 @@ export class LayoutEngine {
         return index;
     }
 
-    public getCursorPosition(): Vec2 {
+    public calculateCursorPosition(): Vec2 {
         let rows = 0;
         for (let i=0; i<this.editor.getLogicalLineIndex(); i++) {
             const chars = Math.max(this.sizes.cols, this.editor.getLineAtIndex(i));
@@ -112,7 +66,7 @@ export class LayoutEngine {
     }
 
     public continuousCharacterOnLeftWithPaddingPos(): Vec2 {
-        let pos: Vec2 = this.getCursorPosition();
+        let pos: Vec2 = this.calculateCursorPosition();
 
         let node = this.editor.getTotalCharsBeforeCursor().getTail();
         while (node && node.val === ' ') {
@@ -127,7 +81,7 @@ export class LayoutEngine {
     }
 
     public continuousCharacterOnRightWithPaddingPos(): Vec2 {
-        let pos: Vec2 = this.getCursorPosition();
+        let pos: Vec2 = this.calculateCursorPosition();
 
         let node = this.editor.getTotalCharsAfterCursor().getHead();
         while (node && node.val === ' ') {
@@ -171,47 +125,5 @@ export class LayoutEngine {
         return pos;
     }
 
-    public moveToPosition(pos: number) {
-        let diff = this.editor.getCursorPosition() - pos;
 
-        if (diff > 0) {
-            this.editor.moveLeft(diff);
-        } else {
-            this.editor.moveRight(diff * -1);
-        }
-    }
-
-    public moveCursorToEnd() {
-        const pos = this.getLastCharPosition();
-        this.moveCursor(pos);
-    }
-
-    public moveCursor(newPos: Vec2) {
-        let realPos = this.convertTo1DPosition(newPos);
-        let diff = this.editor.getTotalCharsBeforeCursor().size() - realPos;
-
-        if (diff > 0) {
-            this.editor.moveLeft(diff);
-        } else {
-            this.editor.moveRight(diff * -1);
-        }
-    }
-
-    public moveCursorLeft() {
-        this.editor.moveLeft(1);
-    }
-
-    public moveCursorRight() {
-        this.editor.moveRight(1);
-    }
-
-    public moveCursorUp() {
-        const pos = this.getCursorPosition();
-        this.moveCursor({ x: pos.x, y: pos.y - 1 });
-    }
-
-    public moveCursorDown() {
-        const pos = this.getCursorPosition();
-        this.moveCursor({ x: pos.x, y: pos.y + 1 });
-    }
 }

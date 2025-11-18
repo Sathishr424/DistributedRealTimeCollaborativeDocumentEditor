@@ -3,7 +3,7 @@ import CursorUpdateSubscription from "../../utils/CursorUpdateSubscription";
 
 export class ShiftArrowRightCommand extends KeyCommandParent implements KeyCommand {
     execute(): void {
-        this.layout.moveCursorRight();
+        this.cursorOperation.moveCursorRight();
         CursorUpdateSubscription.notifyForTextSelection();
     }
 }

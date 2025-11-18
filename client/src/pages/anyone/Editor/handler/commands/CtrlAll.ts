@@ -3,8 +3,8 @@ import CursorUpdateSubscription from "../../utils/CursorUpdateSubscription";
 
 export class CtrlAll extends KeyCommandParent implements KeyCommand {
     execute(): void {
-        this.layout.moveCursorToEnd();
-        this.textController.setCursorWithinARange({x: 0, y: 0}, this.layout.getCursorPosition());
+        this.cursorOperation.moveCursorToEnd();
+        this.textController.setCursorWithinARange({x: 0, y: 0}, this.layout.calculateCursorPosition());
         this.textController.enableTextSelection();
         CursorUpdateSubscription.notifyForTextUpdate();
     }

@@ -11,7 +11,7 @@ export class CutCommand extends ClipboardEventParent implements MyClipboardEvent
     handle(e: ClipboardEvent) {
         const selectedText: string = this.textController.getTextSelection();
         this.textController.deleteTextSelection();
-        this.textController.checkTotalPages();
+        this.textController.checkPages();
         CursorUpdateSubscription.notifyForTextAndCursorUpdate();
         // console.log("Cut event:",  selectedText, e.clipboardData);
 

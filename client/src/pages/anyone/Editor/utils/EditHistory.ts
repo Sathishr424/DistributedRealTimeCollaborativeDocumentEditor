@@ -4,15 +4,16 @@ import {DeleteOperation} from "./DeleteOperation";
 import CursorUpdateSubscription from "./CursorUpdateSubscription";
 import {LayoutEngine} from "../ServiceClasses/LayoutEngine";
 import {TextController} from "../ServiceClasses/TextController";
+import {CursorOperation} from "../ServiceClasses/CursorOperation";
 
 export class EditHistory {
     private historyStack: HistoryOperation[] = [];
     private tempUndoStack: HistoryOperation[] = [];
-    private layout: LayoutEngine;
+    private cursorOperation: CursorOperation;
     private textController: TextController;
 
-    constructor(layout: LayoutEngine, textController: TextController) {
-        this.layout = layout;
+    constructor(cursorOperation: CursorOperation, textController: TextController) {
+        this.cursorOperation = cursorOperation;
         this.textController = textController;
     }
 
@@ -45,11 +46,11 @@ export class EditHistory {
     public doOperation(stack: HistoryOperation[], oppStack: HistoryOperation[]) {
         if (stack.length > 0) {
             const operation = stack.pop()!;
-            operation.handle(this.layout, this.textController);
+            operation.handle(this.cursorOperation, this.textController);
             oppStack.push(this.flipOperation(operation, false));
             while (stack.length > 0 && operation.chain) {
                 const operation = stack.pop()!;
-                operation.handle(this.layout, this.textController);
+                operation.handle(this.cursorOperation, this.textController);
                 oppStack.push(this.flipOperation(operation, true));
             }
             CursorUpdateSubscription.notifyForTextAndCursorUpdate();

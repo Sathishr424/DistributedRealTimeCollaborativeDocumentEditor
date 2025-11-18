@@ -19,8 +19,9 @@ import {CtrlYCommand} from "./handler/commands/CtrlYCommand";
 import {LayoutEngine} from "./ServiceClasses/LayoutEngine";
 import {TextController} from "./ServiceClasses/TextController";
 import {InputController} from "./ServiceClasses/InputController";
+import {CursorOperation} from "./ServiceClasses/CursorOperation";
 
-type CommandConstructor = new (inputController: InputController, layout: LayoutEngine, textController: TextController) => KeyCommand;
+type CommandConstructor = new (inputController: InputController, layout: LayoutEngine, textController: TextController, cursorOperation: CursorOperation) => KeyCommand;
 
 const CommandRegistry: Record<string, CommandConstructor> = {
     "ArrowLeft": ArrowLeftCommand,
@@ -44,11 +45,11 @@ const CommandRegistry: Record<string, CommandConstructor> = {
     "shift+ArrowDown": ShiftArrowDownCommand,
 };
 
-export function initializeCommands(inputController: InputController, layout: LayoutEngine, textController: TextController) {
+export function initializeCommands(inputController: InputController, layout: LayoutEngine, textController: TextController, cursorOperation: CursorOperation) {
     const commands: Record<string, KeyCommand> = {};
     for (const key in CommandRegistry) {
         const CommandClass = CommandRegistry[key];
-        commands[key] = new CommandClass(inputController, layout, textController);
+        commands[key] = new CommandClass(inputController, layout, textController, cursorOperation);
     }
     return commands;
 }

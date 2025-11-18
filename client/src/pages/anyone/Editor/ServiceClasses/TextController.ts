@@ -1,23 +1,26 @@
 import {Vec2} from "../utils/interfaces";
 import CursorUpdateSubscription from "../utils/CursorUpdateSubscription";
-import {CursorOperation} from "../handler/CursorOperation";
+import {CursorOperation} from "./CursorOperation";
 import {LayoutEngine} from "./LayoutEngine";
 import {RawEditor} from "../RawEditor";
 import {InsertOperation} from "../utils/InsertOperation";
 import {DeleteOperation} from "../utils/DeleteOperation";
 import {EditHistory} from "../utils/EditHistory";
+import {PageController} from "./PageController";
 
 export class TextController {
     private cursorOperation: CursorOperation;
     private layout: LayoutEngine
     private editor: RawEditor;
     private editHistory: EditHistory;
+    private pageController: PageController;
 
-    constructor(cursorOperation: CursorOperation, layout: LayoutEngine, editor: RawEditor) {
+    constructor(cursorOperation: CursorOperation, layout: LayoutEngine, editor: RawEditor, pageController: PageController) {
         this.cursorOperation = cursorOperation;
         this.layout = layout;
         this.editor = editor;
-        this.editHistory = new EditHistory(layout, this);
+        this.pageController = pageController;
+        this.editHistory = new EditHistory(cursorOperation, this);
     }
 
     public undo() {
@@ -50,13 +53,13 @@ export class TextController {
     public insertChar(char: string, chain=false) {
         this.editor.insert(char);
         this.editHistory.addHistory(new DeleteOperation(this.editor.getCursorPosition() - char.length, char, chain));
-        this.layout.handlePages();
+        this.pageController.handlePages();
         CursorUpdateSubscription.notifyForTextAndCursorUpdate();
     }
 
     public insertTextFromUndoOrRedo(text: string) {
         this.editor.insertText(text);
-        this.layout.handlePages();
+        this.pageController.handlePages();
         CursorUpdateSubscription.notifyForTextAndCursorUpdate();
     }
 
@@ -65,7 +68,7 @@ export class TextController {
         if (!isUndo && text.length > 0) {
             this.editHistory.addHistory(new DeleteOperation(this.editor.getCursorPosition() - text.length, text, chain));
         }
-        this.layout.handlePages();
+        this.pageController.handlePages();
         CursorUpdateSubscription.notifyForTextAndCursorUpdate();
     }
 
@@ -85,35 +88,27 @@ export class TextController {
         this.cursorOperation.enableTextSelection();
     }
 
-    public getContinuousCharPosLeft() {
-        return this.layout.continuousCharacterOnLeftWithPaddingPos()
-    }
-
-    public getContinuousCharPosRight() {
-        return this.layout.continuousCharacterOnRightWithPaddingPos()
-    }
-
     public selectCurrentWord() {
-        const pos = this.layout.getCursorPosition();
+        const pos = this.layout.calculateCursorPosition();
         let node = this.editor.getTotalCharsBeforeCursor().getTail();
         const left = this.layout.continuousCharacterOnLeftPos({...pos}, node);
 
         node = this.editor.getTotalCharsAfterCursor().getHead();
         const right = this.layout.continuousCharacterOnRightPos({...pos}, node);
 
-        this.layout.moveCursor(right);
+        this.cursorOperation.moveCursor(right);
         this.setCursorWithinARange(left, right);
         this.enableTextSelection();
         CursorUpdateSubscription.notifyForTextUpdate();
     }
 
     public selectEntireLine() {
-        const pos = this.layout.getCursorPosition();
+        const pos = this.layout.calculateCursorPosition();
 
         const left = {x: 0, y: pos.y}
         let right = {x: this.layout.sizes.cols, y: pos.y}
 
-        this.layout.moveCursor(right);
+        this.cursorOperation.moveCursor(right);
         this.setCursorWithinARange(left, right);
         this.enableTextSelection();
         CursorUpdateSubscription.notifyForTextUpdate();
@@ -135,7 +130,7 @@ export class TextController {
         return this.cursorOperation.getIsTextSelection();
     }
 
-    public checkTotalPages() {
-        this.layout.handlePages();
+    public checkPages() {
+        this.pageController.handlePages();
     }
 }
