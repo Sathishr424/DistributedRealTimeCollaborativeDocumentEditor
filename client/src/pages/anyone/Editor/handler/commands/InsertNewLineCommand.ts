@@ -1,13 +1,7 @@
-import {KeyCommand} from "../KeyCommand";
-import {DocumentService} from "../../DocumentService";
+import {KeyCommand, KeyCommandParent} from "../KeyCommand";
 
-export class InsertNewLineCommand implements KeyCommand {
-    service: DocumentService;
-    constructor(service: DocumentService) {
-        this.service = service;
-    }
-
+export class InsertNewLineCommand extends KeyCommandParent implements KeyCommand {
     execute(): void {
-        this.service.handleInsertNewLine();
+        this.inputController.handleInsertNewLine();
     }
 }

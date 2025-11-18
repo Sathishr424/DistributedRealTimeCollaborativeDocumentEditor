@@ -1,15 +1,7 @@
-import { KeyCommand } from "../KeyCommand";
-import { DocumentService } from "../../DocumentService";
-import CursorUpdateSubscription from "../../utils/CursorUpdateSubscription";
+import {KeyCommand, KeyCommandParent} from "../KeyCommand";
 
-export class CtrlYCommand implements KeyCommand {
-    service: DocumentService;
-
-    constructor(service: DocumentService) {
-        this.service = service;
-    }
-
+export class CtrlYCommand extends KeyCommandParent implements KeyCommand {
     execute(): void {
-        this.service.redo();
+        this.textController.redo();
     }
 }

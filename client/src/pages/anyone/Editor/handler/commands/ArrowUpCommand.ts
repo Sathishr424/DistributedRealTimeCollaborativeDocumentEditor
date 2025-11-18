@@ -1,14 +1,7 @@
-import { KeyCommand } from "../KeyCommand";
-import { DocumentService } from "../../DocumentService";
+import {KeyCommand, KeyCommandParent} from "../KeyCommand";
 
-export class ArrowUpCommand implements KeyCommand {
-    service: DocumentService;
-
-    constructor(service: DocumentService) {
-        this.service = service;
-    }
-
+export class ArrowUpCommand extends KeyCommandParent implements KeyCommand {
     execute(): void {
-        this.service.handleArrowUp();
+        this.inputController.handleArrowUp();
     }
 }

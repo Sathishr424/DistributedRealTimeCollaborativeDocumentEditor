@@ -1,12 +1,10 @@
-import {DocumentService} from "../../../DocumentService";
 import {ClipboardEventParent} from "../../../utils/ClipboardEventParent";
 import {MyClipboardEvent} from "../../../utils/MyClipboardEvent";
-import CursorUpdateSubscription from "../../../utils/CursorUpdateSubscription";
-import {config} from "../../../utils/interfaces";
+import {TextController} from "../../../ServiceClasses/TextController";
 
 export class PasteCommand extends ClipboardEventParent implements MyClipboardEvent{
-    constructor(service: DocumentService) {
-        super(service);
+    constructor(textController: TextController) {
+        super(textController);
     }
 
     handle(e: ClipboardEvent) {
@@ -18,8 +16,8 @@ export class PasteCommand extends ClipboardEventParent implements MyClipboardEve
         // console.log("Paste event:", clipboardData, pastedText);
 
         if (pastedText.length > 0) {
-            const change = this.service.deleteTextSelection();
-            this.service.insertText(pastedText, change);
+            const change = this.textController.deleteTextSelection();
+            this.textController.insertText(pastedText, change);
         }
     }
 }

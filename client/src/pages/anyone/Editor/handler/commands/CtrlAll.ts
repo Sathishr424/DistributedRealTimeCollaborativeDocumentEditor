@@ -1,17 +1,11 @@
-import {KeyCommand} from "../KeyCommand";
-import {DocumentService} from "../../DocumentService";
+import {KeyCommand, KeyCommandParent} from "../KeyCommand";
 import CursorUpdateSubscription from "../../utils/CursorUpdateSubscription";
 
-export class CtrlAll implements KeyCommand {
-    service: DocumentService;
-    constructor(service: DocumentService) {
-        this.service = service;
-    }
-
+export class CtrlAll extends KeyCommandParent implements KeyCommand {
     execute(): void {
-        this.service.moveCursorToEnd();
-        this.service.setCursorWithinARange({x: 0, y: 0}, this.service.getCursorPosition());
-        this.service.enableTextSelection();
+        this.layout.moveCursorToEnd();
+        this.textController.setCursorWithinARange({x: 0, y: 0}, this.layout.getCursorPosition());
+        this.textController.enableTextSelection();
         CursorUpdateSubscription.notifyForTextUpdate();
     }
 }

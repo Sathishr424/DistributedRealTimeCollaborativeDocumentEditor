@@ -1,6 +1,8 @@
 import {DefaultEditorConfig} from "../../../../interfaces/DefaultEditorConfig";
 import {DocumentService} from "../DocumentService";
 import {KeyCommand} from "../handler/KeyCommand";
+import {LayoutEngine} from "../ServiceClasses/LayoutEngine";
+import {TextController} from "../ServiceClasses/TextController";
 
 export type CommandMap = Record<string, KeyCommand>;
 
@@ -38,7 +40,7 @@ export interface HistoryOperation {
     chain: boolean;
     position: number;
     text: string;
-    handle(service: DocumentService): void;
+    handle(layout: LayoutEngine, textController: TextController): void;
 }
 
 export class EditorOperation {

@@ -1,15 +1,17 @@
 import {KeyEvent} from "../../utils/KeyEvent";
 import {KeyCombination} from "./KeyCombination";
 import {TextKey} from "./TextKey";
-import {DocumentService} from "../../DocumentService";
-import {CombinationKeyState} from "../../utils/CombinationKeyState";
+import {InputController} from "../../ServiceClasses/InputController";
+import {TextController} from "../../ServiceClasses/TextController";
 
 export class KeyEvents {
     private events: KeyEvent[] = [];
+    private inputController: InputController;
 
-    constructor(service: DocumentService) {
-        this.events.push(new KeyCombination(service));
-        this.events.push(new TextKey(service));
+    constructor(inputController: InputController, textController: TextController) {
+        this.inputController = inputController;
+        this.events.push(new KeyCombination(inputController, textController));
+        this.events.push(new TextKey(inputController, textController));
     }
 
     handleKeyDown(e: KeyboardEvent) {
@@ -20,7 +22,7 @@ export class KeyEvents {
         }
     }
 
-    handleKeyUp(e: KeyboardEvent, combinationKeyState: CombinationKeyState) {
-        combinationKeyState.disableAllKeys();
+    handleKeyUp(e: KeyboardEvent) {
+        this.inputController.keyCombinationDisableAllKeys();
     }
 }

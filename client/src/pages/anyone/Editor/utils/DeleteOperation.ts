@@ -1,5 +1,7 @@
 import {DocumentService} from "../DocumentService";
 import {HistoryOperation} from "./interfaces";
+import {LayoutEngine} from "../ServiceClasses/LayoutEngine";
+import {TextController} from "../ServiceClasses/TextController";
 
 export class DeleteOperation implements HistoryOperation {
     readonly timestamp: number;
@@ -14,8 +16,8 @@ export class DeleteOperation implements HistoryOperation {
         this.chain = chain;
     }
 
-    handle(service: DocumentService): void {
-        service.moveToPosition(this.position);
-        service.deleteRight(this.text.length);
+    handle(layout: LayoutEngine, textController: TextController): void {
+        layout.moveToPosition(this.position);
+        textController.deleteRight(this.text.length);
     }
 }

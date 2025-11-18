@@ -1,17 +1,17 @@
-import {DocumentService} from "../../../DocumentService";
 import {ClipboardEventParent} from "../../../utils/ClipboardEventParent";
 import {MyClipboardEvent} from "../../../utils/MyClipboardEvent";
 import CursorUpdateSubscription from "../../../utils/CursorUpdateSubscription";
+import {TextController} from "../../../ServiceClasses/TextController";
 
 export class CutCommand extends ClipboardEventParent implements MyClipboardEvent{
-    constructor(service: DocumentService) {
-        super(service);
+    constructor(textController: TextController) {
+        super(textController);
     }
 
     handle(e: ClipboardEvent) {
-        const selectedText: string = this.service.getTextSelection();
-        this.service.deleteTextSelection();
-        this.service.handlePages();
+        const selectedText: string = this.textController.getTextSelection();
+        this.textController.deleteTextSelection();
+        this.textController.checkTotalPages();
         CursorUpdateSubscription.notifyForTextAndCursorUpdate();
         // console.log("Cut event:",  selectedText, e.clipboardData);
 

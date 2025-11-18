@@ -5,7 +5,6 @@ import {ArrowDownCommand} from "./handler/commands/ArrowDownCommand";
 import {BackspaceCommand} from "./handler/commands/BackspaceCommand";
 import {InsertNewLineCommand} from "./handler/commands/InsertNewLineCommand";
 import {InsertTabCommand} from "./handler/commands/InsertTabCommand";
-import {DocumentService} from "./DocumentService";
 import {KeyCommand} from "./handler/KeyCommand";
 import {ShiftArrowLeftCommand} from "./handler/commands/ShiftArrowLeftCommand";
 import {ShiftArrowRightCommand} from "./handler/commands/ShiftArrowRightCommand";
@@ -17,8 +16,11 @@ import {CtrlArrowRightCommand} from "./handler/commands/CtrlArrowRightCommand";
 import {CtrlBackspaceCommand} from "./handler/commands/CtrlBackspaceCommand";
 import {CtrlZCommand} from "./handler/commands/CtrlZCommand";
 import {CtrlYCommand} from "./handler/commands/CtrlYCommand";
+import {LayoutEngine} from "./ServiceClasses/LayoutEngine";
+import {TextController} from "./ServiceClasses/TextController";
+import {InputController} from "./ServiceClasses/InputController";
 
-type CommandConstructor = new (service: DocumentService) => KeyCommand;
+type CommandConstructor = new (inputController: InputController, layout: LayoutEngine, textController: TextController) => KeyCommand;
 
 const CommandRegistry: Record<string, CommandConstructor> = {
     "ArrowLeft": ArrowLeftCommand,
@@ -42,11 +44,11 @@ const CommandRegistry: Record<string, CommandConstructor> = {
     "shift+ArrowDown": ShiftArrowDownCommand,
 };
 
-export function initializeCommands(service: DocumentService) {
+export function initializeCommands(inputController: InputController, layout: LayoutEngine, textController: TextController) {
     const commands: Record<string, KeyCommand> = {};
     for (const key in CommandRegistry) {
         const CommandClass = CommandRegistry[key];
-        commands[key] = new CommandClass(service);
+        commands[key] = new CommandClass(inputController, layout, textController);
     }
     return commands;
 }

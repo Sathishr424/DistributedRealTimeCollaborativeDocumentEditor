@@ -2,8 +2,13 @@ import {Vec2, EditorOperation, config} from "../utils/interfaces";
 import CursorUpdateSubscription from "../utils/CursorUpdateSubscription";
 import {DocumentService} from "../DocumentService";
 import {Deque} from "@utils/Deque";
+import {TextController} from "../ServiceClasses/TextController";
+import {LayoutEngine} from "../ServiceClasses/LayoutEngine";
 
-export class CursorOperation extends EditorOperation implements HasSubscription {
+export class CursorOperation implements HasSubscription {
+    private service: DocumentService;
+    private layout: LayoutEngine;
+
     private cursorInterval: any;
     private cursorToggle: boolean = true;
     private mousePosStack: Deque<Vec2>;
@@ -14,8 +19,9 @@ export class CursorOperation extends EditorOperation implements HasSubscription 
     private clickIntervals: Deque<number>;
     private cursorOnUse = Date.now();
 
-    constructor(service: DocumentService) {
-        super(service);
+    constructor(service: DocumentService, layout: LayoutEngine) {
+        this.service = service;
+        this.layout = layout;
         this.mousePosStack = new Deque<Vec2>();
         this.clickIntervals = new Deque<number>();
         this.ready();
@@ -35,7 +41,7 @@ export class CursorOperation extends EditorOperation implements HasSubscription 
     }
 
     public setCursorWithinARange(left: Vec2, right: Vec2) {
-        while (this.mousePosStack.size() > 0) {
+        while (!this.mousePosStack.isEmpty()) {
             this.mousePosStack.popBack();
         }
         this.mousePosStack.pushBack(left);
@@ -55,12 +61,12 @@ export class CursorOperation extends EditorOperation implements HasSubscription 
     }
 
     public ready(): void {
-        this.mousePosStack.pushBack(this.service.getCursorPosition());
+        this.mousePosStack.pushBack(this.layout.getCursorPosition());
         this.cursorInterval = setInterval(this.renderCursor.bind(this), 300);
     }
 
     public updateLiveCursorPosition() {
-        this.updateCursorPosition(this.service.getCursorPosition(), false);
+        this.updateCursorPosition(this.layout.getCursorPosition(), false);
     }
 
     public isTwoCursorPosDifferent(a: Vec2, b: Vec2): boolean {
@@ -85,18 +91,18 @@ export class CursorOperation extends EditorOperation implements HasSubscription 
 
     notify(usage: string): void {
         if (usage === "CURSOR UPDATE") {
-            this.updateCursorPosition(this.service.getCursorPosition())
+            this.updateCursorPosition(this.layout.getCursorPosition())
             if (this.isTextSelected) {
-                this.isTextSelected = false;
+                this.disableTextSelection()
                 CursorUpdateSubscription.notifyForTextUpdate();
             }
             this.cursorOnUse = Date.now();
             this.cursorToggle = true;
         } else if (usage === "KEY EVENT TEXT SELECTION") {
             const prev = this.getCursorPosition();
-            this.updateCursorPosition(this.service.getCursorPosition());
+            this.updateCursorPosition(this.layout.getCursorPosition());
             if (!this.isTextSelected) {
-                this.isTextSelected = true;
+                this.enableTextSelection()
             }
             if (this.isTwoCursorPosDifferent(prev, this.getCursorPosition())) {
                 CursorUpdateSubscription.notifyForTextUpdate();
@@ -116,20 +122,20 @@ export class CursorOperation extends EditorOperation implements HasSubscription 
 
     public processMoveCursor(mousePos: Vec2) {
         this.service.clearCursor(this.getCursorPosition());
-        this.service.moveCursor(mousePos);
+        this.layout.moveCursor(mousePos);
     }
 
     public handleOnMouseDown(mousePos: Vec2) {
         this.processMoveCursor(mousePos);
         this.isMouseDown = true;
-        const newPos = this.service.getCursorPosition();
+        const newPos = this.layout.getCursorPosition();
         this.updateCursorPosition(newPos);
         if (this.service.isCombinationKeyEnabled('shift')) {
-            this.isTextSelected = true;
+            this.enableTextSelection()
             CursorUpdateSubscription.notifyForTextUpdate();
         } else {
             if (this.isTextSelected) {
-                this.isTextSelected = false;
+                this.disableTextSelection();
                 CursorUpdateSubscription.notifyForTextAndCursorUpdate();
             }
         }
@@ -162,10 +168,10 @@ export class CursorOperation extends EditorOperation implements HasSubscription 
             // If left mouse is in pressed state, we check if current and previous recorded mouse position is different and proceed
             if (this.isTwoCursorPosDifferent(this.getCursorPosition(), mousePos)) {
                 this.processMoveCursor(mousePos);
-                this.updateCursorPosition(this.service.getCursorPosition());
+                this.updateCursorPosition(this.layout.getCursorPosition());
 
                 if (!this.isTextSelected) {
-                    this.isTextSelected = true;
+                    this.enableTextSelection();
                 }
                 if (this.isTextSelected) {
                     CursorUpdateSubscription.notifyForTextUpdate();

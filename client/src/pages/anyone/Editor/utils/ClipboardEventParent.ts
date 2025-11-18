@@ -1,9 +1,10 @@
 import {DocumentService} from "../DocumentService";
+import {TextController} from "../ServiceClasses/TextController";
 
 export class ClipboardEventParent {
-    protected service: DocumentService
+    protected textController: TextController
 
-    constructor(service: DocumentService) {
-        this.service = service;
+    constructor(textController: TextController) {
+        this.textController = textController;
     }
 }

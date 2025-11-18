@@ -1,13 +1,7 @@
-import {KeyCommand} from "../KeyCommand";
-import {DocumentService} from "../../DocumentService";
+import {KeyCommand, KeyCommandParent} from "../KeyCommand";
 
-export class InsertTabCommand implements KeyCommand {
-    service: DocumentService;
-    constructor(service: DocumentService) {
-        this.service = service;
-    }
-
+export class InsertTabCommand extends KeyCommandParent implements KeyCommand {
     execute(): void {
-        this.service.handleInsertTab();
+        this.inputController.handleInsertTab();
     }
 }

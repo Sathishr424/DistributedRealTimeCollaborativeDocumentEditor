@@ -1,17 +1,10 @@
-import { KeyCommand } from "../KeyCommand";
-import { DocumentService } from "../../DocumentService";
+import {KeyCommand, KeyCommandParent} from "../KeyCommand";
 import CursorUpdateSubscription from "../../utils/CursorUpdateSubscription";
 
-export class CtrlArrowLeftCommand implements KeyCommand {
-    service: DocumentService;
-
-    constructor(service: DocumentService) {
-        this.service = service;
-    }
-
+export class CtrlArrowLeftCommand extends KeyCommandParent implements KeyCommand {
     execute(): void {
-        const pos = this.service.continuousCharacterOnLeftWithPaddingPos();
-        this.service.moveCursor(pos);
+        const pos = this.layout.continuousCharacterOnLeftWithPaddingPos();
+        this.layout.moveCursor(pos);
         CursorUpdateSubscription.notifyForCursorUpdate();
     }
 }

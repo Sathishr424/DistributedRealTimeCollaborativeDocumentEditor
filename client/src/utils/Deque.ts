@@ -10,6 +10,10 @@ export class Deque<T> {
         this._back = null;
     }
 
+    public isEmpty(): boolean {
+        return this._size == 0;
+    }
+
     public getHead() {
         return this._front;
     }

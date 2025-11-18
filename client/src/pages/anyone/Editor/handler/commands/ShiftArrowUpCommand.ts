@@ -1,16 +1,9 @@
-import { KeyCommand } from "../KeyCommand";
-import { DocumentService } from "../../DocumentService";
+import {KeyCommand, KeyCommandParent} from "../KeyCommand";
 import CursorUpdateSubscription from "../../utils/CursorUpdateSubscription";
 
-export class ShiftArrowUpCommand implements KeyCommand {
-    service: DocumentService;
-
-    constructor(service: DocumentService) {
-        this.service = service;
-    }
-
+export class ShiftArrowUpCommand extends KeyCommandParent implements KeyCommand {
     execute(): void {
-        this.service.moveCursorUp();
+        this.layout.moveCursorUp();
         CursorUpdateSubscription.notifyForTextSelection();
     }
 }
