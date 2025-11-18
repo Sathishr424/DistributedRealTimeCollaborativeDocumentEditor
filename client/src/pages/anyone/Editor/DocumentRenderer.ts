@@ -85,8 +85,6 @@ export class DocumentRenderer {
     }
 
     public renderTextWithSelection(start: Vec2, end: Vec2) {
-        // console.log("Rerendering text with selection:", start, end);
-
         this.clearAllPage();
         let row = 0;
         let col = 0;
@@ -106,7 +104,7 @@ export class DocumentRenderer {
                 if (node.val === '\n' || col + 1 == this.sizes.cols) {
                     if (onSelection) {
                         this.drawSelectionRow(row, row == start.y ? start.x : 0, col);
-                        onSelection = row + 1 <= end.y;
+                        onSelection = row < end.y;
                     }
                     row++;
                     col = 0;
@@ -120,10 +118,5 @@ export class DocumentRenderer {
         if (onSelection) {
             this.drawSelectionRow(row, row == end.y ? (start.y == end.y ? start.x : 0) : 0, col - 1);
         }
-    }
-
-    public getCanvasOffset(page: number): DOMRect {
-        // console.log(page, this.canvasContainer.getCanvasesTotal())
-        return this.canvasContainer.getCanvas(page).getBoundingClientRect();
     }
 }

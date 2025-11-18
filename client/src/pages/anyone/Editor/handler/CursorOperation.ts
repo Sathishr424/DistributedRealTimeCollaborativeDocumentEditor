@@ -46,6 +46,12 @@ export class CursorOperation extends EditorOperation implements HasSubscription 
         this.cursorPosition = pos;
     }
 
+    public isCursorOnDifferentPos(prev: Vec2, curr: Vec2): boolean {
+        let x = Math.abs(curr.x - prev.x);
+        let y = Math.abs(curr.y - prev.y);
+        return x + y > 0;
+    }
+
     notify(usage: string): void {
         if (usage === "CURSOR UPDATE") {
             this.service.clearCursor(this.cursorPosition);
@@ -54,14 +60,13 @@ export class CursorOperation extends EditorOperation implements HasSubscription 
                 this.isTextSelected = false;
                 CursorUpdateSubscription.notifyForTextUpdate();
             }
-        }else if (usage === "KEY EVENT TEXT SELECTION") {
+        } else if (usage === "KEY EVENT TEXT SELECTION") {
             if (!this.isTextSelected) {
                 this.prevCursorPosition = this.cursorPosition;
                 this.isTextSelected = true;
             }
             this.cursorPosition = this.service.getCursorPosition();
-            if (!(this.cursorPosition.x === this.prevCursorPositionForRerender.x && this.cursorPosition.y === this.prevCursorPositionForRerender.y)) {
-                // console.log("Selection:", this.prevCursorPositionForRerender, this.prevCursorPosition, this.cursorPosition, this.isTextSelected);
+            if (this.isCursorOnDifferentPos(this.prevCursorPositionForRerender, this.cursorPosition)) {
                 CursorUpdateSubscription.notifyForTextUpdate();
             }
             this.prevCursorPositionForRerender = this.cursorPosition;
@@ -80,6 +85,10 @@ export class CursorOperation extends EditorOperation implements HasSubscription 
     public processMoveCursor(mousePos: Vec2) {
         this.service.clearCursor(this.cursorPosition);
         this.service.moveCursor(mousePos);
+    }
+
+    public setPrevCursorPosition(mousePos: Vec2) {
+        this.prevCursorPosition = mousePos;
     }
 
     public handleOnMouseDown(mousePos: Vec2) {
@@ -110,26 +119,24 @@ export class CursorOperation extends EditorOperation implements HasSubscription 
         }
     }
 
-    public setPrevCursorPosition(mousePos: Vec2) {
-        this.prevCursorPosition = mousePos;
-    }
-
     public handleOnMouseUp(mousePos: Vec2) {
         this.isMouseDown = false;
     }
 
     public handleOnMouseMove(mousePos: Vec2) {
         if (this.isMouseDown) {
-            this.processMoveCursor(mousePos);
-            this.cursorPosition = this.service.getCursorPosition();
-            if (!this.isTextSelected && Math.abs(this.cursorPosition.x - this.prevCursorPosition.x) + Math.abs(this.cursorPosition.y - this.prevCursorPosition.y) > 0) {
-                this.isTextSelected = true;
+            if (this.isCursorOnDifferentPos(this.prevCursorPositionForRerender, mousePos)) {
+                this.processMoveCursor(mousePos);
+                this.cursorPosition = this.service.getCursorPosition();
+
+                if (!this.isTextSelected && Math.abs(this.cursorPosition.x - this.prevCursorPosition.x) + Math.abs(this.cursorPosition.y - this.prevCursorPosition.y) > 0) {
+                    this.isTextSelected = true;
+                }
+                if (this.isTextSelected) {
+                    CursorUpdateSubscription.notifyForTextUpdate();
+                }
             }
-            if (this.isTextSelected && !(this.cursorPosition.x === this.prevCursorPositionForRerender.x && this.cursorPosition.y === this.prevCursorPositionForRerender.y)) {
-                // console.log("Selection:", this.prevCursorPositionForRerender, this.prevCursorPosition, this.cursorPosition, this.isTextSelected);
-                CursorUpdateSubscription.notifyForTextUpdate();
-            }
-            this.prevCursorPositionForRerender = this.cursorPosition;
+            this.prevCursorPositionForRerender = mousePos;
         }
         while (this.clickIntervals.back()) {
             this.clickIntervals.popBack();

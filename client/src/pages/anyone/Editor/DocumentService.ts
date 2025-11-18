@@ -36,6 +36,10 @@ export class DocumentService implements HasSubscription {
         CursorUpdateSubscription.subscribe(this);
     }
 
+    public getCharWidth(): number {
+        return this.sizes.charWidth;
+    }
+
     private getCorrectPosition(e: MouseEvent): Vec2 {
         let x = e.clientX;
         let y = e.clientY;
@@ -54,7 +58,7 @@ export class DocumentService implements HasSubscription {
 
         // console.log({x, y}, pos, {left, top});
 
-        return {x: Math.floor(x / this.sizes.charWidth), y: Math.floor(y / this.sizes.height) + (page * this.sizes.rows)};
+        return {x: Math.max(0, Math.floor(x / this.sizes.charWidth)), y: Math.floor(y / this.sizes.height) + (page * this.sizes.rows)};
     }
 
     public drawCursor(pos: Vec2): void {
@@ -162,7 +166,7 @@ export class DocumentService implements HasSubscription {
     public handleInsertTab() {
         this.deleteTextSelection()
         for (let i=0; i<config.tabSize; i++) {
-            this.handleInsertChar(" ");
+            this.editor.insert(" ");
         }
         CursorUpdateSubscription.notifyForTextAndCursorUpdate();
     }
@@ -308,7 +312,6 @@ export class DocumentService implements HasSubscription {
 
     public moveCursorLeft() {
         this.editor.moveLeft(1);
-        // console.log("Moved cursor left");
     }
 
     public moveCursorRight() {

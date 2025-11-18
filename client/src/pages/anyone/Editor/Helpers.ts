@@ -20,6 +20,7 @@ export function getNewCanvasElement() {
     document.querySelector(".canvas-container").appendChild(canvasElement);
     canvasElement.classList.add("m-4");
     canvasElement.classList.add("p-6");
+    canvasElement.classList.add("cursor-text");
 
     return canvasElement;
 }
