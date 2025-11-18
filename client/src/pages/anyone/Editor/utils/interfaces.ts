@@ -31,6 +31,14 @@ export interface DocumentSizes {
     rows: number;
 }
 
+export interface HistoryOperation {
+    timestamp: number;
+    chain: boolean;
+    position: number;
+    text: string;
+    handle(service: DocumentService): void;
+}
+
 export class EditorOperation {
     protected service: DocumentService;
 

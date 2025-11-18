@@ -15,6 +15,8 @@ import {CtrlAll} from "./handler/commands/CtrlAll";
 import {CtrlArrowLeftCommand} from "./handler/commands/CtrlArrowLeftCommand";
 import {CtrlArrowRightCommand} from "./handler/commands/CtrlArrowRightCommand";
 import {CtrlBackspaceCommand} from "./handler/commands/CtrlBackspaceCommand";
+import {CtrlZCommand} from "./handler/commands/CtrlZCommand";
+import {CtrlYCommand} from "./handler/commands/CtrlYCommand";
 
 type CommandConstructor = new (service: DocumentService) => KeyCommand;
 
@@ -27,8 +29,10 @@ const CommandRegistry: Record<string, CommandConstructor> = {
     "Enter": InsertNewLineCommand,
     "Tab": InsertTabCommand,
 
+    "ctrl+z": CtrlZCommand,
+    "ctrl+shift+z": CtrlYCommand,
+    "ctrl+y": CtrlYCommand,
     "ctrl+a": CtrlAll,
-    "ctrl+A": CtrlAll,
     "ctrl+Backspace": CtrlBackspaceCommand,
     "ctrl+ArrowLeft": CtrlArrowLeftCommand,
     "ctrl+ArrowRight": CtrlArrowRightCommand,

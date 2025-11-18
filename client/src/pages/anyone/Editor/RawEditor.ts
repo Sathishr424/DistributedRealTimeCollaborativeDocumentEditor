@@ -1,5 +1,5 @@
 import {Deque} from "@utils/Deque";
-import {config} from "./interfaces/interfaces";
+import {config} from "./utils/interfaces";
 
 const sampleText = "🗄️ 3. Extract Utility and Helper Logic\n" +
     "Any code that is reusable or purely supporting the primary function of the class should be moved out.\n" +
@@ -22,6 +22,10 @@ export class RawEditor {
         for (let char of sampleText) {
             this.insert(char);
         }
+    }
+
+    public getCursorPosition(): number {
+        return this.left.size();
     }
 
     public getLogicalLineLengths(): number[] {
@@ -115,13 +119,14 @@ export class RawEditor {
         return chars.join('');
     }
 
-    public backspace() {
-        this.deleteLeft(1);
+    public backspace(): string {
+        return this.deleteLeft(1);
     }
 
-    public deleteLeft(k: number) {
+    public deleteLeft(k: number): string {
+        let deleted: string[] = [];
         while (this.left.size() && k) {
-            let char = this.left.popBack();
+            let char = <string>this.left.popBack();
             if (char == '\n') {
                 this.lineIndex--;
                 this.columnIndex = this.newLines[this.lineIndex];
@@ -131,21 +136,27 @@ export class RawEditor {
                 this.newLines[this.lineIndex]--;
                 this.columnIndex--;
             }
+            deleted.push(char);
             k--;
         }
+        deleted.reverse()
+        return deleted.join('');
     }
 
-    public deleteRight(k: number) {
+    public deleteRight(k: number): string {
+        let deleted: string[] = [];
         while (this.right.size() && k) {
-            let char = this.right.popFront();
+            let char = <string>this.right.popFront();
             if (char == '\n') {
                 this.newLines[this.lineIndex] += this.newLines[this.lineIndex + 1];
                 this.newLines.splice(this.lineIndex + 1, 1);
             } else {
                 this.newLines[this.lineIndex]--;
             }
+            deleted.push(char);
             k--;
         }
+        return deleted.join('');
     }
 
     public moveLeft(k: number) {

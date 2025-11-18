@@ -1,7 +1,7 @@
 import {DocumentService} from "../../../DocumentService";
-import {ClipboardEventParent} from "../../../interfaces/ClipboardEventParent";
-import {MyClipboardEvent} from "../../../interfaces/MyClipboardEvent";
-import CursorUpdateSubscription from "../../../interfaces/CursorUpdateSubscription";
+import {ClipboardEventParent} from "../../../utils/ClipboardEventParent";
+import {MyClipboardEvent} from "../../../utils/MyClipboardEvent";
+import CursorUpdateSubscription from "../../../utils/CursorUpdateSubscription";
 
 export class CopyCommand extends ClipboardEventParent implements MyClipboardEvent{
     constructor(service: DocumentService) {

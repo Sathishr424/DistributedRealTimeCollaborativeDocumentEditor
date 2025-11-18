@@ -1,8 +1,8 @@
 import {DocumentService} from "../../../DocumentService";
-import {ClipboardEventParent} from "../../../interfaces/ClipboardEventParent";
-import {MyClipboardEvent} from "../../../interfaces/MyClipboardEvent";
-import CursorUpdateSubscription from "../../../interfaces/CursorUpdateSubscription";
-import {config} from "../../../interfaces/interfaces";
+import {ClipboardEventParent} from "../../../utils/ClipboardEventParent";
+import {MyClipboardEvent} from "../../../utils/MyClipboardEvent";
+import CursorUpdateSubscription from "../../../utils/CursorUpdateSubscription";
+import {config} from "../../../utils/interfaces";
 
 export class PasteCommand extends ClipboardEventParent implements MyClipboardEvent{
     constructor(service: DocumentService) {
@@ -18,10 +18,8 @@ export class PasteCommand extends ClipboardEventParent implements MyClipboardEve
         // console.log("Paste event:", clipboardData, pastedText);
 
         if (pastedText.length > 0) {
-            this.service.deleteTextSelection();
-            this.service.insertText(pastedText);
-            this.service.handlePages();
-            CursorUpdateSubscription.notifyForTextAndCursorUpdate();
+            const change = this.service.deleteTextSelection();
+            this.service.insertText(pastedText, change);
         }
     }
 }

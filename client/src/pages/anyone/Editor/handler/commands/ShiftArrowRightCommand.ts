@@ -1,6 +1,6 @@
 import { KeyCommand } from "../KeyCommand";
 import { DocumentService } from "../../DocumentService";
-import CursorUpdateSubscription from "../../interfaces/CursorUpdateSubscription";
+import CursorUpdateSubscription from "../../utils/CursorUpdateSubscription";
 
 export class ShiftArrowRightCommand implements KeyCommand {
     service: DocumentService;

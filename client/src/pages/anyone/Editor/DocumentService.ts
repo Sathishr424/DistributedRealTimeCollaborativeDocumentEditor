@@ -1,15 +1,18 @@
 import {RawEditor} from "./RawEditor";
 import {DocumentRenderer} from "./DocumentRenderer";
-import {CommandMap, config, DocumentSizes, Vec2} from "./interfaces/interfaces";
+import {CommandMap, config, DocumentSizes, Vec2} from "./utils/interfaces";
 import {CursorOperation} from "./handler/CursorOperation";
 import {KeyEvents} from "./handler/KeyEvents/KeyEvents";
-import CursorUpdateSubscription from "./interfaces/CursorUpdateSubscription";
+import CursorUpdateSubscription from "./utils/CursorUpdateSubscription";
 import {initializeCommands} from "./CommandRegistry";
 import {ClipboardEvents} from "./handler/KeyEvents/ClipboardEvents";
 import {CanvasContainer} from "./CanvasContainer";
 import {getElementPadding} from "./Helpers";
-import {CombinationKeyState} from "./interfaces/CombinationKeyState";
+import {CombinationKeyState} from "./utils/CombinationKeyState";
 import {DoublyLinkedList} from "@utils/DoublyLinkedList";
+import {EditHistory} from "./utils/EditHistory";
+import {InsertOperation} from "./utils/InsertOperation";
+import {DeleteOperation} from "./utils/DeleteOperation";
 
 export class DocumentService implements HasSubscription {
     private canvasContainer: CanvasContainer;
@@ -21,6 +24,7 @@ export class DocumentService implements HasSubscription {
     private readonly commands: CommandMap = initializeCommands(this);
     private clipboardEvents: ClipboardEvents;
     private combinationKeyState: CombinationKeyState;
+    private editHistory: EditHistory;
 
     public getCommands(): CommandMap {
         return this.commands;
@@ -37,6 +41,7 @@ export class DocumentService implements HasSubscription {
         this.clipboardEvents = new ClipboardEvents(this);
 
         this.combinationKeyState = new CombinationKeyState();
+        this.editHistory = new EditHistory(this);
         CursorUpdateSubscription.subscribe(this);
     }
 
@@ -143,17 +148,16 @@ export class DocumentService implements HasSubscription {
         this.clipboardEvents.executePasteCommand(e);
     }
 
-    public deleteTextSelection() {
+    public deleteTextSelection(): boolean {
         if (this.isCursorInTextSelection()) {
-            this.delete(this.cursorOperation.getPrevCursorPosition());
-            return true;
+            return this.delete(this.cursorOperation.getPrevCursorPosition());
         }
         return false;
     }
 
     public handleBackSpace() {
         if (!this.deleteTextSelection()) {
-            this.editor.backspace();
+            this.backspace();
         }
         this.handlePages();
         CursorUpdateSubscription.notifyForTextAndCursorUpdate();
@@ -174,30 +178,20 @@ export class DocumentService implements HasSubscription {
         this.cursorOperation.updateLiveCursorPosition();
     }
 
-    // Update logic for pages
     public handleInsertChar(char: string) {
-        this.deleteTextSelection()
-        this.editor.insert(char);
-        this.handlePages();
-        CursorUpdateSubscription.notifyForTextAndCursorUpdate();
+        const change = this.deleteTextSelection()
+        this.insertChar(char, change);
     }
 
     public handleInsertTab() {
         this.deleteTextSelection()
-        for (let i=0; i<config.tabSize; i++) {
-            this.editor.insert(" ");
-        }
-        this.handlePages();
-        CursorUpdateSubscription.notifyForTextAndCursorUpdate();
+        this.insertText(new Array(config.tabSize).fill(0).join(''));
     }
 
     public handleInsertNewLine() {
-        this.deleteTextSelection()
-        this.editor.insert('\n');
-        this.handlePages();
-        CursorUpdateSubscription.notifyForTextAndCursorUpdate();
+        const change = this.deleteTextSelection()
+        this.insertChar('\n', change);
     }
-    // Update logic for pages
 
     public handleArrowLeft() {
         if (this.isCursorInTextSelection()) return this.handleArrowLeftOnSelectionEnd();
@@ -288,6 +282,10 @@ export class DocumentService implements HasSubscription {
         return index;
     }
 
+    public getEditorCursorPosition(pos: number) {
+        return this.editor.getCursorPosition();
+    }
+
     public getCursorPosition(): Vec2 {
         let rows = 0;
         for (let i=0; i<this.editor.getLogicalLineIndex(); i++) {
@@ -308,15 +306,12 @@ export class DocumentService implements HasSubscription {
         this.moveCursor(pos);
     }
 
-    public delete(newPos: Vec2) {
-        let realPos = this.convertTo1DPosition(newPos);
-        let diff = this.editor.getTotalCharsBeforeCursor().size() - realPos;
+    public deleteLeft(k: number): string {
+        return this.editor.deleteLeft(k);
+    }
 
-        if (diff > 0) {
-            this.editor.deleteLeft(diff);
-        } else {
-            this.editor.deleteRight(diff * -1);
-        }
+    public deleteRight(k: number): string {
+        return this.editor.deleteRight(k);
     }
 
     public moveCursor(newPos: Vec2) {
@@ -456,8 +451,59 @@ export class DocumentService implements HasSubscription {
         this.cursorOperation.dispose();
     }
 
-    public insertText(text: string) {
+    // START -- Only places where we delete or insert characters
+    public backspace() {
+        const deleted = this.editor.backspace();
+        if (deleted.length > 0) this.editHistory.addHistory(new InsertOperation(this.editor.getCursorPosition(), deleted, false));
+    }
+
+    public delete(newPos: Vec2) {
+        let realPos = this.convertTo1DPosition(newPos);
+        let diff = this.editor.getTotalCharsBeforeCursor().size() - realPos;
+
+        let deleted = '';
+        if (diff > 0) {
+            deleted = this.deleteLeft(diff);
+        } else {
+            deleted = this.deleteRight(diff * -1);
+        }
+        if (deleted.length > 0) this.editHistory.addHistory(new InsertOperation(this.editor.getCursorPosition(), deleted, false));
+        return deleted.length > 0;
+    }
+
+    public insertChar(char: string, chain=false) {
+        this.editor.insert(char);
+        this.editHistory.addHistory(new DeleteOperation(this.editor.getCursorPosition() - char.length, char, chain));
+        this.handlePages();
+        CursorUpdateSubscription.notifyForTextAndCursorUpdate();
+    }
+
+    public insertText(text: string, chain=false, isUndo=false) {
         this.editor.insertText(text);
+        if (!isUndo && text.length > 0) {
+            this.editHistory.addHistory(new DeleteOperation(this.editor.getCursorPosition() - text.length, text, chain));
+        }
+        this.handlePages();
+        CursorUpdateSubscription.notifyForTextAndCursorUpdate();
+    }
+    // Only places where I delete or edit -- END
+
+    public undo() {
+        this.editHistory.undo();
+    }
+
+    public redo() {
+        this.editHistory.redo();
+    }
+
+    public moveToPosition(pos: number) {
+        let diff = this.editor.getCursorPosition() - pos;
+
+        if (diff > 0) {
+            this.editor.moveLeft(diff);
+        } else {
+            this.editor.moveRight(diff * -1);
+        }
     }
 
     public getTextSelection(): string {

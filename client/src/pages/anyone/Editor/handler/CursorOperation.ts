@@ -1,17 +1,18 @@
-import {Vec2, EditorOperation, config} from "../interfaces/interfaces";
-import CursorUpdateSubscription from "../interfaces/CursorUpdateSubscription";
+import {Vec2, EditorOperation, config} from "../utils/interfaces";
+import CursorUpdateSubscription from "../utils/CursorUpdateSubscription";
 import {DocumentService} from "../DocumentService";
 import {Deque} from "@utils/Deque";
 
 export class CursorOperation extends EditorOperation implements HasSubscription {
     private cursorInterval: any;
-    private cursorToggle: boolean = false;
+    private cursorToggle: boolean = true;
     private cursorPosition: Vec2 = {x: 0, y: 0};
     private prevCursorPosition: Vec2 = {x: -1, y: -1};
     private isTextSelected = false;
     private isMouseDown = false;
     private prevCursorPositionForRerender: Vec2 = {x: -1, y: -1};
     private clickIntervals: Deque<number>;
+    private cursorOnUse = Date.now();
 
     public getIsTextSelection(): boolean {
         return this.isTextSelected;
@@ -60,11 +61,12 @@ export class CursorOperation extends EditorOperation implements HasSubscription 
         if (usage === "CURSOR UPDATE") {
             this.service.clearCursor(this.cursorPosition);
             this.cursorPosition = this.service.getCursorPosition();
-            this.service.drawCursor(this.cursorPosition)
             if (this.isTextSelected) {
                 this.isTextSelected = false;
                 CursorUpdateSubscription.notifyForTextUpdate();
             }
+            this.cursorOnUse = Date.now();
+            this.cursorToggle = true;
         } else if (usage === "KEY EVENT TEXT SELECTION") {
             if (!this.isTextSelected) {
                 this.prevCursorPosition = this.cursorPosition;
@@ -79,9 +81,10 @@ export class CursorOperation extends EditorOperation implements HasSubscription 
     }
 
     private renderCursor() {
-        if (!this.cursorToggle) {
+        if (this.cursorToggle) {
             if (!this.isMouseDown) this.service.drawCursor(this.cursorPosition);
         } else {
+            if (Date.now() - this.cursorOnUse <= 1000) return;
             this.service.clearCursor(this.cursorPosition);
         }
         this.cursorToggle = !this.cursorToggle;

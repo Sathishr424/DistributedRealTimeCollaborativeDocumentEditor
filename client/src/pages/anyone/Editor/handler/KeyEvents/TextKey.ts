@@ -1,5 +1,5 @@
-import {KeyEventsParent} from "../../interfaces/KeyEventsParent";
-import {KeyEvent} from "../../interfaces/KeyEvent";
+import {KeyEventsParent} from "../../utils/KeyEventsParent";
+import {KeyEvent} from "../../utils/KeyEvent";
 import {DocumentService} from "../../DocumentService";
 
 export class TextKey extends KeyEventsParent implements KeyEvent{

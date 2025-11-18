@@ -1,6 +1,6 @@
-import {config} from "./interfaces/interfaces";
+import {config} from "./utils/interfaces";
 import {DocumentService} from "./DocumentService";
-import CursorUpdateSubscription from "./interfaces/CursorUpdateSubscription";
+import CursorUpdateSubscription from "./utils/CursorUpdateSubscription";
 import {getNewCanvasElement, loadConfiguredFont} from "./Helpers";
 
 type callbackType = (e: any) => void;

@@ -2,7 +2,7 @@ import { KeyCommand } from "../KeyCommand";
 import { DocumentService } from "../../DocumentService";
 import CursorUpdateSubscription from "../../utils/CursorUpdateSubscription";
 
-export class CtrlArrowLeftCommand implements KeyCommand {
+export class CtrlZCommand implements KeyCommand {
     service: DocumentService;
 
     constructor(service: DocumentService) {
@@ -10,8 +10,6 @@ export class CtrlArrowLeftCommand implements KeyCommand {
     }
 
     execute(): void {
-        const pos = this.service.continuousCharacterOnLeftWithPaddingPos();
-        this.service.moveCursor(pos);
-        CursorUpdateSubscription.notifyForCursorUpdate();
+        this.service.undo();
     }
 }

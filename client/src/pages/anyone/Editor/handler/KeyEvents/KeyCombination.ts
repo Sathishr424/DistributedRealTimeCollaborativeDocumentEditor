@@ -1,5 +1,5 @@
-import {KeyEventsParent} from "../../interfaces/KeyEventsParent";
-import {KeyEvent} from "../../interfaces/KeyEvent";
+import {KeyEventsParent} from "../../utils/KeyEventsParent";
+import {KeyEvent} from "../../utils/KeyEvent";
 import {DocumentService} from "../../DocumentService";
 
 export class KeyCombination extends KeyEventsParent implements KeyEvent{
@@ -9,7 +9,9 @@ export class KeyCombination extends KeyEventsParent implements KeyEvent{
     }
 
     handle(e: KeyboardEvent): boolean {
-        const key = e.key;
+        let key = e.key;
+        if (key.length == 1) key = key.toLowerCase();
+
         let command = "";
         let add = '';
         if (e.ctrlKey) {

@@ -1,6 +1,6 @@
-import {config, DocumentSizes} from "./interfaces/interfaces";
+import {config, DocumentSizes} from "./utils/interfaces";
 import {RawEditor} from "./RawEditor";
-import {Vec2} from "./interfaces/interfaces";
+import {Vec2} from "./utils/interfaces";
 import {CanvasContainer} from "./CanvasContainer";
 
 export class DocumentRenderer {

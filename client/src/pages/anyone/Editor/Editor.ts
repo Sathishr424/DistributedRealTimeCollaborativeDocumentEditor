@@ -1,8 +1,8 @@
 import {RawEditor} from "./RawEditor";
-import {config, DocumentSizes} from "./interfaces/interfaces";
+import {config, DocumentSizes} from "./utils/interfaces";
 import {DocumentService} from "./DocumentService";
 import {DocumentRenderer} from "./DocumentRenderer";
-import CursorUpdateSubscription from "./interfaces/CursorUpdateSubscription";
+import CursorUpdateSubscription from "./utils/CursorUpdateSubscription";
 import {CanvasContainer} from "./CanvasContainer";
 import {getElementPadding, getNewCanvasElement, loadConfiguredFont} from "./Helpers";
 

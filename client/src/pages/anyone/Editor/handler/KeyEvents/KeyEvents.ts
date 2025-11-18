@@ -1,8 +1,8 @@
-import {KeyEvent} from "../../interfaces/KeyEvent";
+import {KeyEvent} from "../../utils/KeyEvent";
 import {KeyCombination} from "./KeyCombination";
 import {TextKey} from "./TextKey";
 import {DocumentService} from "../../DocumentService";
-import {CombinationKeyState} from "../../interfaces/CombinationKeyState";
+import {CombinationKeyState} from "../../utils/CombinationKeyState";
 
 export class KeyEvents {
     private events: KeyEvent[] = [];

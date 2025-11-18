@@ -1,5 +1,5 @@
 import {DocumentService} from "../../DocumentService";
-import {MyClipboardEvent} from "../../interfaces/MyClipboardEvent";
+import {MyClipboardEvent} from "../../utils/MyClipboardEvent";
 import {CopyCommand} from "../commands/ClipboardCommands/CopyCommand";
 import {PasteCommand} from "../commands/ClipboardCommands/PasteCommand";
 import {CutCommand} from "../commands/ClipboardCommands/CutCommand";
