@@ -6,7 +6,7 @@ import CursorUpdateSubscription from "./CursorUpdateSubscription";
 
 export class EditHistory {
     private historyStack: HistoryOperation[] = [];
-    private tempUndoStack: HistoryOperation[] = [];
+    private tempUndoStack: HistoryOperation[] = []; 
     private service: DocumentService;
 
     constructor(service: DocumentService) {
