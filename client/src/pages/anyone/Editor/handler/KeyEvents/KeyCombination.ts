@@ -13,16 +13,24 @@ export class KeyCombination extends KeyEventsParent implements KeyEvent{
         let command = "";
         let add = '';
         if (e.ctrlKey) {
-            command += "Ctrl";
+            command += "ctrl";
             add = "+"
+            this.service.enableCombinationKey("ctrl");
         }
         if (e.shiftKey) {
-            command += add + "Shift";
+            command += add + "shift";
             add = "+"
+            this.service.enableCombinationKey("shift");
         }
         if (e.altKey) {
-            command += add + "Alt";
+            command += add + "alt";
             add = "+"
+            this.service.enableCombinationKey("alt");
+        }
+        if (e.metaKey) {
+            command += add + "meta";
+            add = "+"
+            this.service.enableCombinationKey("meta");
         }
         command += add + key;
 

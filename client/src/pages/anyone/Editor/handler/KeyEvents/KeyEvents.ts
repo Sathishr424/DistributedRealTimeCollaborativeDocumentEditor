@@ -2,6 +2,7 @@ import {KeyEvent} from "../../interfaces/KeyEvent";
 import {KeyCombination} from "./KeyCombination";
 import {TextKey} from "./TextKey";
 import {DocumentService} from "../../DocumentService";
+import {CombinationKeyState} from "../../interfaces/CombinationKeyState";
 
 export class KeyEvents {
     private events: KeyEvent[] = [];
@@ -11,11 +12,15 @@ export class KeyEvents {
         this.events.push(new TextKey(service));
     }
 
-    handle(e: KeyboardEvent) {
+    handleKeyDown(e: KeyboardEvent) {
         for (let event of this.events) {
             if (event.handle(e)) {
                 break;
             }
         }
+    }
+
+    handleKeyUp(e: KeyboardEvent, combinationKeyState: CombinationKeyState) {
+        combinationKeyState.disableAllKeys();
     }
 }

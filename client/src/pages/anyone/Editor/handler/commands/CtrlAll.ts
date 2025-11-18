@@ -2,7 +2,7 @@ import {KeyCommand} from "../KeyCommand";
 import {DocumentService} from "../../DocumentService";
 import CursorUpdateSubscription from "../../interfaces/CursorUpdateSubscription";
 
-export class ControlAll implements KeyCommand {
+export class CtrlAll implements KeyCommand {
     service: DocumentService;
     constructor(service: DocumentService) {
         this.service = service;

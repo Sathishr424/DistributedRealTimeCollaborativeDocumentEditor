@@ -7,8 +7,9 @@ import CursorUpdateSubscription from "./interfaces/CursorUpdateSubscription";
 import {initializeCommands} from "./CommandRegistry";
 import {ClipboardEvents} from "./handler/KeyEvents/ClipboardEvents";
 import {CanvasContainer} from "./CanvasContainer";
-import SubscriptionForPageCreation from "./SubscriptionForPageCreation";
 import {getElementPadding} from "./Helpers";
+import {CombinationKeyState} from "./interfaces/CombinationKeyState";
+import {DoublyLinkedList} from "@utils/DoublyLinkedList";
 
 export class DocumentService implements HasSubscription {
     private canvasContainer: CanvasContainer;
@@ -19,6 +20,7 @@ export class DocumentService implements HasSubscription {
     private sizes: DocumentSizes;
     private readonly commands: CommandMap = initializeCommands(this);
     private clipboardEvents: ClipboardEvents;
+    private combinationKeyState: CombinationKeyState;
 
     public getCommands(): CommandMap {
         return this.commands;
@@ -33,6 +35,8 @@ export class DocumentService implements HasSubscription {
         this.cursorOperation = new CursorOperation(this);
         this.keyEvents = new KeyEvents(this);
         this.clipboardEvents = new ClipboardEvents(this);
+
+        this.combinationKeyState = new CombinationKeyState();
         CursorUpdateSubscription.subscribe(this);
     }
 
@@ -113,7 +117,19 @@ export class DocumentService implements HasSubscription {
     }
 
     public onKeyDown(e: KeyboardEvent) {
-        this.keyEvents.handle(e);
+        this.keyEvents.handleKeyDown(e);
+    }
+
+    public onKeyUp(e: KeyboardEvent) {
+        this.keyEvents.handleKeyUp(e, this.combinationKeyState);
+    }
+
+    public enableCombinationKey(key: string) {
+        this.combinationKeyState.enableKey(key);
+    }
+
+    public isCombinationKeyEnabled(key: string): boolean {
+        return this.combinationKeyState.isKeyEnabled(key);
     }
 
     public onCopy(e: ClipboardEvent) {
@@ -131,7 +147,6 @@ export class DocumentService implements HasSubscription {
     public deleteTextSelection() {
         if (this.isCursorInTextSelection()) {
             this.delete(this.cursorOperation.getPrevCursorPosition());
-            CursorUpdateSubscription.notifyForTextAndCursorUpdate();
             return true;
         }
         return false;
@@ -279,7 +294,6 @@ export class DocumentService implements HasSubscription {
         pos.x %= this.sizes.cols;
         pos.y = pos.y + Math.floor(colIndex / this.sizes.cols);
 
-        // console.log(this.sizes.cols, rows, colIndex, this.editor.getTotalCharsBeforeCursor().toArray(), this.editor.getLogicalLineLengths(), pos)
         return pos;
     }
 
@@ -297,6 +311,7 @@ export class DocumentService implements HasSubscription {
         } else {
             this.editor.deleteRight(diff * -1);
         }
+        CursorUpdateSubscription.notifyForTextAndCursorUpdate();
     }
 
     public moveCursor(newPos: Vec2) {
@@ -341,16 +356,18 @@ export class DocumentService implements HasSubscription {
     }
 
     public selectCurrentWord() {
-        const left = this.continuousCharacterOnLeft();
-        const right = this.continuousCharacterOnRight();
+        const pos = this.getCursorPosition();
+        let node = this.editor.getTotalCharsBeforeCursor().getTail();
+        const left = this.continuousCharacterOnLeftPos({...pos}, node);
 
-        this.moveCursor(left);
-        this.moveCursor(right);
+        node = this.editor.getTotalCharsAfterCursor().getHead();
+        const right = this.continuousCharacterOnRightPos({...pos}, node);
+
         this.updatePrevCursorPosition(left);
+        this.moveCursor(right);
         this.updateCursorPosition(right);
         this.enableTextSelection();
         CursorUpdateSubscription.notifyForTextUpdate();
-        // console.log("SELECT LINE")
     }
 
     public selectEntireLine() {
@@ -358,25 +375,23 @@ export class DocumentService implements HasSubscription {
 
         const left = {x: 0, y: pos.y}
         let right = {x: this.sizes.cols, y: pos.y}
-        this.moveCursor(left);
-        this.moveCursor(right);
-        right = this.getCursorPosition();
-        this.cursorOperation.enableTextSelection();
+
         this.updatePrevCursorPosition(left);
+        this.moveCursor(right);
         this.updateCursorPosition(right);
+        this.enableTextSelection();
         CursorUpdateSubscription.notifyForTextUpdate();
-        // console.log("SELECT LINE")
     }
 
     public checkIfCharIsInContinuous(char: string): boolean {
         return config.canPassthroughCharacters.includes(char);
     }
 
-    public continuousCharacterOnLeft() {
+    public continuousCharacterOnLeftWithPaddingPos(): Vec2 {
         let pos: Vec2 = this.getCursorPosition();
 
         let node = this.editor.getTotalCharsBeforeCursor().getTail();
-        while (node && this.checkIfCharIsInContinuous(node.val)) {
+        while (node && node.val === ' ') {
             if (pos.x == 0) {
                 pos.y--;
                 pos.x = this.sizes.cols;
@@ -384,19 +399,49 @@ export class DocumentService implements HasSubscription {
             node = node.prev;
         }
 
-        return pos;
+        return this.continuousCharacterOnLeftPos(pos, node, true);
     }
 
-    public continuousCharacterOnRight() {
+    public continuousCharacterOnRightWithPaddingPos(): Vec2 {
         let pos: Vec2 = this.getCursorPosition();
 
         let node = this.editor.getTotalCharsAfterCursor().getHead();
-        while (node && this.checkIfCharIsInContinuous(node.val)) {
+        while (node && node.val === ' ') {
             if (pos.x == this.sizes.cols) {
                 pos.y++;
                 pos.x = 0;
             } pos.x++;
             node = node.next;
+        }
+
+        return this.continuousCharacterOnRightPos(pos, node, true);
+    }
+
+    public continuousCharacterOnLeftPos(pos: Vec2, node: DoublyLinkedList<string> | null, ignoreFirst=false): Vec2 {
+        let first = ignoreFirst;
+        while (node && (first || this.checkIfCharIsInContinuous(node.val))) {
+            if (pos.x == 0) {
+                pos.y--;
+                pos.x = this.sizes.cols;
+            } pos.x--;
+            if (!this.checkIfCharIsInContinuous(node.val)) break;
+            node = node.prev;
+            first = false;
+        }
+
+        return pos;
+    }
+
+    public continuousCharacterOnRightPos(pos: Vec2, node: DoublyLinkedList<string> | null, ignoreFirst=false): Vec2 {
+        let first = ignoreFirst;
+        while (node && (first || this.checkIfCharIsInContinuous(node.val))) {
+            if (pos.x == this.sizes.cols) {
+                pos.y++;
+                pos.x = 0;
+            } pos.x++;
+            if (!this.checkIfCharIsInContinuous(node.val)) break;
+            node = node.next;
+            first = false;
         }
 
         return pos;

@@ -44,11 +44,11 @@ random_data = [
 # -----------------------------------------------
 def get_or_create(table, name):
     """Get ID of existing record or insert and return new ID"""
-    cursor.handle(f"SELECT id FROM {table} WHERE name = %s", (name,))
+    cursor.handleKeyDown(f"SELECT id FROM {table} WHERE name = %s", (name,))
     result = cursor.fetchone()
     if result:
         return result[0]
-    cursor.handle(f"INSERT INTO {table} (name, created_at, updated_at) VALUES (%s, %s, %s)", (name, datetime.date.today(), datetime.date.today()))
+    cursor.handleKeyDown(f"INSERT INTO {table} (name, created_at, updated_at) VALUES (%s, %s, %s)", (name, datetime.date.today(), datetime.date.today()))
     conn.commit()
     return cursor.lastrowid
 
@@ -73,7 +73,7 @@ for _ in range(records_to_insert):
     expense_date = datetime.date.today() - datetime.timedelta(days=days_ago)
 
     # Insert into expenses table
-    cursor.handle("""
+    cursor.handleKeyDown("""
         INSERT INTO expenses (description, title, date, amount, expense, quantity, user_id, created_at, updated_at)
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
     """, ("", expense_group["name"], expense_date, cost, cost * qty, qty, user_id, datetime.date.today(), datetime.date.today()) )
@@ -83,7 +83,7 @@ for _ in range(records_to_insert):
 
     # Link tag in expense_tags table (many-to-many)
     for cat_id in category_ids:
-        cursor.handle("""
+        cursor.handleKeyDown("""
             INSERT INTO expense_category_relation (expenses_id, categories_id)
             VALUES (%s, %s)
         """, (expense_id, cat_id))

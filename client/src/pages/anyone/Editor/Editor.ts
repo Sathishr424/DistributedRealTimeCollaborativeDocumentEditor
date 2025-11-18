@@ -14,6 +14,7 @@ class Editor {
     private sizes: DocumentSizes
 
     private boundKeyDown: (e: KeyboardEvent) => void;
+    private boundKeyUp: (e: KeyboardEvent) => void;
     private boundCopy: (e: ClipboardEvent) => void;
     private boundCut: (e: ClipboardEvent) => void;
     private boundPaste: (e: ClipboardEvent) => void;
@@ -43,6 +44,7 @@ class Editor {
         this.canvasContainer.appendCanvas(canvas, this.service);
 
         this.boundKeyDown = this.service.onKeyDown.bind(this.service);
+        this.boundKeyUp = this.service.onKeyUp.bind(this.service);
         this.boundCopy = this.service.onCopy.bind(this.service);
         this.boundCut = this.service.onCut.bind(this.service);
         this.boundPaste = this.service.onPaste.bind(this.service);
@@ -55,6 +57,7 @@ class Editor {
     public attachEvents() {
         console.log("Attaching key events")
         document.addEventListener('keydown', this.boundKeyDown);
+        document.addEventListener('keyup', this.boundKeyUp);
         document.addEventListener('copy', this.boundCopy);
         document.addEventListener('cut', this.boundCut);
         document.addEventListener('paste', this.boundPaste);
@@ -63,6 +66,7 @@ class Editor {
     public dispose(): void {
         console.log("Disposed");
         document.removeEventListener('keydown', this.boundKeyDown);
+        document.removeEventListener('keyup', this.boundKeyUp);
         document.removeEventListener('copy', this.boundCopy);
         document.removeEventListener('cut', this.boundCut);
         document.removeEventListener('paste', this.boundPaste);

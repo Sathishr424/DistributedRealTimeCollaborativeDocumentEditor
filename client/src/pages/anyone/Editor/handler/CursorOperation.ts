@@ -93,13 +93,21 @@ export class CursorOperation extends EditorOperation implements HasSubscription 
 
     public handleOnMouseDown(mousePos: Vec2) {
         this.processMoveCursor(mousePos);
-        this.cursorPosition = this.service.getCursorPosition();
-        this.prevCursorPosition = this.cursorPosition;
         this.isMouseDown = true;
-        if (this.isTextSelected) {
-            this.isTextSelected = false;
-            CursorUpdateSubscription.notifyForTextAndCursorUpdate();
+        const newPos = this.service.getCursorPosition();
+        if (this.service.isCombinationKeyEnabled('shift')) {
+            this.cursorPosition = newPos;
+            this.isTextSelected = true;
+            CursorUpdateSubscription.notifyForTextUpdate();
+        } else {
+            this.cursorPosition = newPos;
+            if (this.isTextSelected) {
+                this.isTextSelected = false;
+                CursorUpdateSubscription.notifyForTextAndCursorUpdate();
+            }
+            this.prevCursorPosition = this.cursorPosition;
         }
+
         while (this.clickIntervals.size() && Date.now() - (this.clickIntervals.front() || 0) > config.mouseInterval) {
             this.clickIntervals.popBack();
         }

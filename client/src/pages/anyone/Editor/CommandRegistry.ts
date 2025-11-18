@@ -11,7 +11,10 @@ import {ShiftArrowLeftCommand} from "./handler/commands/ShiftArrowLeftCommand";
 import {ShiftArrowRightCommand} from "./handler/commands/ShiftArrowRightCommand";
 import {ShiftArrowUpCommand} from "./handler/commands/ShiftArrowUpCommand";
 import {ShiftArrowDownCommand} from "./handler/commands/ShiftArrowDownCommand";
-import {ControlAll} from "./handler/commands/ControlAll";
+import {CtrlAll} from "./handler/commands/CtrlAll";
+import {CtrlArrowLeftCommand} from "./handler/commands/CtrlArrowLeftCommand";
+import {CtrlArrowRightCommand} from "./handler/commands/CtrlArrowRightCommand";
+import {CtrlBackspaceCommand} from "./handler/commands/CtrlBackspaceCommand";
 
 type CommandConstructor = new (service: DocumentService) => KeyCommand;
 
@@ -20,15 +23,19 @@ const CommandRegistry: Record<string, CommandConstructor> = {
     "ArrowRight": ArrowRightCommand,
     "ArrowUp": ArrowUpCommand,
     "ArrowDown": ArrowDownCommand,
-    "Ctrl+a": ControlAll,
-    "Ctrl+A": ControlAll,
-    "Shift+ArrowLeft": ShiftArrowLeftCommand,
-    "Shift+ArrowRight": ShiftArrowRightCommand,
-    "Shift+ArrowUp": ShiftArrowUpCommand,
-    "Shift+ArrowDown": ShiftArrowDownCommand,
     "Backspace": BackspaceCommand,
     "Enter": InsertNewLineCommand,
-    "Tab": InsertTabCommand
+    "Tab": InsertTabCommand,
+
+    "ctrl+a": CtrlAll,
+    "ctrl+A": CtrlAll,
+    "ctrl+Backspace": CtrlBackspaceCommand,
+    "ctrl+ArrowLeft": CtrlArrowLeftCommand,
+    "ctrl+ArrowRight": CtrlArrowRightCommand,
+    "shift+ArrowLeft": ShiftArrowLeftCommand,
+    "shift+ArrowRight": ShiftArrowRightCommand,
+    "shift+ArrowUp": ShiftArrowUpCommand,
+    "shift+ArrowDown": ShiftArrowDownCommand,
 };
 
 export function initializeCommands(service: DocumentService) {
