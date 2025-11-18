@@ -6,13 +6,21 @@ import {Deque} from "@utils/Deque";
 export class CursorOperation extends EditorOperation implements HasSubscription {
     private cursorInterval: any;
     private cursorToggle: boolean = true;
-    private cursorPosition: Vec2 = {x: 0, y: 0};
-    private prevCursorPosition: Vec2 = {x: -1, y: -1};
+    private mousePosStack: Deque<Vec2>;
+
     private isTextSelected = false;
     private isMouseDown = false;
-    private prevCursorPositionForRerender: Vec2 = {x: -1, y: -1};
+
     private clickIntervals: Deque<number>;
     private cursorOnUse = Date.now();
+
+    constructor(service: DocumentService) {
+        super(service);
+        this.mousePosStack = new Deque<Vec2>();
+        this.clickIntervals = new Deque<number>();
+        this.ready();
+        CursorUpdateSubscription.subscribe(this);
+    }
 
     public getIsTextSelection(): boolean {
         return this.isTextSelected;
@@ -22,45 +30,62 @@ export class CursorOperation extends EditorOperation implements HasSubscription 
         this.isTextSelected = true;
     }
 
+    public disableTextSelection(): void {
+        this.isTextSelected = false;
+    }
+
+    public setCursorWithinARange(left: Vec2, right: Vec2) {
+        while (this.mousePosStack.size() > 0) {
+            this.mousePosStack.popBack();
+        }
+        this.mousePosStack.pushBack(left);
+        this.mousePosStack.pushBack(right);
+    }
+
     public getPrevCursorPosition(): Vec2 {
-        return this.prevCursorPosition;
+        const tail = this.mousePosStack.getTail()!;
+        if (tail && tail.prev) {
+            return tail.prev.val;
+        }
+        return tail.val;
     }
 
     public getCursorPosition(): Vec2 {
-        return this.cursorPosition;
-    }
-
-    constructor(service: DocumentService) {
-        super(service);
-        this.clickIntervals = new Deque<number>();
-        this.ready();
-        CursorUpdateSubscription.subscribe(this);
+        return this.mousePosStack.back()!;
     }
 
     public ready(): void {
+        this.mousePosStack.pushBack(this.service.getCursorPosition());
         this.cursorInterval = setInterval(this.renderCursor.bind(this), 300);
-        this.cursorPosition = this.service.getCursorPosition();
     }
 
     public updateLiveCursorPosition() {
-        this.cursorPosition = this.service.getCursorPosition();
+        this.updateCursorPosition(this.service.getCursorPosition(), false);
     }
 
-    public updateCursorPosition(pos: Vec2) {
-        this.service.clearCursor(this.cursorPosition);
-        this.cursorPosition = pos;
+    public isTwoCursorPosDifferent(a: Vec2, b: Vec2): boolean {
+        return !(a.x == b.x && a.y == b.y);
     }
 
-    public isCursorOnDifferentPos(prev: Vec2, curr: Vec2): boolean {
-        let x = Math.abs(curr.x - prev.x);
-        let y = Math.abs(curr.y - prev.y);
-        return x + y > 0;
+    public updateCursorPosition(pos: Vec2, clear=true) {
+        const prev = this.getCursorPosition();
+        if (this.isTwoCursorPosDifferent(prev, pos)) {
+            if (clear) this.service.clearCursor(prev);
+            if (this.isTextSelected) {
+                this.mousePosStack.getTail()!.val = pos;
+            } else {
+                this.mousePosStack.pushBack(pos);
+            }
+
+            while (this.mousePosStack.size() > 2) {
+                this.mousePosStack.popFront();
+            }
+        }
     }
 
     notify(usage: string): void {
         if (usage === "CURSOR UPDATE") {
-            this.service.clearCursor(this.cursorPosition);
-            this.cursorPosition = this.service.getCursorPosition();
+            this.updateCursorPosition(this.service.getCursorPosition())
             if (this.isTextSelected) {
                 this.isTextSelected = false;
                 CursorUpdateSubscription.notifyForTextUpdate();
@@ -68,52 +93,45 @@ export class CursorOperation extends EditorOperation implements HasSubscription 
             this.cursorOnUse = Date.now();
             this.cursorToggle = true;
         } else if (usage === "KEY EVENT TEXT SELECTION") {
+            const prev = this.getCursorPosition();
+            this.updateCursorPosition(this.service.getCursorPosition());
             if (!this.isTextSelected) {
-                this.prevCursorPosition = this.cursorPosition;
                 this.isTextSelected = true;
             }
-            this.cursorPosition = this.service.getCursorPosition();
-            if (this.isCursorOnDifferentPos(this.prevCursorPositionForRerender, this.cursorPosition)) {
+            if (this.isTwoCursorPosDifferent(prev, this.getCursorPosition())) {
                 CursorUpdateSubscription.notifyForTextUpdate();
             }
-            this.prevCursorPositionForRerender = this.cursorPosition;
         }
     }
 
     private renderCursor() {
         if (this.cursorToggle) {
-            if (!this.isMouseDown) this.service.drawCursor(this.cursorPosition);
+            if (!this.isMouseDown) this.service.drawCursor(this.getCursorPosition());
         } else {
             if (Date.now() - this.cursorOnUse <= 1000) return;
-            this.service.clearCursor(this.cursorPosition);
+            this.service.clearCursor(this.getCursorPosition());
         }
         this.cursorToggle = !this.cursorToggle;
     }
 
     public processMoveCursor(mousePos: Vec2) {
-        this.service.clearCursor(this.cursorPosition);
+        this.service.clearCursor(this.getCursorPosition());
         this.service.moveCursor(mousePos);
-    }
-
-    public setPrevCursorPosition(mousePos: Vec2) {
-        this.prevCursorPosition = mousePos;
     }
 
     public handleOnMouseDown(mousePos: Vec2) {
         this.processMoveCursor(mousePos);
         this.isMouseDown = true;
         const newPos = this.service.getCursorPosition();
+        this.updateCursorPosition(newPos);
         if (this.service.isCombinationKeyEnabled('shift')) {
-            this.cursorPosition = newPos;
             this.isTextSelected = true;
             CursorUpdateSubscription.notifyForTextUpdate();
         } else {
-            this.cursorPosition = newPos;
             if (this.isTextSelected) {
                 this.isTextSelected = false;
                 CursorUpdateSubscription.notifyForTextAndCursorUpdate();
             }
-            this.prevCursorPosition = this.cursorPosition;
         }
 
         while (this.clickIntervals.size() && Date.now() - (this.clickIntervals.front() || 0) > config.mouseInterval) {
@@ -141,18 +159,18 @@ export class CursorOperation extends EditorOperation implements HasSubscription 
 
     public handleOnMouseMove(mousePos: Vec2) {
         if (this.isMouseDown) {
-            if (this.isCursorOnDifferentPos(this.prevCursorPositionForRerender, mousePos)) {
+            // If left mouse is in pressed state, we check if current and previous recorded mouse position is different and proceed
+            if (this.isTwoCursorPosDifferent(this.getCursorPosition(), mousePos)) {
                 this.processMoveCursor(mousePos);
-                this.cursorPosition = this.service.getCursorPosition();
+                this.updateCursorPosition(this.service.getCursorPosition());
 
-                if (!this.isTextSelected && Math.abs(this.cursorPosition.x - this.prevCursorPosition.x) + Math.abs(this.cursorPosition.y - this.prevCursorPosition.y) > 0) {
+                if (!this.isTextSelected) {
                     this.isTextSelected = true;
                 }
                 if (this.isTextSelected) {
                     CursorUpdateSubscription.notifyForTextUpdate();
                 }
             }
-            this.prevCursorPositionForRerender = mousePos;
         }
         while (this.clickIntervals.back()) {
             this.clickIntervals.popBack();
@@ -161,6 +179,6 @@ export class CursorOperation extends EditorOperation implements HasSubscription 
 
     public dispose(): void {
         clearInterval(this.cursorInterval);
-        this.service.clearCursor(this.cursorPosition);
+        this.service.clearCursor(this.getCursorPosition());
     }
 }

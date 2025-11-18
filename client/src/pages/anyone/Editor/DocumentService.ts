@@ -343,12 +343,8 @@ export class DocumentService implements HasSubscription {
         this.moveCursor({ x: pos.x, y: pos.y + 1 });
     }
 
-    public updatePrevCursorPosition(pos: Vec2) {
-        this.cursorOperation.setPrevCursorPosition(pos);
-    }
-
-    public updateCursorPosition(pos?: Vec2) {
-        this.cursorOperation.updateCursorPosition(pos || this.getCursorPosition());
+    public setCursorWithinARange(left: Vec2, right: Vec2) {
+        this.cursorOperation.setCursorWithinARange(left, right);
     }
 
     public enableTextSelection() {
@@ -363,9 +359,8 @@ export class DocumentService implements HasSubscription {
         node = this.editor.getTotalCharsAfterCursor().getHead();
         const right = this.continuousCharacterOnRightPos({...pos}, node);
 
-        this.updatePrevCursorPosition(left);
         this.moveCursor(right);
-        this.updateCursorPosition(right);
+        this.setCursorWithinARange(left, right);
         this.enableTextSelection();
         CursorUpdateSubscription.notifyForTextUpdate();
     }
@@ -376,9 +371,8 @@ export class DocumentService implements HasSubscription {
         const left = {x: 0, y: pos.y}
         let right = {x: this.sizes.cols, y: pos.y}
 
-        this.updatePrevCursorPosition(left);
         this.moveCursor(right);
-        this.updateCursorPosition(right);
+        this.setCursorWithinARange(left, right);
         this.enableTextSelection();
         CursorUpdateSubscription.notifyForTextUpdate();
     }

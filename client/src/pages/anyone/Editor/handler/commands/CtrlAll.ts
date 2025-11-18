@@ -10,8 +10,7 @@ export class CtrlAll implements KeyCommand {
 
     execute(): void {
         this.service.moveCursorToEnd();
-        this.service.updatePrevCursorPosition({x: 0, y: 0});
-        this.service.updateCursorPosition();
+        this.service.setCursorWithinARange({x: 0, y: 0}, this.service.getCursorPosition());
         this.service.enableTextSelection();
         CursorUpdateSubscription.notifyForTextUpdate();
     }
