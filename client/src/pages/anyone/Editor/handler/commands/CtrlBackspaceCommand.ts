@@ -11,7 +11,8 @@ export class CtrlBackspaceCommand implements KeyCommand {
 
     execute(): void {
         const pos = this.service.continuousCharacterOnLeftWithPaddingPos();
-        console.log(pos)
         this.service.delete(pos);
+        this.service.handlePages();
+        CursorUpdateSubscription.notifyForTextAndCursorUpdate();
     }
 }

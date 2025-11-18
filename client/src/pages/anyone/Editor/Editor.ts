@@ -4,25 +4,33 @@ import {DocumentService} from "./DocumentService";
 import {DocumentRenderer} from "./DocumentRenderer";
 import CursorUpdateSubscription from "./interfaces/CursorUpdateSubscription";
 import {CanvasContainer} from "./CanvasContainer";
-import {getElementPadding, getNewCanvasElement} from "./Helpers";
+import {getElementPadding, getNewCanvasElement, loadConfiguredFont} from "./Helpers";
 
 class Editor {
-    private canvasContainer: CanvasContainer
-    private editor: RawEditor;
-    private renderer: DocumentRenderer;
-    private service: DocumentService;
-    private sizes: DocumentSizes
+    private canvasContainer!: CanvasContainer
+    private editor!: RawEditor;
+    private renderer!: DocumentRenderer;
+    private service!: DocumentService;
+    private sizes!: DocumentSizes
+    private destroyed = false;
 
-    private boundKeyDown: (e: KeyboardEvent) => void;
-    private boundKeyUp: (e: KeyboardEvent) => void;
-    private boundCopy: (e: ClipboardEvent) => void;
-    private boundCut: (e: ClipboardEvent) => void;
-    private boundPaste: (e: ClipboardEvent) => void;
+    private boundKeyDown!: (e: KeyboardEvent) => void;
+    private boundKeyUp!: (e: KeyboardEvent) => void;
+    private boundCopy!: (e: ClipboardEvent) => void;
+    private boundCut!: (e: ClipboardEvent) => void;
+    private boundPaste!: (e: ClipboardEvent) => void;
 
     constructor() {
+        this.init();
+    }
+
+    private async init() {
+        await loadConfiguredFont();
+        if (this.destroyed) return;
         this.canvasContainer = new CanvasContainer();
         const canvas = getNewCanvasElement();
         const ctx = <CanvasRenderingContext2D>canvas.getContext('2d');
+
         this.canvasContainer.configCanvas(canvas, ctx);
 
         const charWidth = Math.ceil(ctx.measureText("A").width);
@@ -65,13 +73,15 @@ class Editor {
 
     public dispose(): void {
         console.log("Disposed");
-        document.removeEventListener('keydown', this.boundKeyDown);
-        document.removeEventListener('keyup', this.boundKeyUp);
-        document.removeEventListener('copy', this.boundCopy);
-        document.removeEventListener('cut', this.boundCut);
-        document.removeEventListener('paste', this.boundPaste);
+        if (this.service) {
+            document.removeEventListener('keydown', this.boundKeyDown);
+            document.removeEventListener('keyup', this.boundKeyUp);
+            document.removeEventListener('copy', this.boundCopy);
+            document.removeEventListener('cut', this.boundCut);
+            document.removeEventListener('paste', this.boundPaste);
 
-        this.service.dispose();
+            this.service.dispose();
+        }
         // @ts-ignore
         this.editor = null;
         // @ts-ignore
@@ -79,8 +89,11 @@ class Editor {
         // @ts-ignore
         this.service = null;
 
-        this.canvasContainer.clearCanvases();
+        if (this.canvasContainer) {
+            this.canvasContainer.clearCanvases();
+        }
         CursorUpdateSubscription.clearAll();
+        this.destroyed = true;
     }
 }
 

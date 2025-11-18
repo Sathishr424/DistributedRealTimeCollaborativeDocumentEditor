@@ -67,7 +67,7 @@ export class RawEditor {
         this.columnIndex++;
     }
 
-    public insertNewLine() {
+    private insertNewLine() {
         this.left.pushBack("\n");
         let rem = this.newLines[this.lineIndex] - this.columnIndex;
         this.newLines[this.lineIndex] = this.columnIndex;

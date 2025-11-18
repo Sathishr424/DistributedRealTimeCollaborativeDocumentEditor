@@ -90,7 +90,6 @@ export class DocumentService implements HasSubscription {
     notify(usage: string): void {
         // console.log("Usage: ", usage);
         if (usage !== "TEXT OPERATION") return;
-        this.handlePages();
 
         if (this.isCursorInTextSelection()) {
             const [start, end] = this.getCursorPositionsStartAndEnd();
@@ -153,7 +152,10 @@ export class DocumentService implements HasSubscription {
     }
 
     public handleBackSpace() {
-        if (!this.deleteTextSelection()) this.editor.backspace();
+        if (!this.deleteTextSelection()) {
+            this.editor.backspace();
+        }
+        this.handlePages();
         CursorUpdateSubscription.notifyForTextAndCursorUpdate();
     }
 
@@ -169,6 +171,7 @@ export class DocumentService implements HasSubscription {
         while (this.canvasContainer.getCanvasesTotal() > pages + 1) {
             this.canvasContainer.popCanvas();
         }
+        this.cursorOperation.updateLiveCursorPosition();
     }
 
     // Update logic for pages
@@ -183,12 +186,14 @@ export class DocumentService implements HasSubscription {
         for (let i=0; i<config.tabSize; i++) {
             this.editor.insert(" ");
         }
+        this.handlePages();
         CursorUpdateSubscription.notifyForTextAndCursorUpdate();
     }
 
     public handleInsertNewLine() {
         this.deleteTextSelection()
-        this.editor.insertNewLine();
+        this.editor.insert('\n');
+        this.handlePages();
         CursorUpdateSubscription.notifyForTextAndCursorUpdate();
     }
     // Update logic for pages
@@ -311,7 +316,6 @@ export class DocumentService implements HasSubscription {
         } else {
             this.editor.deleteRight(diff * -1);
         }
-        CursorUpdateSubscription.notifyForTextAndCursorUpdate();
     }
 
     public moveCursor(newPos: Vec2) {

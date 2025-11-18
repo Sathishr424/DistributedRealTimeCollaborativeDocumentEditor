@@ -23,8 +23,8 @@ class CursorUpdateSubscription {
 
     notifyForTextAndCursorUpdate() {
         for (let subscription of this.subscribers) {
-            subscription.notify("CURSOR UPDATE");
             subscription.notify("TEXT OPERATION");
+            subscription.notify("CURSOR UPDATE");
         }
     }
 

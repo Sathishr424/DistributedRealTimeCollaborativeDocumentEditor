@@ -2,7 +2,7 @@ import {CanvasContainer} from "./CanvasContainer";
 import {RawEditor} from "./RawEditor";
 import {DocumentRenderer} from "./DocumentRenderer";
 import {DocumentService} from "./DocumentService";
-import {DocumentSizes} from "./interfaces/interfaces";
+import {config, DocumentSizes} from "./interfaces/interfaces";
 
 export function getElementPadding(element: HTMLElement) {
     const styles = window.getComputedStyle(element);
@@ -10,6 +10,21 @@ export function getElementPadding(element: HTMLElement) {
     const paddingLeft = parseFloat(styles.paddingLeft);
     const paddingTop = parseFloat(styles.paddingTop);
     return {x: paddingLeft, y: paddingTop};
+}
+
+export function loadConfiguredFont(): Promise<boolean> {
+    return new Promise((resolve) => {
+        const fontLoadString = `400 ${config.fontSize}px ${config.font}`
+        document.fonts.load(fontLoadString)
+            .then(() => {
+                console.log(`${config.font} font successfully loaded.`);
+                resolve(true);
+            })
+            .catch(error => {
+                console.error("Error loading font:", error);
+                resolve(true);
+            });
+    })
 }
 
 export function getNewCanvasElement() {

@@ -41,6 +41,10 @@ export class CursorOperation extends EditorOperation implements HasSubscription 
         this.cursorPosition = this.service.getCursorPosition();
     }
 
+    public updateLiveCursorPosition() {
+        this.cursorPosition = this.service.getCursorPosition();
+    }
+
     public updateCursorPosition(pos: Vec2) {
         this.service.clearCursor(this.cursorPosition);
         this.cursorPosition = pos;
@@ -56,6 +60,7 @@ export class CursorOperation extends EditorOperation implements HasSubscription 
         if (usage === "CURSOR UPDATE") {
             this.service.clearCursor(this.cursorPosition);
             this.cursorPosition = this.service.getCursorPosition();
+            this.service.drawCursor(this.cursorPosition)
             if (this.isTextSelected) {
                 this.isTextSelected = false;
                 CursorUpdateSubscription.notifyForTextUpdate();

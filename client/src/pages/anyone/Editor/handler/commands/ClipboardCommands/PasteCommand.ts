@@ -19,6 +19,7 @@ export class PasteCommand extends ClipboardEventParent implements MyClipboardEve
         if (pastedText.length > 0) {
             this.service.deleteTextSelection();
             this.service.insertText(pastedText);
+            this.service.handlePages();
             CursorUpdateSubscription.notifyForTextAndCursorUpdate();
         }
     }

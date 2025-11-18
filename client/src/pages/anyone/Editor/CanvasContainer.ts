@@ -1,7 +1,7 @@
 import {config} from "./interfaces/interfaces";
 import {DocumentService} from "./DocumentService";
 import CursorUpdateSubscription from "./interfaces/CursorUpdateSubscription";
-import {getNewCanvasElement} from "./Helpers";
+import {getNewCanvasElement, loadConfiguredFont} from "./Helpers";
 
 type callbackType = (e: any) => void;
 type CanvasEvent = Record<string, callbackType>;
