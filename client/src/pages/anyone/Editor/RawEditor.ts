@@ -1,4 +1,5 @@
 import {Deque} from "@utils/Deque";
+import {config} from "./interfaces/interfaces";
 
 const sampleText = "🗄️ 3. Extract Utility and Helper Logic\n" +
     "Any code that is reusable or purely supporting the primary function of the class should be moved out.\n" +
@@ -62,6 +63,9 @@ export class RawEditor {
 
     public insert(char: string) {
         if (char === '\n') return this.insertNewLine();
+        if (char === '\t') {
+            return this.insertText(new Array(config.tabSize).fill(' ').join(''))
+        }
         this.left.pushBack(char);
         this.newLines[this.lineIndex]++;
         this.columnIndex++;

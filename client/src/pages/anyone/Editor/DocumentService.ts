@@ -178,6 +178,7 @@ export class DocumentService implements HasSubscription {
     public handleInsertChar(char: string) {
         this.deleteTextSelection()
         this.editor.insert(char);
+        this.handlePages();
         CursorUpdateSubscription.notifyForTextAndCursorUpdate();
     }
 

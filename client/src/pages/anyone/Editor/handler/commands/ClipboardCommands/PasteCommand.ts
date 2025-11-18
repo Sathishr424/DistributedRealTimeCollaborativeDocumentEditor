@@ -2,6 +2,7 @@ import {DocumentService} from "../../../DocumentService";
 import {ClipboardEventParent} from "../../../interfaces/ClipboardEventParent";
 import {MyClipboardEvent} from "../../../interfaces/MyClipboardEvent";
 import CursorUpdateSubscription from "../../../interfaces/CursorUpdateSubscription";
+import {config} from "../../../interfaces/interfaces";
 
 export class PasteCommand extends ClipboardEventParent implements MyClipboardEvent{
     constructor(service: DocumentService) {
