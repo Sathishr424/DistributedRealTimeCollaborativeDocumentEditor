@@ -19,14 +19,14 @@ export class EditHistory {
         this.tempUndoStack = [];
     }
 
-    private flipOperation(operation: HistoryOperation): HistoryOperation {
+    private flipOperation(operation: HistoryOperation, chain: boolean): HistoryOperation {
         if (operation instanceof InsertOperation) {
-            return new DeleteOperation(operation.position, operation.text, operation.chain);
+            return new DeleteOperation(operation.position, operation.text, chain);
         } else if (operation instanceof DeleteOperation) {
-            return new InsertOperation(operation.position, operation.text, operation.chain);
+            return new InsertOperation(operation.position, operation.text, chain);
         } else {
             // For now only two types exist, so this will work
-            return new InsertOperation(operation.position - operation.text.length, operation.text, operation.chain);
+            return new InsertOperation(operation.position - operation.text.length, operation.text, chain);
         }
     }
 
@@ -43,11 +43,11 @@ export class EditHistory {
         if (stack.length > 0) {
             const operation = stack.pop()!;
             operation.handle(this.service);
-            oppStack.push(this.flipOperation(operation));
+            oppStack.push(this.flipOperation(operation, false));
             while (stack.length > 0 && operation.chain) {
                 const operation = stack.pop()!;
                 operation.handle(this.service);
-                oppStack.push(this.flipOperation(operation));
+                oppStack.push(this.flipOperation(operation, true));
             }
             CursorUpdateSubscription.notifyForTextAndCursorUpdate();
         }

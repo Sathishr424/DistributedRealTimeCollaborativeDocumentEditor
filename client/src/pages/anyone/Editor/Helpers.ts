@@ -29,8 +29,8 @@ export function loadConfiguredFont(): Promise<boolean> {
 
 export function getNewCanvasElement() {
     const canvasElement = document.createElement('canvas');
-    canvasElement.width = 595;
-    canvasElement.height = 892;
+    canvasElement.width = config.canvasWidth;
+    canvasElement.height = config.canvasHeight;
     // @ts-ignore
     document.querySelector(".canvas-container").appendChild(canvasElement);
     canvasElement.classList.add("m-4");

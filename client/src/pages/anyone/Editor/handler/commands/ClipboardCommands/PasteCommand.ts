@@ -19,6 +19,7 @@ export class PasteCommand extends ClipboardEventParent implements MyClipboardEve
 
         if (pastedText.length > 0) {
             const change = this.service.deleteTextSelection();
+            console.log(change);
             this.service.insertText(pastedText, change);
         }
     }

@@ -50,6 +50,7 @@ export class DocumentRenderer {
     }
 
     private drawText(text: string, pos: Vec2) {
+        if (text === '\n') return;
         const updatedPos = this.getTheCanvasPos(pos);
         const ctx = this.getCtx(pos.y);
         ctx.fillText(text, updatedPos.x, updatedPos.y + this.sizes.height, this.sizes.charWidth);

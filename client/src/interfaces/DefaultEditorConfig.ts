@@ -3,6 +3,8 @@ export interface DefaultEditorConfig {
     fontSize: number;
     color: string;
     lineHeight: number;
+    canvasWidth: number;
+    canvasHeight: number;
     cursorWidth: number;
     cursorColor: string;
     selectionColor: string;
