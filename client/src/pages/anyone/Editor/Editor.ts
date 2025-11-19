@@ -19,6 +19,7 @@ class Editor {
     private boundCopy!: (e: ClipboardEvent) => void;
     private boundCut!: (e: ClipboardEvent) => void;
     private boundPaste!: (e: ClipboardEvent) => void;
+    private boundScroll!: (e: Event) => void;
 
     constructor() {
         this.init();
@@ -46,21 +47,19 @@ class Editor {
         }
         console.log(this.sizes);
 
-        this.editor = new RawEditor();
-        this.renderer = new DocumentRenderer(this.editor, this.sizes, this.canvasContainer);
-        this.service = new DocumentService(this.canvasContainer, this.renderer, this.editor, this.sizes);
+        canvas.remove();
 
-        this.canvasContainer.appendCanvas(canvas, this.service);
+        this.editor = new RawEditor();
+        this.service = new DocumentService(this.canvasContainer, this.editor, this.sizes);
 
         this.boundKeyDown = this.service.onKeyDown.bind(this.service);
         this.boundKeyUp = this.service.onKeyUp.bind(this.service);
         this.boundCopy = this.service.onCopy.bind(this.service);
         this.boundCut = this.service.onCut.bind(this.service);
         this.boundPaste = this.service.onPaste.bind(this.service);
+        this.boundScroll = this.service.onScroll.bind(this.service);
 
         this.attachEvents();
-
-        CursorUpdateSubscription.notifyForTextAndCursorUpdate();
     }
 
     public attachEvents() {
@@ -70,6 +69,7 @@ class Editor {
         document.addEventListener('copy', this.boundCopy);
         document.addEventListener('cut', this.boundCut);
         document.addEventListener('paste', this.boundPaste);
+        document.querySelector('.document-body')!.addEventListener('scroll', this.boundScroll);
     }
 
     public dispose(): void {
@@ -80,13 +80,12 @@ class Editor {
             document.removeEventListener('copy', this.boundCopy);
             document.removeEventListener('cut', this.boundCut);
             document.removeEventListener('paste', this.boundPaste);
+            document.querySelector('.document-body')!.removeEventListener('scroll', this.boundScroll);
 
             this.service.dispose();
         }
         // @ts-ignore
         this.editor = null;
-        // @ts-ignore
-        this.renderer = null;
         // @ts-ignore
         this.service = null;
 

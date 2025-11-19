@@ -12,19 +12,17 @@ import {InputController} from "./ServiceClasses/InputController";
 import {PageController} from "./ServiceClasses/PageController";
 
 export class DocumentService implements HasSubscription {
-    private renderer: DocumentRenderer;
-
     private cursorOperation: CursorOperation;
     private keyEvents: KeyEvents;
     private clipboardEvents: ClipboardEvents;
 
+    private renderer: DocumentRenderer;
     private pageController: PageController;
-    private layout: LayoutEngine
+    private layout: LayoutEngine;
     private textController: TextController;
     private inputController: InputController;
 
-    constructor(canvasContainer: CanvasContainer, renderer: DocumentRenderer, editor: RawEditor, sizes: DocumentSizes) {
-        this.renderer = renderer;
+    constructor(canvasContainer: CanvasContainer, editor: RawEditor, sizes: DocumentSizes) {
 
         this.layout = new LayoutEngine(editor, sizes);
         this.pageController = new PageController(this, canvasContainer, this.layout);
@@ -33,10 +31,19 @@ export class DocumentService implements HasSubscription {
         this.textController = new TextController(this.cursorOperation, this.layout, editor, this.pageController);
         this.inputController = new InputController(this.layout, this.textController, this.cursorOperation);
 
+        this.renderer = new DocumentRenderer(editor, this.layout, this.pageController, this.cursorOperation);
+
         this.keyEvents = new KeyEvents(this.inputController, this.textController);
         this.clipboardEvents = new ClipboardEvents(this.textController);
 
         CursorUpdateSubscription.subscribe(this);
+
+        this.pageController.handlePages();
+        CursorUpdateSubscription.notifyForTextAndCursorUpdate();
+    }
+
+    public onScroll(e: Event) {
+        console.log(e);
     }
 
     public onMouseMove(e: MouseEvent) {
@@ -74,10 +81,6 @@ export class DocumentService implements HasSubscription {
         this.clipboardEvents.executePasteCommand(e);
     }
 
-    public drawCursor(pos: Vec2): void {
-        this.renderer.renderCursor(pos);
-    }
-
     public clearCursor(pos: Vec2): void {
         this.renderer.clearCursor(pos);
     }
@@ -95,6 +98,16 @@ export class DocumentService implements HasSubscription {
     }
 
     public dispose() {
+        // @ts-ignore
+        this.renderer = null;
+        // @ts-ignore
+        this.pageController = null;
+        // @ts-ignore
+        this.layout = null;
+        // @ts-ignore
+        this.textController = null;
+        // @ts-ignore
+        this.inputController = null;
         this.cursorOperation.dispose();
     }
 

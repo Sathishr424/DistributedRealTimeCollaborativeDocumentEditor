@@ -15,6 +15,19 @@ export class PageController {
         this.layout = layout;
     }
 
+    public getPageCtxForRow(row: number): CanvasRenderingContext2D {
+        let page = Math.floor(row / this.layout.sizes.rows);
+        return this.getPageCtx(page)!;
+    }
+
+    public getTotalPages(): number {
+        return this.canvasContainer.getCanvasesTotal();
+    }
+
+    public getPageCtx(page: number) {
+        return this.canvasContainer.getCanvas(page).getContext('2d')
+    }
+
     public handlePages() {
         const pos = this.layout.getLastCharPosition();
         const pages = Math.floor(pos.y / this.layout.sizes.rows);
@@ -26,6 +39,7 @@ export class PageController {
         while (this.canvasContainer.getCanvasesTotal() > pages + 1) {
             this.canvasContainer.popCanvas();
         }
+
         this.service.updateLiveCursorPosition();
     }
 
@@ -44,6 +58,6 @@ export class PageController {
         y -= top + padding.y;
         x += (x % this.layout.sizes.charWidth);
 
-        return {x: Math.max(0, Math.floor(x / this.layout.sizes.charWidth)), y: Math.floor(y / this.layout.sizes.height) + (page * this.layout.sizes.rows)};
+        return {x: Math.max(0, Math.min(this.layout.sizes.cols, Math.floor(x / this.layout.sizes.charWidth))), y: Math.min(this.layout.sizes.rows - 1, Math.floor(y / this.layout.sizes.height)) + (page * this.layout.sizes.rows)};
     }
 }

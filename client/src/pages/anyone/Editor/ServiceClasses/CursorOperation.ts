@@ -10,8 +10,6 @@ export class CursorOperation implements HasSubscription {
     private layout: LayoutEngine;
     private editor: RawEditor;
 
-    private cursorInterval: any;
-    private cursorToggle: boolean = true;
     private mousePosStack: Deque<Vec2>;
 
     private isTextSelected = false;
@@ -26,6 +24,7 @@ export class CursorOperation implements HasSubscription {
         this.editor = editor;
 
         this.mousePosStack = new Deque<Vec2>();
+        this.mousePosStack.pushBack({x: 0, y: 0});
         this.clickIntervals = new Deque<number>();
         this.ready();
         CursorUpdateSubscription.subscribe(this);
@@ -41,6 +40,10 @@ export class CursorOperation implements HasSubscription {
 
     public disableTextSelection(): void {
         this.isTextSelected = false;
+    }
+
+    public isMousePressed(): boolean {
+        return this.isMouseDown;
     }
 
     public getCursorPositionsStartAndEnd(): Vec2[] {
@@ -75,7 +78,6 @@ export class CursorOperation implements HasSubscription {
 
     public ready(): void {
         this.mousePosStack.pushBack(this.layout.calculateCursorPosition());
-        this.cursorInterval = setInterval(this.renderCursor.bind(this), 300);
     }
 
     public updateLiveCursorPosition() {
@@ -110,7 +112,6 @@ export class CursorOperation implements HasSubscription {
                 CursorUpdateSubscription.notifyForTextUpdate();
             }
             this.cursorOnUse = Date.now();
-            this.cursorToggle = true;
         } else if (usage === "KEY EVENT TEXT SELECTION") {
             const prev = this.getCursorPosition();
             this.updateCursorPosition(this.layout.calculateCursorPosition());
@@ -121,16 +122,6 @@ export class CursorOperation implements HasSubscription {
                 CursorUpdateSubscription.notifyForTextUpdate();
             }
         }
-    }
-
-    private renderCursor() {
-        if (this.cursorToggle) {
-            if (!this.isMouseDown) this.service.drawCursor(this.getCursorPosition());
-        } else {
-            if (Date.now() - this.cursorOnUse <= 1000) return;
-            this.service.clearCursor(this.getCursorPosition());
-        }
-        this.cursorToggle = !this.cursorToggle;
     }
 
     public processMoveCursor(mousePos: Vec2) {
@@ -241,7 +232,10 @@ export class CursorOperation implements HasSubscription {
     }
 
     public dispose(): void {
-        clearInterval(this.cursorInterval);
         this.service.clearCursor(this.getCursorPosition());
+    }
+
+    public getLastTimeCursorOnUse(): number {
+        return this.cursorOnUse
     }
 }

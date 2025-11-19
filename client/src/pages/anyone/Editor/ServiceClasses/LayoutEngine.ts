@@ -11,6 +11,11 @@ export class LayoutEngine {
         this.sizes = sizes;
     }
 
+    public convertToCanvasPos(pos: Vec2): Vec2 {
+        const row = pos.y % this.sizes.rows;
+        return { x: pos.x * this.sizes.charWidth, y: row * this.sizes.height };
+    }
+
     public convertTo1DPosition(pos: Vec2) {
         let index = 0;
         let row = 0;
