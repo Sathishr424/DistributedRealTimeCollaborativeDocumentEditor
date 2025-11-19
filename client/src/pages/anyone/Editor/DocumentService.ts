@@ -43,7 +43,7 @@ export class DocumentService implements HasSubscription {
     }
 
     public onScroll(e: Event) {
-        console.log(e);
+        // console.log(e);
     }
 
     public onMouseMove(e: MouseEvent) {

@@ -49,7 +49,7 @@ class Editor {
 
         canvas.remove();
 
-        this.editor = new RawEditor();
+        this.editor = new RawEditor(this.sizes);
         this.service = new DocumentService(this.canvasContainer, this.editor, this.sizes);
 
         this.boundKeyDown = this.service.onKeyDown.bind(this.service);

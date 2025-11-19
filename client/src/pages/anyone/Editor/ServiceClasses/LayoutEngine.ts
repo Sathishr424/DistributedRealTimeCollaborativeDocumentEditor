@@ -13,10 +13,10 @@ export class LayoutEngine {
 
     public convertToCanvasPos(pos: Vec2): Vec2 {
         const row = pos.y % this.sizes.rows;
-        return { x: pos.x * this.sizes.charWidth, y: row * this.sizes.height };
+        return {x: pos.x * this.sizes.charWidth, y: row * this.sizes.height};
     }
 
-    public convertTo1DPosition(pos: Vec2) {
+    public convertTo1DPosition(pos: Vec2): number {
         let index = 0;
         let row = 0;
         let found = false;
@@ -44,7 +44,7 @@ export class LayoutEngine {
         return index;
     }
 
-    public calculateCursorPosition(): Vec2 {
+    public calculateCursorPositionOld(): Vec2 {
         let rows = 0;
 
         let node = this.editor.getLeftLines().getHead()!;
@@ -53,22 +53,35 @@ export class LayoutEngine {
             rows += Math.ceil(chars / this.sizes.cols);
             node = node.next;
         }
-
         const colIndex = this.editor.getLogicalColumnIndex();
+        const pos = {x: colIndex % this.sizes.cols, y: rows + Math.floor(colIndex / this.sizes.cols)};
+        console.log(pos.y, this.editor.getLineSizeLeft().back(), this.editor.getLeftRows());
+        return pos;
+    }
+
+    public calculateCursorPosition(): Vec2 {
+        const colIndex = this.editor.getLogicalColumnIndex();
+        const rows = this.editor.getLeftRows() - this.editor.getLeftLastRows();
         return {x: colIndex % this.sizes.cols, y: rows + Math.floor(colIndex / this.sizes.cols)};
     }
 
-    public getLastCharPosition(): Vec2 {
+    public getLastCharPositionOld(): Vec2 {
         let rows = 0;
 
-        let node = this.editor.getLeftLines().getHead();
-        while (node) {
-            const chars = Math.max(this.sizes.cols, node.val);
-            rows += Math.ceil(chars / this.sizes.cols);
-            node = node.next;
-        }
+        [this.editor.getLeftLines().getHead(), this.editor.getRightLines().getHead()].forEach(node => {
+            while (node) {
+                const chars = Math.max(this.sizes.cols, node.val);
+                rows += Math.ceil(chars / this.sizes.cols);
+                node = node.next;
+            }
+        })
         const colIndex = this.editor.getLastLine();
         return {x: colIndex % this.sizes.cols, y: rows};
+    }
+
+    public getLastCharPosition(): Vec2 {
+        const colIndex = this.editor.getLastLine();
+        return {x: colIndex % this.sizes.cols, y: this.editor.getLeftRows() + this.editor.getRightRows()};
     }
 
     public checkIfCharIsInContinuous(char: string): boolean {
@@ -83,7 +96,8 @@ export class LayoutEngine {
             if (pos.x == 0) {
                 pos.y--;
                 pos.x = this.sizes.cols;
-            } pos.x--;
+            }
+            pos.x--;
             node = node.prev;
         }
 
@@ -98,20 +112,22 @@ export class LayoutEngine {
             if (pos.x == this.sizes.cols) {
                 pos.y++;
                 pos.x = 0;
-            } pos.x++;
+            }
+            pos.x++;
             node = node.next;
         }
 
         return this.continuousCharacterOnRightPos(pos, node, true);
     }
 
-    public continuousCharacterOnLeftPos(pos: Vec2, node: DoublyLinkedList<string> | null, ignoreFirst=false): Vec2 {
+    public continuousCharacterOnLeftPos(pos: Vec2, node: DoublyLinkedList<string> | null, ignoreFirst = false): Vec2 {
         let first = ignoreFirst;
         while (node && (first || this.checkIfCharIsInContinuous(node.val))) {
             if (pos.x == 0) {
                 pos.y--;
                 pos.x = this.sizes.cols;
-            } pos.x--;
+            }
+            pos.x--;
             if (!this.checkIfCharIsInContinuous(node.val)) break;
             node = node.prev;
             first = false;
@@ -120,13 +136,14 @@ export class LayoutEngine {
         return pos;
     }
 
-    public continuousCharacterOnRightPos(pos: Vec2, node: DoublyLinkedList<string> | null, ignoreFirst=false): Vec2 {
+    public continuousCharacterOnRightPos(pos: Vec2, node: DoublyLinkedList<string> | null, ignoreFirst = false): Vec2 {
         let first = ignoreFirst;
         while (node && (first || this.checkIfCharIsInContinuous(node.val))) {
             if (pos.x == this.sizes.cols) {
                 pos.y++;
                 pos.x = 0;
-            } pos.x++;
+            }
+            pos.x++;
             if (!this.checkIfCharIsInContinuous(node.val)) break;
             node = node.next;
             first = false;

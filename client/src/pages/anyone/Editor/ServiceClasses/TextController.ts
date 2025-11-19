@@ -78,9 +78,9 @@ export class TextController {
         CursorUpdateSubscription.notifyForTextAndCursorUpdate();
     }
 
-    public insertText(text: string, chain=false, isUndo=false) {
+    public insertText(text: string, chain=false) {
         this.editor.insertText(text);
-        if (!isUndo && text.length > 0) {
+        if (text.length > 0) {
             this.editHistory.addHistory(new DeleteOperation(this.editor.getCursorPosition() - text.length, text, chain));
         }
         this.pageController.handlePages();
