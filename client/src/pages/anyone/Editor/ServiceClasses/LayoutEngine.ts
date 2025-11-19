@@ -19,45 +19,53 @@ export class LayoutEngine {
     public convertTo1DPosition(pos: Vec2) {
         let index = 0;
         let row = 0;
-        for (let line of this.editor.getLogicalLineLengths()) {
-            let lineLength = Math.max(this.sizes.cols, line);
-            let rowsLineContain = Math.ceil(lineLength / this.sizes.cols);
+        let found = false;
+        [this.editor.getLeftLines().getHead(), this.editor.getRightLines().getHead()].forEach(node => {
+            while (!found && node) {
+                const line = node.val;
+                let lineLength = Math.max(this.sizes.cols, line);
+                let rowsLineContain = Math.ceil(lineLength / this.sizes.cols);
 
-            row += rowsLineContain;
-            if (row > pos.y) {
-                let remRow = pos.y - (row - rowsLineContain);
-                let possible_chars = remRow * this.sizes.cols;
-                index += possible_chars;
-                index += Math.min(pos.x, line - possible_chars);
-                return index;
+                row += rowsLineContain;
+                if (row > pos.y) {
+                    let remRow = pos.y - (row - rowsLineContain);
+                    let possible_chars = remRow * this.sizes.cols;
+                    index += possible_chars;
+                    index += Math.min(pos.x, line - possible_chars);
+                    found = true;
+                    break;
+                }
+
+                index += line + 1;
+                node = node.next;
             }
-
-            index += line + 1;
-        }
+        })
 
         return index;
     }
 
     public calculateCursorPosition(): Vec2 {
         let rows = 0;
-        for (let i=0; i<this.editor.getLogicalLineIndex(); i++) {
-            const chars = Math.max(this.sizes.cols, this.editor.getLineAtIndex(i));
+
+        let node = this.editor.getLeftLines().getHead()!;
+        while (node.next) {
+            const chars = Math.max(this.sizes.cols, node.val);
             rows += Math.ceil(chars / this.sizes.cols);
+            node = node.next;
         }
+
         const colIndex = this.editor.getLogicalColumnIndex();
-        const pos: Vec2 = { x: colIndex, y: rows }
-
-        pos.x %= this.sizes.cols;
-        pos.y = pos.y + Math.floor(colIndex / this.sizes.cols);
-
-        return pos;
+        return {x: colIndex % this.sizes.cols, y: rows + Math.floor(colIndex / this.sizes.cols)};
     }
 
     public getLastCharPosition(): Vec2 {
         let rows = 0;
-        for (let i=0; i<this.editor.getLinesLength(); i++) {
-            const chars = Math.max(this.sizes.cols, this.editor.getLineAtIndex(i));
+
+        let node = this.editor.getLeftLines().getHead();
+        while (node) {
+            const chars = Math.max(this.sizes.cols, node.val);
             rows += Math.ceil(chars / this.sizes.cols);
+            node = node.next;
         }
         const colIndex = this.editor.getLastLine();
         return {x: colIndex % this.sizes.cols, y: rows};

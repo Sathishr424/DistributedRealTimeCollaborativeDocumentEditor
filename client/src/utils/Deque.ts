@@ -10,6 +10,14 @@ export class Deque<T> {
         this._back = null;
     }
 
+    public updateBack(newVal: T) {
+        if (this._back) this._back.val = newVal;
+    }
+
+    public updateFront(newVal: T) {
+        if (this._front) this._front.val = newVal;
+    }
+
     public isEmpty(): boolean {
         return this._size == 0;
     }
