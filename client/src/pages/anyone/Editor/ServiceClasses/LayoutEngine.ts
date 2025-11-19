@@ -1,7 +1,4 @@
-import {DocumentService} from "../DocumentService";
 import {config, DocumentSizes, Vec2} from "../utils/interfaces";
-import {getElementPadding} from "../Helpers";
-import {CanvasContainer} from "../CanvasContainer";
 import {RawEditor} from "../RawEditor";
 import {DoublyLinkedList} from "@utils/DoublyLinkedList";
 

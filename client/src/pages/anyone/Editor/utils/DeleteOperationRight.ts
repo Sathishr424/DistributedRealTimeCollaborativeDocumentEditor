@@ -4,7 +4,7 @@ import {LayoutEngine} from "../ServiceClasses/LayoutEngine";
 import {TextController} from "../ServiceClasses/TextController";
 import {CursorOperation} from "../ServiceClasses/CursorOperation";
 
-export class InsertOperation implements HistoryOperation {
+export class DeleteOperationRight implements HistoryOperation {
     readonly timestamp: number;
     readonly chain: boolean;
     readonly position: number;
@@ -18,6 +18,7 @@ export class InsertOperation implements HistoryOperation {
     }
 
     handle(cursorOperation: CursorOperation, textController: TextController): void {
-        textController.insertTextFromUndoOrRedo(this.position, this.text);
+        cursorOperation.moveToPosition(this.position);
+        textController.deleteRight(this.text.length);
     }
 }

@@ -20,6 +20,8 @@ import {LayoutEngine} from "./ServiceClasses/LayoutEngine";
 import {TextController} from "./ServiceClasses/TextController";
 import {InputController} from "./ServiceClasses/InputController";
 import {CursorOperation} from "./ServiceClasses/CursorOperation";
+import {DeleteCommand} from "./handler/commands/DeleteCommand";
+import {CtrlDeleteCommand} from "./handler/commands/CtrlDeleteCommand";
 
 type CommandConstructor = new (inputController: InputController, layout: LayoutEngine, textController: TextController, cursorOperation: CursorOperation) => KeyCommand;
 
@@ -29,6 +31,7 @@ const CommandRegistry: Record<string, CommandConstructor> = {
     "ArrowUp": ArrowUpCommand,
     "ArrowDown": ArrowDownCommand,
     "Backspace": BackspaceCommand,
+    "Delete": DeleteCommand,
     "Enter": InsertNewLineCommand,
     "Tab": InsertTabCommand,
 
@@ -37,6 +40,7 @@ const CommandRegistry: Record<string, CommandConstructor> = {
     "ctrl+y": CtrlYCommand,
     "ctrl+a": CtrlAll,
     "ctrl+Backspace": CtrlBackspaceCommand,
+    "ctrl+Delete": CtrlDeleteCommand,
     "ctrl+ArrowLeft": CtrlArrowLeftCommand,
     "ctrl+ArrowRight": CtrlArrowRightCommand,
     "shift+ArrowLeft": ShiftArrowLeftCommand,

@@ -7,6 +7,7 @@ import {InsertOperation} from "../utils/InsertOperation";
 import {DeleteOperation} from "../utils/DeleteOperation";
 import {EditHistory} from "../utils/EditHistory";
 import {PageController} from "./PageController";
+import {InsertOperationRight} from "../utils/InsertOperationRight";
 
 export class TextController {
     private cursorOperation: CursorOperation;
@@ -31,12 +32,17 @@ export class TextController {
         this.editHistory.redo();
     }
 
+    public deleteKey() {
+        const deleted = this.editor.deleteKey();
+        if (deleted.length > 0) this.editHistory.addHistory(new InsertOperationRight(this.editor.getCursorPosition(), deleted, false));
+    }
+
     public backspace() {
         const deleted = this.editor.backspace();
         if (deleted.length > 0) this.editHistory.addHistory(new InsertOperation(this.editor.getCursorPosition(), deleted, false));
     }
 
-    public delete(newPos: Vec2) {
+    public delete(newPos: Vec2, classCommand=InsertOperation) {
         let realPos = this.layout.convertTo1DPosition(newPos);
         let diff = this.editor.getTotalCharsBeforeCursor().size() - realPos;
 
@@ -46,7 +52,7 @@ export class TextController {
         } else {
             deleted = this.deleteRight(diff * -1);
         }
-        if (deleted.length > 0) this.editHistory.addHistory(new InsertOperation(this.editor.getCursorPosition(), deleted, false));
+        if (deleted.length > 0) this.editHistory.addHistory(new classCommand(this.editor.getCursorPosition(), deleted, false));
         return deleted.length > 0;
     }
 
@@ -57,8 +63,17 @@ export class TextController {
         CursorUpdateSubscription.notifyForTextAndCursorUpdate();
     }
 
-    public insertTextFromUndoOrRedo(text: string) {
+    public insertTextFromUndoOrRedo(pos: number, text: string) {
+        this.cursorOperation.moveToPosition(pos);
         this.editor.insertText(text);
+        this.pageController.handlePages();
+        CursorUpdateSubscription.notifyForTextAndCursorUpdate();
+    }
+
+    public insertTextFromUndoOrRedoRight(pos: number, text: string) {
+        this.cursorOperation.moveToPosition(pos);
+        this.editor.insertText(text);
+        this.editor.moveLeft(text.length);
         this.pageController.handlePages();
         CursorUpdateSubscription.notifyForTextAndCursorUpdate();
     }

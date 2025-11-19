@@ -2,9 +2,10 @@ import {HistoryOperation} from "./interfaces";
 import {InsertOperation} from "./InsertOperation";
 import {DeleteOperation} from "./DeleteOperation";
 import CursorUpdateSubscription from "./CursorUpdateSubscription";
-import {LayoutEngine} from "../ServiceClasses/LayoutEngine";
 import {TextController} from "../ServiceClasses/TextController";
 import {CursorOperation} from "../ServiceClasses/CursorOperation";
+import {InsertOperationRight} from "./InsertOperationRight";
+import {DeleteOperationRight} from "./DeleteOperationRight";
 
 export class EditHistory {
     private historyStack: HistoryOperation[] = [];
@@ -23,14 +24,17 @@ export class EditHistory {
         this.tempUndoStack = [];
     }
 
-    private flipOperation(operation: HistoryOperation, chain: boolean): HistoryOperation {
+    private flipOperation(operation: HistoryOperation, chain: boolean): HistoryOperation | null {
         if (operation instanceof InsertOperation) {
             return new DeleteOperation(operation.position, operation.text, chain);
         } else if (operation instanceof DeleteOperation) {
             return new InsertOperation(operation.position, operation.text, chain);
+        } else if (operation instanceof InsertOperationRight) {
+            return new DeleteOperationRight(operation.position, operation.text, chain);
+        } else if (operation instanceof DeleteOperationRight) {
+            return new InsertOperationRight(operation.position, operation.text, chain);
         } else {
-            // For now only two types exist, so this will work
-            return new InsertOperation(operation.position - operation.text.length, operation.text, chain);
+            return null;
         }
     }
 
@@ -47,11 +51,11 @@ export class EditHistory {
         if (stack.length > 0) {
             const operation = stack.pop()!;
             operation.handle(this.cursorOperation, this.textController);
-            oppStack.push(this.flipOperation(operation, false));
+            oppStack.push(this.flipOperation(operation, false)!);
             while (stack.length > 0 && operation.chain) {
                 const operation = stack.pop()!;
                 operation.handle(this.cursorOperation, this.textController);
-                oppStack.push(this.flipOperation(operation, true));
+                oppStack.push(this.flipOperation(operation, true)!);
             }
             CursorUpdateSubscription.notifyForTextAndCursorUpdate();
         }

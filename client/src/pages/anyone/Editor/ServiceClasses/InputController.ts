@@ -30,6 +30,14 @@ export class InputController {
         CursorUpdateSubscription.notifyForTextAndCursorUpdate();
     }
 
+    public handleDeleteKey() {
+        if (!this.textController.deleteTextSelection()) {
+            this.textController.deleteKey();
+        }
+        this.textController.checkPages();
+        CursorUpdateSubscription.notifyForTextAndCursorUpdate();
+    }
+
     public handleInsertChar(char: string) {
         const change = this.textController.deleteTextSelection()
         this.textController.insertChar(char, change);
@@ -37,7 +45,7 @@ export class InputController {
 
     public handleInsertTab() {
         this.textController.deleteTextSelection()
-        this.textController.insertText(new Array(config.tabSize).fill(0).join(''));
+        this.textController.insertText(new Array(config.tabSize).fill(' ').join(''));
     }
 
     public handleInsertNewLine() {

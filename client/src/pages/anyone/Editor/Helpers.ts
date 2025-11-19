@@ -1,8 +1,4 @@
-import {CanvasContainer} from "./CanvasContainer";
-import {RawEditor} from "./RawEditor";
-import {DocumentRenderer} from "./DocumentRenderer";
-import {DocumentService} from "./DocumentService";
-import {config, DocumentSizes} from "./utils/interfaces";
+import {config} from "./utils/interfaces";
 
 export function getElementPadding(element: HTMLElement) {
     const styles = window.getComputedStyle(element);

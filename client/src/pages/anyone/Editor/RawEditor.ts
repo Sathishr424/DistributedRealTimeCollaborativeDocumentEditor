@@ -1,12 +1,7 @@
 import {Deque} from "@utils/Deque";
 import {config} from "./utils/interfaces";
 
-const sampleText = "🗄️ 3. Extract Utility and Helper Logic\n" +
-    "Any code that is reusable or purely supporting the primary function of the class should be moved out.\n" +
-    "\n" +
-    "Helper Classes/Modules: Move complex calculations, formatting logic, or validation routines into dedicated, static helper classes or utility modules.\n" +
-    "\n" +
-    "Example: Your getPagePosition logic in DocumentService is essential, but if it grew too complex, you might move the visual-to-logical translation into a CoordinateConverter class, leaving the Service cleaner.";
+const sampleText = "An application programming interface is a connection between computers or between computer programs. It is a type of software interface, offering a service to other pieces of software. A document or standard that describes how to build such a connection or interface is called an API specification.";
 
 export class RawEditor {
     private left: Deque<string>;
@@ -121,6 +116,10 @@ export class RawEditor {
 
     public backspace(): string {
         return this.deleteLeft(1);
+    }
+
+    public deleteKey(): string {
+        return this.deleteRight(1);
     }
 
     public deleteLeft(k: number): string {
