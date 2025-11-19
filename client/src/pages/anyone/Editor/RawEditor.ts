@@ -17,8 +17,8 @@ export class RawEditor {
     private newlinesLeft: Deque<number>;
     private newlinesRight: Deque<number>;
 
-    private linesSizeLeft: Deque<RowData>;
-    private linesSizeRight: Deque<RowData>;
+    private linesSizeLeft: RowData[] = [];
+    private linesSizeRight: RowData[] = [];
 
     private leftRows: number = 1;
     private rightRows: number = 0;
@@ -30,9 +30,7 @@ export class RawEditor {
         this.left = new Deque<string>();
         this.right = new Deque<string>();
 
-        this.linesSizeLeft = new Deque<RowData>();
-        this.linesSizeLeft.pushBack({cols: 0, rowsSoFar: 1});
-        this.linesSizeRight = new Deque<RowData>();
+        this.linesSizeLeft.push({cols: 0, rowsSoFar: 1});
 
         this.newlinesLeft = new Deque<number>();
         this.newlinesLeft.pushBack(0);
@@ -53,6 +51,10 @@ export class RawEditor {
         return this.newlinesRight;
     }
 
+    public getTotalRows(): number {
+        return this.leftRows + this.rightRows;
+    }
+
     public getLeftRows(): number {
         return this.leftRows;
     }
@@ -62,14 +64,22 @@ export class RawEditor {
     }
 
     public getLeftLastRows(): number {
-        return this.linesSizeLeft.back()!.rowsSoFar;
+        return this.linesSizeLeft[this.linesSizeLeft.length - 1].rowsSoFar;
     }
 
-    public getLineSizeLeft(): Deque<RowData> {
+    public getLineSizeLeft(): RowData {
+        return this.linesSizeLeft[this.linesSizeLeft.length - 1];
+    }
+
+    public getLineSizeRight(): RowData {
+        return this.linesSizeRight[this.linesSizeRight.length - 1];
+    }
+
+    public getLeftRowsData(): RowData[] {
         return this.linesSizeLeft;
     }
 
-    public getLineSizeRight(): Deque<RowData> {
+    public getRightRowsData(): RowData[] {
         return this.linesSizeRight;
     }
 
@@ -107,7 +117,7 @@ export class RawEditor {
         this.newlinesLeft.updateBack(this.newlinesLeft.back()! + 1);
         this.columnIndex++;
 
-        const rowData = this.linesSizeLeft.back()!;
+        const rowData = this.linesSizeLeft[this.linesSizeLeft.length - 1];
         rowData.cols += 1;
 
         const prevRows = rowData.rowsSoFar;
@@ -124,7 +134,7 @@ export class RawEditor {
         this.newlinesLeft.updateBack(this.columnIndex);
         this.newlinesLeft.pushBack(rem);
 
-        const rowData = this.linesSizeLeft.back()!;
+        const rowData = this.linesSizeLeft[this.linesSizeLeft.length - 1];
         const prevRows = rowData.rowsSoFar;
         rowData.cols = this.columnIndex;
         this.updateRowsSofar(rowData);
@@ -132,7 +142,7 @@ export class RawEditor {
 
         const newRowData = {cols: rem, rowsSoFar: 0};
         this.updateRowsSofar(newRowData)
-        this.linesSizeLeft.pushBack(newRowData);
+        this.linesSizeLeft.push(newRowData);
         this.leftRows += newRowData.rowsSoFar;
 
         this.columnIndex = 0;
@@ -181,7 +191,7 @@ export class RawEditor {
     }
 
     private reduceColSizeOnLineSizes() {
-        const rowData = this.linesSizeLeft.back()!;
+        const rowData = this.linesSizeLeft[this.linesSizeLeft.length - 1];
         this.leftRows -= rowData.rowsSoFar;
         rowData.cols -= 1;
         this.updateRowsSofar(rowData);
@@ -197,9 +207,9 @@ export class RawEditor {
                 this.columnIndex = this.newlinesLeft.back()!;
                 this.newlinesLeft.updateBack(this.columnIndex + curr);
 
-                const prevRowData = this.linesSizeLeft.popBack()!;
+                const prevRowData = this.linesSizeLeft.pop()!;
                 this.leftRows -= prevRowData.rowsSoFar;
-                const rowData = this.linesSizeLeft.back()!;
+                const rowData = this.linesSizeLeft[this.linesSizeLeft.length - 1];
 
                 const prevRows = rowData.rowsSoFar;
                 rowData.cols += prevRowData.cols;
@@ -227,9 +237,9 @@ export class RawEditor {
                 const curr = this.newlinesRight.popFront()!;
                 this.newlinesLeft.updateBack(this.newlinesLeft.back()! + curr);
 
-                const prevRowData = this.linesSizeRight.popFront()!;
+                const prevRowData = this.linesSizeRight.pop()!;
                 this.rightRows -= prevRowData.rowsSoFar;
-                const rowData = this.linesSizeLeft.back()!;
+                const rowData = this.linesSizeLeft[this.linesSizeLeft.length - 1];
 
                 const prevRows = rowData.rowsSoFar;
                 rowData.cols += prevRowData.cols;
@@ -255,8 +265,8 @@ export class RawEditor {
                 this.newlinesRight.pushFront(this.newlinesLeft.popBack()!);
                 this.columnIndex = this.newlinesLeft.back()!;
 
-                const prevRowData = this.linesSizeLeft.popBack()!;
-                this.linesSizeRight.pushFront(prevRowData);
+                const prevRowData = this.linesSizeLeft.pop()!;
+                this.linesSizeRight.push(prevRowData);
 
                 this.leftRows -= prevRowData.rowsSoFar;
                 this.rightRows += prevRowData.rowsSoFar;
@@ -274,8 +284,8 @@ export class RawEditor {
                 this.newlinesLeft.pushBack(this.newlinesRight.popFront()!);
                 this.columnIndex = 0;
 
-                const prevRowData = this.linesSizeRight.popFront()!;
-                this.linesSizeLeft.pushBack(prevRowData);
+                const prevRowData = this.linesSizeRight.pop()!;
+                this.linesSizeLeft.push(prevRowData);
 
                 this.leftRows += prevRowData.rowsSoFar;
                 this.rightRows -= prevRowData.rowsSoFar;

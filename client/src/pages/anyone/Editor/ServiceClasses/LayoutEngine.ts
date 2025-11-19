@@ -16,7 +16,7 @@ export class LayoutEngine {
         return {x: pos.x * this.sizes.charWidth, y: row * this.sizes.height};
     }
 
-    public convertTo1DPosition(pos: Vec2): number {
+    public convertTo1DPositionOld(pos: Vec2): number {
         let index = 0;
         let row = 0;
         let found = false;
@@ -44,6 +44,36 @@ export class LayoutEngine {
         return index;
     }
 
+    public convertTo1DPosition(pos: Vec2): number {
+        // TODO Optimize later for O(log N) on left and O(N) on right
+        let rowsData = this.editor.getLeftRowsData();
+        let index = 0;
+        let rows = 0;
+        for (let rowData of rowsData) {
+            if (rows + rowData.rowsSoFar > pos.y) {
+                let diff = pos.y - rows;
+                index += Math.min(rowData.cols, diff * this.sizes.cols + pos.x);
+                return index;
+            }
+            rows += rowData.rowsSoFar;
+            index += rowData.cols + 1;
+        }
+        rowsData = this.editor.getRightRowsData();
+        for (let i=rowsData.length - 1; i>=0; i--) {
+            const rowData = rowsData[i];
+
+            if (rows + rowData.rowsSoFar > pos.y) {
+                let diff = pos.y - rows;
+                index += Math.min(rowData.cols, diff * this.sizes.cols + pos.x);
+                break;
+            }
+
+            rows += rowData.rowsSoFar;
+            index += rowData.cols + 1;
+        }
+        return index;
+    }
+
     public calculateCursorPositionOld(): Vec2 {
         let rows = 0;
 
@@ -55,7 +85,7 @@ export class LayoutEngine {
         }
         const colIndex = this.editor.getLogicalColumnIndex();
         const pos = {x: colIndex % this.sizes.cols, y: rows + Math.floor(colIndex / this.sizes.cols)};
-        console.log(pos.y, this.editor.getLineSizeLeft().back(), this.editor.getLeftRows());
+        console.log(pos.y, this.editor.getLineSizeLeft(), this.editor.getLeftRows());
         return pos;
     }
 
