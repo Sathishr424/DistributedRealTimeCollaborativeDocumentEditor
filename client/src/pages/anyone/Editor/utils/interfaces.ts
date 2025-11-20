@@ -9,12 +9,12 @@ export type CommandMap = Record<string, KeyCommand>;
 
 export const config: DefaultEditorConfig = {
     font: "JetBrains Mono",
-    fontSize: 12,
-    fontPadding: 0,
+    fontSize: 18,
+    fontPadding: 4,
     color: "black",
     canvasWidth: 800,
     canvasHeight: 1100,
-    selectionColor: "rgba(0,0,255,0.57)",
+    selectionColor: "rgba(0,30,182,0.6)",
     selectionHorizontalPadding: 20,
     lineHeight: 20,
     cursorColor: 'black',
