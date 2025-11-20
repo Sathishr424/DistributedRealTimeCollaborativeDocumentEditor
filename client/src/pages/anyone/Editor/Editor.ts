@@ -69,7 +69,7 @@ class Editor {
         document.addEventListener('copy', this.boundCopy);
         document.addEventListener('cut', this.boundCut);
         document.addEventListener('paste', this.boundPaste);
-        document.querySelector('.document-body')!.addEventListener('scroll', this.boundScroll);
+        document.querySelector(config.canvasContainerBodyClass)!.addEventListener('scroll', this.boundScroll);
     }
 
     public dispose(): void {
@@ -80,7 +80,7 @@ class Editor {
             document.removeEventListener('copy', this.boundCopy);
             document.removeEventListener('cut', this.boundCut);
             document.removeEventListener('paste', this.boundPaste);
-            document.querySelector('.document-body')!.removeEventListener('scroll', this.boundScroll);
+            document.querySelector(config.canvasContainerBodyClass)!.removeEventListener('scroll', this.boundScroll);
 
             this.service.dispose();
         }

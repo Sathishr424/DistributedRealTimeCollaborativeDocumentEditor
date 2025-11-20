@@ -13,4 +13,8 @@ export interface DefaultEditorConfig {
     canPassthroughCharacters: string;
     mouseInterval: number;
     backgroundColor: string;
+    canvasContainerClass: string;
+    canvasContainerBodyClass: string;
+    canvasPadding: number;
+    canvasMargin: number;
 }

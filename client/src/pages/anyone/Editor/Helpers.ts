@@ -28,9 +28,9 @@ export function getNewCanvasElement() {
     canvasElement.width = config.canvasWidth;
     canvasElement.height = config.canvasHeight;
     // @ts-ignore
-    document.querySelector(".canvas-container").appendChild(canvasElement);
-    canvasElement.classList.add("m-4");
-    canvasElement.classList.add("p-6");
+    document.querySelector(config.canvasContainerClass).appendChild(canvasElement);
+    canvasElement.style.margin = config.canvasMargin + "px";
+    canvasElement.style.padding = config.canvasPadding + "px";
     canvasElement.classList.add("cursor-text");
 
     return canvasElement;

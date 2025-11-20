@@ -22,6 +22,10 @@ export const config: DefaultEditorConfig = {
     mouseInterval: 500,
     canPassthroughCharacters: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890_",
     backgroundColor: "white",
+    canvasContainerClass: ".canvas-container",
+    canvasContainerBodyClass: ".document-body",
+    canvasPadding: 25,
+    canvasMargin: 25
 }
 
 export interface Vec2 {

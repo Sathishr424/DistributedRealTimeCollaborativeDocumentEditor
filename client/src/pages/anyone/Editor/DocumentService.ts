@@ -1,6 +1,6 @@
 import {RawEditor} from "./RawEditor";
 import {DocumentRenderer} from "./DocumentRenderer";
-import {DocumentSizes, Vec2} from "./utils/interfaces";
+import {config, DocumentSizes, Vec2} from "./utils/interfaces";
 import {CursorOperation} from "./ServiceClasses/CursorOperation";
 import {KeyEvents} from "./handler/KeyEvents/KeyEvents";
 import CursorUpdateSubscription from "./utils/CursorUpdateSubscription";
@@ -43,7 +43,33 @@ export class DocumentService implements HasSubscription {
     }
 
     public onScroll(e: Event) {
-        // console.log(e);
+        const el = document.querySelector(config.canvasContainerBodyClass);
+        if (el) {
+            const clientHeight = el.clientHeight;
+            const height = el.scrollHeight;
+            const scrollTop = el.scrollTop;
+
+            const padding = config.canvasPadding;
+            const margin = config.canvasMargin;
+            const pageHeight = config.canvasHeight + (padding + margin) * 2;
+
+            const totalPages = height / pageHeight;
+            const startPage = Math.floor(scrollTop / pageHeight) + 1;
+            const endPage = Math.floor((scrollTop + clientHeight) / pageHeight) + 1;
+
+            // Calculating the starting rows on the screen
+            let row = (padding + margin) * 2 * (startPage - 1);
+            // To get the accurate row index, we also have to add the correct padding and margin of the current canvas page (only the top padding and margin here)
+            row += Math.min(padding + margin, scrollTop % pageHeight)
+
+            // Here we calculate the bottom margin and padding and adding
+            const diff = Math.max(0, (scrollTop % pageHeight) - (config.canvasHeight + margin + padding));
+            row += Math.min(padding + margin, diff)
+
+            row = Math.max(0, scrollTop - row);
+            row = Math.floor(row / config.lineHeight);
+            console.log(pageHeight, scrollTop, height, totalPages, [startPage, endPage], row);
+        }
     }
 
     public onMouseMove(e: MouseEvent) {
