@@ -95,6 +95,7 @@ export class DocumentService implements HasSubscription {
     }
 
     public dispose() {
+        this.renderer.dispose();
         // @ts-ignore
         this.renderer = null;
         // @ts-ignore

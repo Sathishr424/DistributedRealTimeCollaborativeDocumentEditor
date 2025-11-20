@@ -47,36 +47,16 @@ export class RawEditor {
         return this.left.length;
     }
 
-    public getLeftLines(): Deque<number> {
-        return this.newlinesLeft;
-    }
-
-    public getRightLines(): Deque<number> {
-        return this.newlinesRight;
-    }
-
-    public getTotalRows(): number {
-        return this.leftRows + this.rightRows;
-    }
-
-    public getLeftRows(): number {
+    public getLeftTotalRows(): number {
         return this.leftRows;
     }
 
-    public getRightRows(): number {
+    public getRightTotalRows(): number {
         return this.rightRows;
     }
 
     public getLeftLastRows(): number {
         return this.linesSizeLeft[this.linesSizeLeft.length - 1].rowsSoFar;
-    }
-
-    public getLineSizeLeft(): RowData {
-        return this.linesSizeLeft[this.linesSizeLeft.length - 1];
-    }
-
-    public getLineSizeRight(): RowData {
-        return this.linesSizeRight[this.linesSizeRight.length - 1];
     }
 
     public getTotalRowsDataLength(): number {
@@ -92,19 +72,11 @@ export class RawEditor {
         }
     }
 
-    public getLeftRowsData(): RowData[] {
-        return this.linesSizeLeft;
-    }
-
-    public getRightRowsData(): RowData[] {
-        return this.linesSizeRight;
-    }
-
     public getLastLine() {
         return this.newlinesRight.back()!;
     }
 
-    public getLogicalColumnIndex(): number {
+    public getActiveLineColumnIndex(): number {
         return this.columnIndex;
     }
 
@@ -113,10 +85,6 @@ export class RawEditor {
     }
 
     public getTotalCharsAfterCursor(): string[] {
-        return this.right;
-    }
-
-    public getRight(): string[] {
         return this.right;
     }
 

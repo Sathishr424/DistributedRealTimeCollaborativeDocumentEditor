@@ -34,12 +34,13 @@ export class TextController {
 
     public deleteKey() {
         const deleted = this.editor.deleteKey();
-        if (deleted.length > 0) this.editHistory.addHistory(new InsertOperationRight(this.editor.getCursorPosition(), deleted, false));
+        if (deleted.length > 0) this.editHistory.addHistory(deleted, this.editor.getCursorPosition(), InsertOperationRight, false);
     }
 
     public backspace() {
         const deleted = this.editor.backspace();
-        if (deleted.length > 0) this.editHistory.addHistory(new InsertOperation(this.editor.getCursorPosition(), deleted, false));
+
+        if (deleted.length > 0) this.editHistory.addHistory(deleted, this.editor.getCursorPosition(), InsertOperation, false);
     }
 
     public delete(newPos: Vec2, classCommand=InsertOperation) {
@@ -52,13 +53,14 @@ export class TextController {
         } else {
             deleted = this.deleteRight(diff * -1);
         }
-        if (deleted.length > 0) this.editHistory.addHistory(new classCommand(this.editor.getCursorPosition(), deleted, false));
+
+        if (deleted.length > 0) this.editHistory.addHistory(deleted, this.editor.getCursorPosition(), classCommand, false);
         return deleted.length > 0;
     }
 
     public insertChar(char: string, chain=false) {
         this.editor.insert(char);
-        this.editHistory.addHistory(new DeleteOperation(this.editor.getCursorPosition() - char.length, char, chain));
+        this.editHistory.addHistory(char, this.editor.getCursorPosition() - char.length, DeleteOperation, chain);
         this.pageController.handlePages();
         CursorUpdateSubscription.notifyForTextAndCursorUpdate();
     }
@@ -81,7 +83,7 @@ export class TextController {
     public insertText(text: string, chain=false) {
         this.editor.insertText(text);
         if (text.length > 0) {
-            this.editHistory.addHistory(new DeleteOperation(this.editor.getCursorPosition() - text.length, text, chain));
+            this.editHistory.addHistory(text, this.editor.getCursorPosition() - text.length, DeleteOperation, chain);
         }
         this.pageController.handlePages();
         CursorUpdateSubscription.notifyForTextAndCursorUpdate();

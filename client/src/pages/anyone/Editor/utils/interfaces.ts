@@ -1,7 +1,5 @@
 import {DefaultEditorConfig} from "../../../../interfaces/DefaultEditorConfig";
-import {DocumentService} from "../DocumentService";
 import {KeyCommand} from "../handler/KeyCommand";
-import {LayoutEngine} from "../ServiceClasses/LayoutEngine";
 import {TextController} from "../ServiceClasses/TextController";
 import {CursorOperation} from "../ServiceClasses/CursorOperation";
 
@@ -9,8 +7,8 @@ export type CommandMap = Record<string, KeyCommand>;
 
 export const config: DefaultEditorConfig = {
     font: "JetBrains Mono",
-    fontSize: 18,
-    fontPadding: 4,
+    fontSize: 16,
+    fontPadding: 2,
     color: "black",
     canvasWidth: 800,
     canvasHeight: 1100,
@@ -51,10 +49,30 @@ export interface DocumentSizes {
     pageHeight: number;
 }
 
+export abstract class HistoryOperationParent {
+    readonly timestamp: number;
+    readonly chain: boolean;
+    readonly position: number;
+    readonly text: string;
+    readonly cursorPositions: Vec2[];
+    readonly isTextSelection: boolean;
+
+    constructor(position: number, text: string, chain: boolean, cursorPositions: Vec2[], isTextSelection: boolean) {
+        this.timestamp = Date.now();
+        this.position = position;
+        this.text = text;
+        this.chain = chain;
+        this.cursorPositions = cursorPositions;
+        this.isTextSelection = isTextSelection;
+    }
+}
+
 export interface HistoryOperation {
-    timestamp: number;
-    chain: boolean;
-    position: number;
-    text: string;
+    readonly timestamp: number;
+    readonly chain: boolean;
+    readonly position: number;
+    readonly text: string;
+    readonly cursorPositions: Vec2[];
+    readonly isTextSelection: boolean;
     handle(cursorOperation: CursorOperation, textController: TextController): void;
 }
