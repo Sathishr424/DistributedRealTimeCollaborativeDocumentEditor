@@ -41,28 +41,15 @@ export class LayoutEngine {
 
     public convertTo1DPosition(pos: Vec2): number {
         // TODO Optimize later for O(log N) on left and O(N) on right
-        let rowsData = this.editor.getLeftRowsData();
         let index = 0;
         let rows = 0;
-        for (let rowData of rowsData) {
+        for (let i=0; i<this.editor.getTotalRowsDataLength(); i++) {
+            const rowData = this.editor.getRowDataAtIndex(i);
             if (rows + rowData.rowsSoFar > pos.y) {
                 let diff = pos.y - rows;
                 index += Math.min(rowData.cols, diff * this.sizes.cols + pos.x);
                 return index;
             }
-            rows += rowData.rowsSoFar;
-            index += rowData.cols + 1;
-        }
-        rowsData = this.editor.getRightRowsData();
-        for (let i=rowsData.length - 1; i>=0; i--) {
-            const rowData = rowsData[i];
-
-            if (rows + rowData.rowsSoFar > pos.y) {
-                let diff = pos.y - rows;
-                index += Math.min(rowData.cols, diff * this.sizes.cols + pos.x);
-                break;
-            }
-
             rows += rowData.rowsSoFar;
             index += rowData.cols + 1;
         }

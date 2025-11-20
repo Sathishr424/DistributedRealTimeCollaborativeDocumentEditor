@@ -79,6 +79,19 @@ export class RawEditor {
         return this.linesSizeRight[this.linesSizeRight.length - 1];
     }
 
+    public getTotalRowsDataLength(): number {
+        return this.linesSizeLeft.length + this.linesSizeRight.length;
+    }
+
+    public getRowDataAtIndex(index: number): RowData {
+        if (index < this.linesSizeLeft.length) {
+            return this.linesSizeLeft[index];
+        } else {
+            index -= this.linesSizeLeft.length;
+            return this.linesSizeRight[this.linesSizeRight.length - index - 1];
+        }
+    }
+
     public getLeftRowsData(): RowData[] {
         return this.linesSizeLeft;
     }
