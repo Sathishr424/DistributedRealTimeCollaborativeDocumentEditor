@@ -12,7 +12,7 @@ export const config: DefaultEditorConfig = {
     fontSize: 15,
     fontPadding: 0,
     color: "black",
-    canvasWidth: 700,
+    canvasWidth: 800,
     canvasHeight: 1100,
     selectionColor: "rgba(0,0,255,0.57)",
     selectionHorizontalPadding: 20,

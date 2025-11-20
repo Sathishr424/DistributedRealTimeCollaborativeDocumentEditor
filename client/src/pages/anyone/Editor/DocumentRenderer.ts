@@ -41,18 +41,17 @@ export class DocumentRenderer implements HasRenderSubscription {
 
     notify(viewport: RenderViewport): void {
         // console.log(viewport);
-        viewport.startRow = Math.max(0, viewport.startRow);
         this.renderViewport(viewport);
     }
 
     private renderViewport(viewport: RenderViewport): void {
         const [start, end] = this.cursorOperation.getCursorPositionsStartAndEnd();
         const startPos = this.layout.convertTo1DPosition({x: 0, y: viewport.startRow})
-        const endPos = this.layout.convertTo1DPosition({x: this.layout.sizes.cols, y: Math.max(0, viewport.endRow)});
+        const endPos = this.layout.convertTo1DPosition({x: this.layout.sizes.cols, y: viewport.endRow});
 
         const isTextSelectionEnabled = this.cursorOperation.getIsTextSelection();
         const pos = this.layout.getPosFrom1DIndex(startPos);
-        // console.log(viewport, [startPos, endPos], pos, this.layout.getPosFrom1DIndex(endPos))
+        console.log(viewport, [startPos, endPos], pos, this.layout.getPosFrom1DIndex(endPos))
         let row = pos.y;
         let col = pos.x;
         let onSelection = false;

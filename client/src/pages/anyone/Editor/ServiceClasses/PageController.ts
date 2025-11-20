@@ -44,19 +44,14 @@ export class PageController {
     }
 
     public initialRender() {
-        RenderSubscription.notify({
-            startRow: this.viewport.startRow,
-            startCol: 0,
-            endRow: this.viewport.endRow,
-            endCol: 0
-        });
+        this.rerenderViewport();
     }
 
     public rerenderViewport(): void {
         RenderSubscription.notify({
-            startRow: this.viewport.startRow,
+            startRow: Math.max(0, this.viewport.startRow),
             startCol: 0,
-            endRow: this.viewport.endRow,
+            endRow: Math.max(0, Math.min(this.viewport.endRow, this.getTotalPossibleRows())),
             endCol: 0
         });
     }
@@ -87,27 +82,23 @@ export class PageController {
         const startRow = this.calculateStartRow(heightRange.top);
         const endRow = this.calculateStartRow(heightRange.bottom);
 
+        console.log(startRow, endRow);
+
         const halfHeight = Math.floor(config.viewportExtraRenderRows / 2);
 
         this.viewport = {
             startRow: startRow - config.viewportExtraRenderRows,
             endRow: endRow + config.viewportExtraRenderRows,
-            startRowTriggerRerender: startRow - halfHeight,
-            endRowTriggerRerender: endRow + halfHeight
+            startRowTriggerRerender: startRow - (config.viewportExtraRenderRows / 2),
+            endRowTriggerRerender: endRow + (config.viewportExtraRenderRows / 2)
         }
 
-        RenderSubscription.notify({
-            startRow: this.viewport.startRow,
-            startCol: 0,
-            endRow: this.viewport.endRow,
-            endCol: 0
-        });
+        this.rerenderViewport();
 
 
         // if (startRow <= this.viewport.startRowTriggerRerender) {
         //     this.renderStackOperation.pushBack(-halfHeight);
         // } else if (endRow >= this.viewport.endRowTriggerRerender) {
-        //     const halfHeight = Math.floor(config.viewportExtraRenderRows / 2);
         //     this.renderStackOperation.pushBack(halfHeight);
         // }
         //
@@ -145,6 +136,10 @@ export class PageController {
     public getPageCtxForRow(row: number): CanvasRenderingContext2D {
         let page = Math.floor(row / this.layout.sizes.rows);
         return this.getPageCtx(page)!;
+    }
+
+    public getTotalPossibleRows(): number {
+        return this.getTotalPages() * this.layout.sizes.rows;
     }
 
     public isRowWithinThePages(row: number): boolean {
@@ -197,7 +192,6 @@ export class PageController {
 
         x = Math.max(0, Math.min(this.layout.sizes.cols, Math.floor(x / this.layout.sizes.charWidth)));
         y = Math.min(this.layout.sizes.rows - 1, Math.floor(y / (this.layout.sizes.height + config.fontPadding * 2))) + (page * this.layout.sizes.rows)
-
         return {x, y};
     }
 }

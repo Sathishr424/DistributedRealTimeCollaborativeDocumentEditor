@@ -60,6 +60,7 @@ export class DocumentService implements HasSubscription {
 
     public onMouseDown(e: MouseEvent) {
         const pos = this.pageController.getPagePosition(e);
+        console.log({x: e.clientX, y: e.clientY}, pos);
         this.cursorOperation.handleOnMouseDown(pos);
     }
 
