@@ -82,15 +82,13 @@ export class PageController {
         const startRow = this.calculateStartRow(heightRange.top);
         const endRow = this.calculateStartRow(heightRange.bottom);
 
-        console.log(startRow, endRow);
-
         const halfHeight = Math.floor(config.viewportExtraRenderRows / 2);
 
         this.viewport = {
             startRow: startRow - config.viewportExtraRenderRows,
             endRow: endRow + config.viewportExtraRenderRows,
-            startRowTriggerRerender: startRow - (config.viewportExtraRenderRows / 2),
-            endRowTriggerRerender: endRow + (config.viewportExtraRenderRows / 2)
+            startRowTriggerRerender: startRow - halfHeight,
+            endRowTriggerRerender: endRow + halfHeight
         }
 
         this.rerenderViewport();

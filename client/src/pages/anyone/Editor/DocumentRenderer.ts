@@ -51,7 +51,7 @@ export class DocumentRenderer implements HasRenderSubscription {
 
         const isTextSelectionEnabled = this.cursorOperation.getIsTextSelection();
         const pos = this.layout.getPosFrom1DIndex(startPos);
-        console.log(viewport, [startPos, endPos], pos, this.layout.getPosFrom1DIndex(endPos))
+        // console.log(viewport, [startPos, endPos], pos, this.layout.getPosFrom1DIndex(endPos))
         let row = pos.y;
         let col = pos.x;
         let onSelection = false;
@@ -69,7 +69,8 @@ export class DocumentRenderer implements HasRenderSubscription {
 
         let selectionRender: SelectionPos[] = [];
         let textsRender: CharRender[] = []
-        for (let i=startPos; i<endPos; i++) {
+        let i = startPos;
+        while (i < endPos) {
             const char = this.editor.getCharAtIndex(i);
 
             textsRender.push({pos: {x: col, y: row}, char});
@@ -87,11 +88,15 @@ export class DocumentRenderer implements HasRenderSubscription {
                     selectionRender.push({colStart: row == start.y ? start.x : 0, row: row, colEnd: col});
                     onSelection = row < end.y;
                 }
+                if (col + 1 == this.layout.sizes.cols && i + 1 < this.editor.getTotalCharsLength() && this.editor.getCharAtIndex(i + 1) === '\n') {
+                    i++;
+                }
                 row++;
                 col = 0;
             } else {
                 col++;
             }
+            i++;
         }
 
         if (isTextSelectionEnabled && onSelection) {
