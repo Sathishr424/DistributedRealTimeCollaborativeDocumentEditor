@@ -1,10 +1,7 @@
-import {config, DocumentSizes, RenderViewport} from "./utils/interfaces";
+import {config, RenderViewport, Vec2} from "./utils/interfaces";
 import {RawEditor} from "./RawEditor";
-import {Vec2} from "./utils/interfaces";
-import {CanvasContainer} from "./CanvasContainer";
 import {PageController} from "./ServiceClasses/PageController";
 import {LayoutEngine} from "./ServiceClasses/LayoutEngine";
-import {Deque} from "@utils/Deque";
 import {CursorOperation} from "./ServiceClasses/CursorOperation";
 import {HasRenderSubscription} from "./utils/HasRenderSubscription";
 import RenderSubscription from "./utils/RenderSubscription";
@@ -40,21 +37,18 @@ export class DocumentRenderer implements HasRenderSubscription {
     notify(viewport: RenderViewport): void {
         // console.log(viewport);
         viewport.startRow = Math.max(0, viewport.startRow);
-        viewport.endRow = Math.min(this.editor.getTotalRows(), viewport.endRow);
+        // viewport.endRow = Math.max(0, Math.min(this.editor.getTotalRows(), viewport.endRow));
         this.renderViewport(viewport);
     }
 
     private renderViewport(viewport: RenderViewport): void {
         const [start, end] = this.cursorOperation.getCursorPositionsStartAndEnd();
-        // console.log("SELECTION:", [start, end]);
         const startPos = this.layout.convertTo1DPosition({x: 0, y: viewport.startRow})
-        const endPos = this.layout.convertTo1DPosition({x: this.layout.sizes.cols, y: viewport.endRow});
+        const endPos = this.layout.convertTo1DPosition({x: this.layout.sizes.cols, y: Math.max(0, viewport.endRow)});
 
         const isTextSelectionEnabled = this.cursorOperation.getIsTextSelection();
         const pos = this.layout.getPosFrom1DIndex(startPos);
-        console.log(viewport, [startPos, endPos], pos, this.layout.getPosFrom1DIndex(endPos))
-        // console.log(pos, [startPos, endPos], 'convert');
-        // return;
+        // console.log(viewport, [startPos, endPos], pos, this.layout.getPosFrom1DIndex(endPos))
         let row = pos.y;
         let col = pos.x;
         let onSelection = false;
@@ -69,7 +63,6 @@ export class DocumentRenderer implements HasRenderSubscription {
                 }
             }
         }
-        // console.log(onSelection);
 
         let selectionRender: SelectionPos[] = [];
         for (let i=startPos; i<endPos; i++) {
@@ -101,9 +94,15 @@ export class DocumentRenderer implements HasRenderSubscription {
         if (isTextSelectionEnabled && onSelection) {
             selectionRender.push({colStart: row == end.y ? (start.y == end.y ? start.x : 0) : 0, row: row, colEnd: col - 1});
         }
-        // console.log(selectionRender);
+
         for (let sel of selectionRender) {
             this.drawSelectionRow(sel);
+        }
+
+        row++;
+        while (row <= viewport.endRow) {
+            this.clearRow(row);
+            row++;
         }
     }
 
@@ -114,14 +113,27 @@ export class DocumentRenderer implements HasRenderSubscription {
         }
     }
 
+    private clearArea(row: number, colStart: number, colEnd: number): void {
+        // if (!this.pageController.isRowWithinThePages(row)) return;
+        const ctx = this.pageController.getPageCtxForRow(row);
+
+        const startPos = this.pageController.convertToCanvasPos({x: colStart, y: row});
+        const endPos = this.pageController.convertToCanvasPos({x: colEnd + 1, y: row});
+        // console.log(row, colStart, colEnd, startPos, endPos);
+        // console.log(startPos.x, startPos.y - this.padding, endPos.x - startPos.x, this.layout.sizes.height + this.padding * 2)
+
+        ctx.clearRect(startPos.x, startPos.y - this.padding, endPos.x - startPos.x, this.layout.sizes.height + this.padding * 2);
+    }
+
     private clearRow(row: number): void {
+        if (!this.pageController.isRowWithinThePages(row)) return;
         const ctx = this.pageController.getPageCtxForRow(row);
         const updatedPos = this.pageController.convertToCanvasPos({x: 0, y: row});
         ctx.clearRect(updatedPos.x, updatedPos.y - this.padding, this.layout.sizes.cols * this.layout.sizes.charWidth, this.layout.sizes.height + this.padding * 2);
     }
 
     private drawText(text: string, pos: Vec2) {
-        if (text === '\n') return;
+        if (text === undefined || text === '\n') return;
         const updatedPos = this.pageController.convertToCanvasPos(pos);
         const ctx = this.pageController.getPageCtxForRow(pos.y);
         ctx.fillText(text, updatedPos.x, updatedPos.y + this.layout.sizes.height, this.layout.sizes.charWidth);

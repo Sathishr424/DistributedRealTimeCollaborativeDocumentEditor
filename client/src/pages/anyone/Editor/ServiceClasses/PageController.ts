@@ -122,6 +122,11 @@ export class PageController {
         return this.getPageCtx(page)!;
     }
 
+    public isRowWithinThePages(row: number): boolean {
+        let page = Math.floor(row / this.layout.sizes.rows);
+        return page < this.getTotalPages();
+    }
+
     public getTotalPages(): number {
         return this.canvasContainer.getCanvasesTotal();
     }

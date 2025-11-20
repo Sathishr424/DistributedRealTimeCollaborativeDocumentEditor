@@ -113,7 +113,7 @@ export class LayoutEngine {
         let rowsData = this.editor.getLeftRowsData();
         let rows = 0;
         for (let rowData of rowsData) {
-            if (index - rowData.cols < 0) {
+            if (index - rowData.cols <= 0) {
                 return {x: index % this.sizes.cols, y: rows + Math.ceil(index / this.sizes.cols)};
             }
             rows += rowData.rowsSoFar;
@@ -123,7 +123,7 @@ export class LayoutEngine {
         for (let i=rowsData.length - 1; i>=0; i--) {
             const rowData = rowsData[i];
 
-            if (index - rowData.cols < 0) {
+            if (index - rowData.cols <= 0) {
                 return {x: index % this.sizes.cols, y: rows + Math.ceil(index / this.sizes.cols)};
             }
             rows += rowData.rowsSoFar;
