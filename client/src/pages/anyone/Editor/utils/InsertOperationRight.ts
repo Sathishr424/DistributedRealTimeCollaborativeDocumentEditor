@@ -7,6 +7,7 @@ import {CursorOperation} from "../ServiceClasses/CursorOperation";
 export class InsertOperationRight extends HistoryOperationParent implements HistoryOperation {
     handle(cursorOperation: CursorOperation, textController: TextController): void {
         textController.insertTextFromUndoOrRedoRight(this.position, this.text);
+        cursorOperation.disableTextSelection();
         if (this.isTextSelection) {
             cursorOperation.enableTextSelection();
             cursorOperation.setCursorWithinARange(this.cursorPositions[0], this.cursorPositions[1]);
