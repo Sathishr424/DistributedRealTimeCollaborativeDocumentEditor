@@ -25,7 +25,15 @@ export const config: DefaultEditorConfig = {
     canvasContainerClass: ".canvas-container",
     canvasContainerBodyClass: ".document-body",
     canvasPadding: 25,
-    canvasMargin: 25
+    canvasMargin: 25,
+    viewportExtraRenderHeight: 100
+}
+
+export interface RenderViewport {
+    startRow: number;
+    startCol: number;
+    endRow: number;
+    endCol: number;
 }
 
 export interface Vec2 {
@@ -38,6 +46,7 @@ export interface DocumentSizes {
     charWidth: number
     height: number;
     rows: number;
+    pageHeight: number;
 }
 
 export interface HistoryOperation {

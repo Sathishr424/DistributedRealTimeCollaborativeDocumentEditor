@@ -17,4 +17,5 @@ export interface DefaultEditorConfig {
     canvasContainerBodyClass: string;
     canvasPadding: number;
     canvasMargin: number;
+    viewportExtraRenderHeight: number;
 }

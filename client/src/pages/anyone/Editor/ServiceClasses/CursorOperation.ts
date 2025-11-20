@@ -4,6 +4,7 @@ import {DocumentService} from "../DocumentService";
 import {Deque} from "@utils/Deque";
 import {LayoutEngine} from "./LayoutEngine";
 import {RawEditor} from "../RawEditor";
+import {HasSubscription} from "../utils/HasSubscription";
 
 export class CursorOperation implements HasSubscription {
     private service: DocumentService;
@@ -26,7 +27,7 @@ export class CursorOperation implements HasSubscription {
         this.mousePosStack = new Deque<Vec2>();
         this.mousePosStack.pushBack({x: 0, y: 0});
         this.clickIntervals = new Deque<number>();
-        this.ready();
+        this.mousePosStack.pushBack(this.layout.calculateCursorPosition());
         CursorUpdateSubscription.subscribe(this);
     }
 
@@ -74,10 +75,6 @@ export class CursorOperation implements HasSubscription {
 
     public getCursorPosition(): Vec2 {
         return this.mousePosStack.back()!;
-    }
-
-    public ready(): void {
-        this.mousePosStack.pushBack(this.layout.calculateCursorPosition());
     }
 
     public updateLiveCursorPosition() {

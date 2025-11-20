@@ -1,3 +1,5 @@
+import {HasSubscription} from "./HasSubscription";
+
 class CursorUpdateSubscription {
     private subscribers: HasSubscription[] = [];
 

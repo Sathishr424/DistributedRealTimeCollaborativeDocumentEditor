@@ -1,4 +1,4 @@
-import {config, DocumentSizes} from "./utils/interfaces";
+import {config, DocumentSizes, RenderViewport} from "./utils/interfaces";
 import {RawEditor} from "./RawEditor";
 import {Vec2} from "./utils/interfaces";
 import {CanvasContainer} from "./CanvasContainer";
@@ -6,8 +6,9 @@ import {PageController} from "./ServiceClasses/PageController";
 import {LayoutEngine} from "./ServiceClasses/LayoutEngine";
 import {Deque} from "@utils/Deque";
 import {CursorOperation} from "./ServiceClasses/CursorOperation";
+import {HasRenderSubscription} from "./utils/HasRenderSubscription";
 
-export class DocumentRenderer {
+export class DocumentRenderer implements HasRenderSubscription {
     private editor: RawEditor;
     private layout: LayoutEngine;
     private pageController: PageController;
@@ -23,6 +24,10 @@ export class DocumentRenderer {
         this.pageController = pageController;
         this.cursorOperation = cursorOperation;
         this.cursorInterval = setInterval(this.renderCursor.bind(this), 300);
+    }
+
+    notify(viewport: RenderViewport): void {
+
     }
 
     public clearAllPage(): void {

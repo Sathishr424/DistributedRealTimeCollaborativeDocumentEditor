@@ -1,18 +1,107 @@
-import {Vec2} from "../utils/interfaces";
+import {config, RenderViewport, Vec2} from "../utils/interfaces";
 import {getElementPadding} from "../Helpers";
 import {LayoutEngine} from "./LayoutEngine";
 import {CanvasContainer} from "../CanvasContainer";
 import {DocumentService} from "../DocumentService";
+import RenderSubscription from "../utils/RenderSubscription";
+
+interface Viewport {
+    startRow: number;
+    endRow: number;
+    startRowTriggerRerender: number;
+    endRowTriggerRerender: number;
+}
+
+interface HeightRange {
+    top: number;
+    bottom: number;
+}
 
 export class PageController {
     private service: DocumentService;
     private canvasContainer: CanvasContainer;
     private layout: LayoutEngine
+    private viewport: Viewport;
 
     constructor(service: DocumentService, canvasContainer: CanvasContainer, layout: LayoutEngine) {
         this.service = service;
         this.canvasContainer = canvasContainer;
         this.layout = layout;
+
+        const heightRange = this.getCanvasBodyHeights();
+        const startRow = this.calculateStartRow(heightRange.top);
+        const endRow = this.calculateStartRow(heightRange.bottom);
+        this.viewport = {
+            startRow: startRow - config.viewportExtraRenderHeight,
+            endRow: endRow + config.viewportExtraRenderHeight,
+            startRowTriggerRerender: startRow - (config.viewportExtraRenderHeight / 2),
+            endRowTriggerRerender: endRow + (config.viewportExtraRenderHeight / 2)
+        }
+        console.log(this.viewport)
+
+        // Trigger render of the top
+        RenderSubscription.notify({
+            startRow: this.viewport.startRow,
+            startCol: 0,
+            endRow: this.viewport.endRow,
+            endCol: 0
+        });
+    }
+
+    private getCanvasBodyHeights(): HeightRange {
+        const el = document.querySelector(config.canvasContainerBodyClass)!;
+        return {top: el.scrollTop, bottom: el.scrollTop + el.clientHeight};
+    }
+
+    private calculateStartRow(scrollTop: number) {
+        const page = Math.floor(scrollTop / this.layout.sizes.pageHeight) + 1
+        const remPageHeight = scrollTop % this.layout.sizes.pageHeight;
+        // Current page top padding
+        let startRow = Math.min(config.canvasPadding + config.canvasMargin, remPageHeight);
+        // Current page bottom config.canvasPadding
+        startRow += Math.min(config.canvasPadding + config.canvasMargin, Math.max(0, remPageHeight - (config.canvasHeight + config.canvasMargin + config.canvasPadding)));
+        // Previous pages padding and margin
+        startRow += (page - 1) * ((config.canvasMargin + config.canvasPadding) * 2);
+        // And finally we get the total accurate rows
+        startRow = scrollTop - startRow;
+        startRow = Math.ceil(startRow / config.lineHeight);
+        return startRow;
+    }
+
+    public onScroll(event: Event) {
+        const heightRange = this.getCanvasBodyHeights();
+
+        const startRow = this.calculateStartRow(heightRange.top);
+        const endRow = this.calculateStartRow(heightRange.bottom);
+
+        const halfHeight = (config.viewportExtraRenderHeight / 2);
+        if (startRow <= this.viewport.startRowTriggerRerender) {
+            this.viewport.startRow -= halfHeight;
+            this.viewport.startRowTriggerRerender -= halfHeight;
+            this.viewport.endRow -= halfHeight;
+            this.viewport.endRowTriggerRerender -= halfHeight;
+
+            // Trigger render of the top
+            RenderSubscription.notify({
+                startRow: this.viewport.startRow,
+                startCol: 0,
+                endRow: this.viewport.startRowTriggerRerender,
+                endCol: 0
+            });
+        } else if (endRow >= this.viewport.endRowTriggerRerender) {
+            this.viewport.startRow += halfHeight;
+            this.viewport.startRowTriggerRerender += halfHeight;
+            this.viewport.endRow += halfHeight;
+            this.viewport.endRowTriggerRerender += halfHeight;
+
+            // Trigger render of the top
+            RenderSubscription.notify({
+                startRow: this.viewport.endRowTriggerRerender,
+                startCol: 0,
+                endRow: this.viewport.endRow,
+                endCol: 0
+            });
+        }
     }
 
     public getPageCtxForRow(row: number): CanvasRenderingContext2D {

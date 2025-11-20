@@ -10,6 +10,7 @@ import {LayoutEngine} from "./ServiceClasses/LayoutEngine";
 import {TextController} from "./ServiceClasses/TextController";
 import {InputController} from "./ServiceClasses/InputController";
 import {PageController} from "./ServiceClasses/PageController";
+import {HasSubscription} from "./utils/HasSubscription";
 
 export class DocumentService implements HasSubscription {
     private cursorOperation: CursorOperation;
@@ -42,36 +43,8 @@ export class DocumentService implements HasSubscription {
         CursorUpdateSubscription.notifyForTextAndCursorUpdate();
     }
 
-    private calculateStartRow(pageHeight: number, scrollTop: number) {
-        const page = Math.floor(scrollTop / pageHeight) + 1
-        const remPageHeight = scrollTop % pageHeight;
-        // Current page top padding
-        let startRow = Math.min(config.canvasPadding + config.canvasMargin, remPageHeight);
-        // Current page bottom config.canvasPadding
-        startRow += Math.min(config.canvasPadding + config.canvasMargin, Math.max(0, remPageHeight - (config.canvasHeight + config.canvasMargin + config.canvasPadding)));
-        // Previous pages padding and margin
-        startRow += (page - 1) * ((config.canvasMargin + config.canvasPadding) * 2);
-        // And finally we get the total accurate rows
-        startRow = scrollTop - startRow;
-        startRow = Math.ceil(startRow / config.lineHeight);
-        return startRow;
-    }
-
     public onScroll(e: Event) {
-        const el = document.querySelector(config.canvasContainerBodyClass);
-        if (el) {
-            const clientHeight = el.clientHeight;
-            const height = el.scrollHeight;
-            const scrollTop = el.scrollTop;
-            const pageHeight = config.canvasHeight + (config.canvasPadding + config.canvasMargin) * 2;
-
-            const totalPages = height / pageHeight;
-
-            const startRow = this.calculateStartRow(pageHeight, scrollTop);
-            const endRow = this.calculateStartRow(pageHeight, scrollTop + clientHeight);
-
-            console.log(pageHeight, scrollTop, height, totalPages, startRow, endRow);
-        }
+        this.pageController.onScroll(e);
     }
 
     public onMouseMove(e: MouseEvent) {
