@@ -9,7 +9,7 @@ export type CommandMap = Record<string, KeyCommand>;
 
 export const config: DefaultEditorConfig = {
     font: "JetBrains Mono",
-    fontSize: 15,
+    fontSize: 12,
     fontPadding: 0,
     color: "black",
     canvasWidth: 800,
@@ -25,7 +25,7 @@ export const config: DefaultEditorConfig = {
     backgroundColor: "white",
     canvasContainerClass: ".canvas-container",
     canvasContainerBodyClass: ".document-body",
-    canvasPadding: 25,
+    canvasPadding: 50,
     canvasMargin: 25,
     viewportExtraRenderRows: 100
 }

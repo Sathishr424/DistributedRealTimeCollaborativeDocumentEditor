@@ -107,18 +107,6 @@ export class DocumentRenderer implements HasRenderSubscription {
             this.clearRow(i);
         }
 
-        // for (let i=viewport.startRow; i<=Math.max(0, viewport.endRow); i++) {
-        //     if (i % this.layout.sizes.rows == 0) {
-        //         try {
-        //             const ctx = this.pageController.getPageCtxForRow(i);
-        //
-        //             ctx.fillText(Math.floor(i / this.layout.sizes.rows + 1).toString(), config.canvasWidth / 2, config.canvasHeight / 2, 500);
-        //         } catch (e) {
-        //
-        //         }
-        //     }
-        // }
-
         for (let tr of textsRender) {
             this.drawText(tr.char, tr.pos);
         }
@@ -132,7 +120,7 @@ export class DocumentRenderer implements HasRenderSubscription {
         if (!this.pageController.isRowWithinThePages(row)) return;
         const ctx = this.pageController.getPageCtxForRow(row);
         const updatedPos = this.pageController.convertToCanvasPos({x: 0, y: row});
-        ctx.clearRect(updatedPos.x, updatedPos.y - config.fontPadding, this.layout.sizes.cols * this.layout.sizes.charWidth, config.lineHeight + (config.fontPadding * 2));
+        ctx.clearRect(updatedPos.x, updatedPos.y + this.padding - config.fontPadding, this.layout.sizes.cols * this.layout.sizes.charWidth, this.layout.sizes.height + (config.fontPadding * 2));
     }
 
     private drawText(text: string, pos: Vec2) {
@@ -149,7 +137,7 @@ export class DocumentRenderer implements HasRenderSubscription {
 
         ctx.fillStyle = config.selectionColor;
 
-        ctx.fillRect(startPos.x, startPos.y + this.padding - config.fontPadding, endPos.x - startPos.x, config.lineHeight + (config.fontPadding * 2));
+        ctx.fillRect(startPos.x, startPos.y + this.padding - config.fontPadding, endPos.x - startPos.x, this.layout.sizes.height + (config.fontPadding * 2));
 
         ctx.fillStyle = config.color;
     }
@@ -157,13 +145,13 @@ export class DocumentRenderer implements HasRenderSubscription {
     public clearCursor(pos: Vec2): void {
         const newPos = this.pageController.convertToCanvasPos(pos);
         const ctx = this.pageController.getPageCtxForRow(pos.y)!;
-        ctx.clearRect(newPos.x, newPos.y, config.cursorWidth, this.layout.sizes.height);
+        ctx.clearRect(newPos.x, newPos.y + this.padding, config.cursorWidth, this.layout.sizes.height);
     }
 
     public drawCursor(pos: Vec2): void {
         const newPos = this.pageController.convertToCanvasPos(pos);
         const ctx = this.pageController.getPageCtxForRow(pos.y)!;
-        ctx.fillRect(newPos.x, newPos.y, config.cursorWidth, this.layout.sizes.height);
+        ctx.fillRect(newPos.x, newPos.y + this.padding, config.cursorWidth, this.layout.sizes.height);
     }
 
     private renderCursor() {

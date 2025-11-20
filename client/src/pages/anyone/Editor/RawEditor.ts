@@ -312,6 +312,7 @@ export class RawEditor {
 
     insertText(pastedText: string) {
         for (let char of pastedText) {
+            if (char === '\r') continue;
             this.insert(char);
         }
     }
