@@ -34,10 +34,10 @@ export class PageController {
         const startRow = this.calculateStartRow(heightRange.top);
         const endRow = this.calculateStartRow(heightRange.bottom);
         this.viewport = {
-            startRow: startRow - config.viewportExtraRenderHeight,
-            endRow: endRow + config.viewportExtraRenderHeight,
-            startRowTriggerRerender: startRow - (config.viewportExtraRenderHeight / 2),
-            endRowTriggerRerender: endRow + (config.viewportExtraRenderHeight / 2)
+            startRow: startRow - config.viewportExtraRenderRows,
+            endRow: endRow + config.viewportExtraRenderRows,
+            startRowTriggerRerender: startRow - (config.viewportExtraRenderRows / 2),
+            endRowTriggerRerender: endRow + (config.viewportExtraRenderRows / 2)
         }
         this.renderStackOperation = new Deque();
         console.log(this.viewport)
@@ -87,42 +87,59 @@ export class PageController {
         const startRow = this.calculateStartRow(heightRange.top);
         const endRow = this.calculateStartRow(heightRange.bottom);
 
-        if (startRow <= this.viewport.startRowTriggerRerender) {
-            const halfHeight = Math.floor(config.viewportExtraRenderHeight / 2);
-            this.renderStackOperation.pushBack(-halfHeight);
-        } else if (endRow >= this.viewport.endRowTriggerRerender) {
-            const halfHeight = Math.floor(config.viewportExtraRenderHeight / 2);
-            this.renderStackOperation.pushBack(halfHeight);
+        const halfHeight = Math.floor(config.viewportExtraRenderRows / 2);
+
+        this.viewport = {
+            startRow: startRow - config.viewportExtraRenderRows,
+            endRow: endRow + config.viewportExtraRenderRows,
+            startRowTriggerRerender: startRow - halfHeight,
+            endRowTriggerRerender: endRow + halfHeight
         }
 
-        while (this.renderStackOperation.size()) {
-            const val = this.renderStackOperation.popFront()!;
-            if (val < 0) {
-                this.viewport.startRow += val;
-                this.viewport.startRowTriggerRerender += val;
-                this.viewport.endRow += val;
-                this.viewport.endRowTriggerRerender += val;
+        RenderSubscription.notify({
+            startRow: this.viewport.startRow,
+            startCol: 0,
+            endRow: this.viewport.endRow,
+            endCol: 0
+        });
 
-                RenderSubscription.notify({
-                    startRow: this.viewport.startRow,
-                    startCol: 0,
-                    endRow: this.viewport.startRowTriggerRerender,
-                    endCol: 0
-                });
-            } else {
-                this.viewport.startRow += val;
-                this.viewport.startRowTriggerRerender += val;
-                this.viewport.endRow += val;
-                this.viewport.endRowTriggerRerender += val;
 
-                RenderSubscription.notify({
-                    startRow: this.viewport.endRowTriggerRerender,
-                    startCol: 0,
-                    endRow: this.viewport.endRow,
-                    endCol: 0
-                });
-            }
-        }
+        // if (startRow <= this.viewport.startRowTriggerRerender) {
+        //     this.renderStackOperation.pushBack(-halfHeight);
+        // } else if (endRow >= this.viewport.endRowTriggerRerender) {
+        //     const halfHeight = Math.floor(config.viewportExtraRenderRows / 2);
+        //     this.renderStackOperation.pushBack(halfHeight);
+        // }
+        //
+        // console.log(this.renderStackOperation.toArray(), this.viewport);
+        // while (this.renderStackOperation.size()) {
+        //     const val = this.renderStackOperation.popFront()!;
+        //     if (val < 0) {
+        //         this.viewport.startRow += val;
+        //         this.viewport.startRowTriggerRerender += val;
+        //         this.viewport.endRow += val;
+        //         this.viewport.endRowTriggerRerender += val;
+        //
+        //         RenderSubscription.notify({
+        //             startRow: this.viewport.startRow,
+        //             startCol: 0,
+        //             endRow: this.viewport.startRowTriggerRerender,
+        //             endCol: 0
+        //         });
+        //     } else {
+        //         this.viewport.startRow += val;
+        //         this.viewport.startRowTriggerRerender += val;
+        //         this.viewport.endRow += val;
+        //         this.viewport.endRowTriggerRerender += val;
+        //
+        //         RenderSubscription.notify({
+        //             startRow: this.viewport.endRowTriggerRerender,
+        //             startCol: 0,
+        //             endRow: this.viewport.endRow,
+        //             endCol: 0
+        //         });
+        //     }
+        // }
     }
 
     public getPageCtxForRow(row: number): CanvasRenderingContext2D {

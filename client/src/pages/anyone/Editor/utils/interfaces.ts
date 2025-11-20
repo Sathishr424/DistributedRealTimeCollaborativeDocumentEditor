@@ -27,7 +27,7 @@ export const config: DefaultEditorConfig = {
     canvasContainerBodyClass: ".document-body",
     canvasPadding: 25,
     canvasMargin: 25,
-    viewportExtraRenderHeight: 100
+    viewportExtraRenderRows: 100
 }
 
 export interface RenderViewport {

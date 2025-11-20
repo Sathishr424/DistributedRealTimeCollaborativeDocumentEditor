@@ -40,7 +40,7 @@ export class DocumentRenderer implements HasRenderSubscription {
     }
 
     notify(viewport: RenderViewport): void {
-        console.log(viewport);
+        // console.log(viewport);
         viewport.startRow = Math.max(0, viewport.startRow);
         this.renderViewport(viewport);
     }
