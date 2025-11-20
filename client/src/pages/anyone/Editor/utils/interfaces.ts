@@ -10,7 +10,7 @@ export type CommandMap = Record<string, KeyCommand>;
 export const config: DefaultEditorConfig = {
     font: "JetBrains Mono",
     fontSize: 15,
-    fontPadding: 5,
+    fontPadding: 0,
     color: "black",
     canvasWidth: 700,
     canvasHeight: 1100,

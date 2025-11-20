@@ -46,7 +46,7 @@ class Editor {
             charHeight: charHeight,
             height: config.lineHeight,
             cols: Math.floor((width - padding.x * 2) / charWidth),
-            rows: Math.floor((height - padding.x * 2) / config.lineHeight),
+            rows: Math.floor((height - padding.x * 2) / (config.lineHeight + config.fontPadding * 2)),
             pageHeight: config.canvasHeight + (config.canvasMargin + config.canvasPadding) * 2
         }
         console.log(this.sizes);

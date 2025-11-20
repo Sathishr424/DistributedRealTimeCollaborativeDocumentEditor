@@ -4,6 +4,7 @@ import {LayoutEngine} from "./LayoutEngine";
 import {CanvasContainer} from "../CanvasContainer";
 import {DocumentService} from "../DocumentService";
 import RenderSubscription from "../utils/RenderSubscription";
+import {Deque} from "@utils/Deque";
 
 interface Viewport {
     startRow: number;
@@ -22,6 +23,7 @@ export class PageController {
     private canvasContainer: CanvasContainer;
     private layout: LayoutEngine
     private viewport: Viewport;
+    private renderStackOperation: Deque<number>;
 
     constructor(service: DocumentService, canvasContainer: CanvasContainer, layout: LayoutEngine) {
         this.service = service;
@@ -37,6 +39,7 @@ export class PageController {
             startRowTriggerRerender: startRow - (config.viewportExtraRenderHeight / 2),
             endRowTriggerRerender: endRow + (config.viewportExtraRenderHeight / 2)
         }
+        this.renderStackOperation = new Deque();
         console.log(this.viewport)
     }
 
@@ -84,36 +87,41 @@ export class PageController {
         const startRow = this.calculateStartRow(heightRange.top);
         const endRow = this.calculateStartRow(heightRange.bottom);
 
-        const halfHeight = Math.floor(config.viewportExtraRenderHeight / 2);
         if (startRow <= this.viewport.startRowTriggerRerender) {
-            // console.log(this.viewport)
-            this.viewport.startRow -= halfHeight;
-            this.viewport.startRowTriggerRerender -= halfHeight;
-            this.viewport.endRow -= halfHeight;
-            this.viewport.endRowTriggerRerender -= halfHeight;
-            // console.log(halfHeight, this.viewport);
-
-            // Trigger render of the top
-            RenderSubscription.notify({
-                startRow: this.viewport.startRow,
-                startCol: 0,
-                endRow: this.viewport.startRowTriggerRerender,
-                endCol: 0
-            });
+            const halfHeight = Math.floor(config.viewportExtraRenderHeight / 2);
+            this.renderStackOperation.pushBack(-halfHeight);
         } else if (endRow >= this.viewport.endRowTriggerRerender) {
-            this.viewport.startRow += halfHeight;
-            this.viewport.startRowTriggerRerender += halfHeight;
-            this.viewport.endRow += halfHeight;
-            this.viewport.endRowTriggerRerender += halfHeight;
-            // console.log(halfHeight, this.viewport);
+            const halfHeight = Math.floor(config.viewportExtraRenderHeight / 2);
+            this.renderStackOperation.pushBack(halfHeight);
+        }
 
-            // Trigger render of the top
-            RenderSubscription.notify({
-                startRow: this.viewport.endRowTriggerRerender,
-                startCol: 0,
-                endRow: this.viewport.endRow,
-                endCol: 0
-            });
+        while (this.renderStackOperation.size()) {
+            const val = this.renderStackOperation.popFront()!;
+            if (val < 0) {
+                this.viewport.startRow += val;
+                this.viewport.startRowTriggerRerender += val;
+                this.viewport.endRow += val;
+                this.viewport.endRowTriggerRerender += val;
+
+                RenderSubscription.notify({
+                    startRow: this.viewport.startRow,
+                    startCol: 0,
+                    endRow: this.viewport.startRowTriggerRerender,
+                    endCol: 0
+                });
+            } else {
+                this.viewport.startRow += val;
+                this.viewport.startRowTriggerRerender += val;
+                this.viewport.endRow += val;
+                this.viewport.endRowTriggerRerender += val;
+
+                RenderSubscription.notify({
+                    startRow: this.viewport.endRowTriggerRerender,
+                    startCol: 0,
+                    endRow: this.viewport.endRow,
+                    endCol: 0
+                });
+            }
         }
     }
 
