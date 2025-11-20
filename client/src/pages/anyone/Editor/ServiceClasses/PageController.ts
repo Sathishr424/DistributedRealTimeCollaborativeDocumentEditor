@@ -40,7 +40,6 @@ export class PageController {
             endRowTriggerRerender: endRow + (config.viewportExtraRenderRows / 2)
         }
         this.renderStackOperation = new Deque();
-        console.log(this.viewport)
     }
 
     public initialRender() {
@@ -62,18 +61,17 @@ export class PageController {
     }
 
     private calculateStartRow(scrollTop: number) {
-        const page = Math.floor(scrollTop / this.layout.sizes.pageHeight) + 1
+        scrollTop = Math.floor(scrollTop);
+        const page = Math.floor(scrollTop / this.layout.sizes.pageHeight) + 1;
         const remPageHeight = scrollTop % this.layout.sizes.pageHeight;
-        // Current page top padding
-        let startRow = Math.min(config.canvasPadding + config.canvasMargin, remPageHeight);
-        // Current page bottom config.canvasPadding
-        startRow += Math.min(config.canvasPadding + config.canvasMargin, Math.max(0, remPageHeight - (config.canvasHeight + config.canvasMargin + config.canvasPadding)));
-        // Previous pages padding and margin
-        startRow += (page - 1) * ((config.canvasMargin + config.canvasPadding) * 2);
-        // And finally we get the total accurate rows
-        startRow = scrollTop - startRow;
-        startRow = Math.ceil(startRow / config.lineHeight);
-        return startRow;
+
+        let curr = Math.min(config.canvasMargin + config.canvasPadding, remPageHeight);
+        let rem = remPageHeight - curr;
+
+        let rows = Math.ceil(rem / (this.layout.sizes.height + config.fontPadding * 2));
+        rows += (page - 1) * this.layout.sizes.rows
+
+        return rows;
     }
 
     public onScroll(event: Event) {
@@ -81,6 +79,7 @@ export class PageController {
 
         const startRow = this.calculateStartRow(heightRange.top);
         const endRow = this.calculateStartRow(heightRange.bottom);
+        // console.log(startRow, endRow);
 
         const halfHeight = Math.floor(config.viewportExtraRenderRows / 2);
 
@@ -170,7 +169,7 @@ export class PageController {
 
     public convertToCanvasPos(pos: Vec2): Vec2 {
         const row = pos.y % this.layout.sizes.rows;
-        return {x: pos.x * this.layout.sizes.charWidth, y: row * (this.layout.sizes.height + config.fontPadding * 2)};
+        return {x: pos.x * this.layout.sizes.charWidth, y: row * (this.layout.sizes.height + (config.fontPadding * 2))};
     }
 
     public getPagePosition(e: MouseEvent): Vec2 {
@@ -189,7 +188,8 @@ export class PageController {
         x += (x % this.layout.sizes.charWidth);
 
         x = Math.max(0, Math.min(this.layout.sizes.cols, Math.floor(x / this.layout.sizes.charWidth)));
-        y = Math.min(this.layout.sizes.rows - 1, Math.floor(y / (this.layout.sizes.height + config.fontPadding * 2))) + (page * this.layout.sizes.rows)
+        y = Math.min(this.layout.sizes.rows - 1, Math.floor(y / (this.layout.sizes.height + (config.fontPadding * 2))));
+        y += (page * this.layout.sizes.rows);
         return {x, y};
     }
 }

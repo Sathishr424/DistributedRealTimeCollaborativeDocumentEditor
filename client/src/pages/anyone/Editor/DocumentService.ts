@@ -1,5 +1,5 @@
 import {RawEditor} from "./RawEditor";
-import {DocumentRenderer} from "./DocumentRenderer";
+import {DocumentRenderer} from "./ServiceClasses/DocumentRenderer";
 import {config, DocumentSizes, Vec2} from "./utils/interfaces";
 import {CursorOperation} from "./ServiceClasses/CursorOperation";
 import {KeyEvents} from "./handler/KeyEvents/KeyEvents";

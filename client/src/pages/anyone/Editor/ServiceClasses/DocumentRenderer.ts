@@ -1,10 +1,10 @@
-import {config, RenderViewport, Vec2} from "./utils/interfaces";
-import {RawEditor} from "./RawEditor";
-import {PageController} from "./ServiceClasses/PageController";
-import {LayoutEngine} from "./ServiceClasses/LayoutEngine";
-import {CursorOperation} from "./ServiceClasses/CursorOperation";
-import {HasRenderSubscription} from "./utils/HasRenderSubscription";
-import RenderSubscription from "./utils/RenderSubscription";
+import {config, RenderViewport, Vec2} from "../utils/interfaces";
+import {RawEditor} from "../RawEditor";
+import {PageController} from "./PageController";
+import {LayoutEngine} from "./LayoutEngine";
+import {CursorOperation} from "./CursorOperation";
+import {HasRenderSubscription} from "../utils/HasRenderSubscription";
+import RenderSubscription from "../utils/RenderSubscription";
 
 interface SelectionPos {
     row: number;
@@ -35,7 +35,7 @@ export class DocumentRenderer implements HasRenderSubscription {
         this.pageController = pageController;
         this.cursorOperation = cursorOperation;
         this.cursorInterval = setInterval(this.renderCursor.bind(this), 300);
-        this.padding = Math.floor(this.layout.sizes.height * (config.selectionHorizontalPadding / 100));
+        this.padding = Math.floor((this.layout.sizes.height - this.layout.sizes.charHeight) / 2);
         RenderSubscription.subscribe(this);
     }
 
@@ -107,6 +107,18 @@ export class DocumentRenderer implements HasRenderSubscription {
             this.clearRow(i);
         }
 
+        // for (let i=viewport.startRow; i<=Math.max(0, viewport.endRow); i++) {
+        //     if (i % this.layout.sizes.rows == 0) {
+        //         try {
+        //             const ctx = this.pageController.getPageCtxForRow(i);
+        //
+        //             ctx.fillText(Math.floor(i / this.layout.sizes.rows + 1).toString(), config.canvasWidth / 2, config.canvasHeight / 2, 500);
+        //         } catch (e) {
+        //
+        //         }
+        //     }
+        // }
+
         for (let tr of textsRender) {
             this.drawText(tr.char, tr.pos);
         }
@@ -120,7 +132,7 @@ export class DocumentRenderer implements HasRenderSubscription {
         if (!this.pageController.isRowWithinThePages(row)) return;
         const ctx = this.pageController.getPageCtxForRow(row);
         const updatedPos = this.pageController.convertToCanvasPos({x: 0, y: row});
-        ctx.clearRect(updatedPos.x, updatedPos.y - config.fontPadding, this.layout.sizes.cols * this.layout.sizes.charWidth, this.layout.sizes.height + config.fontPadding * 2);
+        ctx.clearRect(updatedPos.x, updatedPos.y - config.fontPadding, this.layout.sizes.cols * this.layout.sizes.charWidth, config.lineHeight + (config.fontPadding * 2));
     }
 
     private drawText(text: string, pos: Vec2) {
@@ -137,7 +149,7 @@ export class DocumentRenderer implements HasRenderSubscription {
 
         ctx.fillStyle = config.selectionColor;
 
-        ctx.fillRect(startPos.x, startPos.y + this.padding, endPos.x - startPos.x, config.lineHeight);
+        ctx.fillRect(startPos.x, startPos.y + this.padding - config.fontPadding, endPos.x - startPos.x, config.lineHeight + (config.fontPadding * 2));
 
         ctx.fillStyle = config.color;
     }

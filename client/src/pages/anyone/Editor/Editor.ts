@@ -1,7 +1,7 @@
 import {RawEditor} from "./RawEditor";
 import {config, DocumentSizes} from "./utils/interfaces";
 import {DocumentService} from "./DocumentService";
-import {DocumentRenderer} from "./DocumentRenderer";
+import {DocumentRenderer} from "./ServiceClasses/DocumentRenderer";
 import CursorUpdateSubscription from "./utils/CursorUpdateSubscription";
 import {CanvasContainer} from "./CanvasContainer";
 import {getElementPadding, getNewCanvasElement, loadConfiguredFont} from "./Helpers";
@@ -38,15 +38,13 @@ class Editor {
         const charWidth = Math.ceil(metrics.width);
         const charHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
         let {width, height} = canvas.getBoundingClientRect();
-
-        const padding = getElementPadding(canvas);
-
+        console.log(width, height);
         this.sizes = {
             charWidth: charWidth,
             charHeight: charHeight,
             height: config.lineHeight,
-            cols: Math.floor((width - padding.x * 2) / charWidth),
-            rows: Math.floor((height - padding.x * 2) / (config.lineHeight + config.fontPadding * 2)),
+            cols: Math.floor((width - config.canvasPadding * 2) / charWidth),
+            rows: Math.floor((height - (config.canvasMargin * 2)) / (config.lineHeight + (config.fontPadding * 2))),
             pageHeight: config.canvasHeight + (config.canvasMargin + config.canvasPadding) * 2
         }
         console.log(this.sizes);
