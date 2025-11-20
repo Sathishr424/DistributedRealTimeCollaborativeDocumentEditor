@@ -10,6 +10,7 @@ export type CommandMap = Record<string, KeyCommand>;
 export const config: DefaultEditorConfig = {
     font: "JetBrains Mono",
     fontSize: 15,
+    fontPadding: 5,
     color: "black",
     canvasWidth: 700,
     canvasHeight: 1100,
@@ -43,7 +44,8 @@ export interface Vec2 {
 
 export interface DocumentSizes {
     cols: number;
-    charWidth: number
+    charWidth: number;
+    charHeight: number;
     height: number;
     rows: number;
     pageHeight: number;

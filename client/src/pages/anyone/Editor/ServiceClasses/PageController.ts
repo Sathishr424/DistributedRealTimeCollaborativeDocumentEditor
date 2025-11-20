@@ -38,8 +38,18 @@ export class PageController {
             endRowTriggerRerender: endRow + (config.viewportExtraRenderHeight / 2)
         }
         console.log(this.viewport)
+    }
 
-        // Trigger render of the top
+    public initialRender() {
+        RenderSubscription.notify({
+            startRow: this.viewport.startRow,
+            startCol: 0,
+            endRow: this.viewport.endRow,
+            endCol: 0
+        });
+    }
+
+    public rerenderViewport(): void {
         RenderSubscription.notify({
             startRow: this.viewport.startRow,
             startCol: 0,
@@ -74,12 +84,14 @@ export class PageController {
         const startRow = this.calculateStartRow(heightRange.top);
         const endRow = this.calculateStartRow(heightRange.bottom);
 
-        const halfHeight = (config.viewportExtraRenderHeight / 2);
+        const halfHeight = Math.floor(config.viewportExtraRenderHeight / 2);
         if (startRow <= this.viewport.startRowTriggerRerender) {
+            // console.log(this.viewport)
             this.viewport.startRow -= halfHeight;
             this.viewport.startRowTriggerRerender -= halfHeight;
             this.viewport.endRow -= halfHeight;
             this.viewport.endRowTriggerRerender -= halfHeight;
+            // console.log(halfHeight, this.viewport);
 
             // Trigger render of the top
             RenderSubscription.notify({
@@ -93,6 +105,7 @@ export class PageController {
             this.viewport.startRowTriggerRerender += halfHeight;
             this.viewport.endRow += halfHeight;
             this.viewport.endRowTriggerRerender += halfHeight;
+            // console.log(halfHeight, this.viewport);
 
             // Trigger render of the top
             RenderSubscription.notify({
@@ -132,6 +145,11 @@ export class PageController {
         this.service.updateLiveCursorPosition();
     }
 
+    public convertToCanvasPos(pos: Vec2): Vec2 {
+        const row = pos.y % this.layout.sizes.rows;
+        return {x: pos.x * this.layout.sizes.charWidth, y: row * (this.layout.sizes.height + config.fontPadding * 2)};
+    }
+
     public getPagePosition(e: MouseEvent): Vec2 {
         let x = e.clientX;
         let y = e.clientY;
@@ -147,6 +165,9 @@ export class PageController {
         y -= top + padding.y;
         x += (x % this.layout.sizes.charWidth);
 
-        return {x: Math.max(0, Math.min(this.layout.sizes.cols, Math.floor(x / this.layout.sizes.charWidth))), y: Math.min(this.layout.sizes.rows - 1, Math.floor(y / this.layout.sizes.height)) + (page * this.layout.sizes.rows)};
+        x = Math.max(0, Math.min(this.layout.sizes.cols, Math.floor(x / this.layout.sizes.charWidth)));
+        y = Math.min(this.layout.sizes.rows - 1, Math.floor(y / (this.layout.sizes.height + config.fontPadding * 2))) + (page * this.layout.sizes.rows)
+
+        return {x, y};
     }
 }

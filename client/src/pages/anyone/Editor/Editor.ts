@@ -34,13 +34,16 @@ class Editor {
 
         this.canvasContainer.configCanvas(canvas, ctx);
 
-        const charWidth = Math.ceil(ctx.measureText("A").width);
+        const metrics = ctx.measureText("A");
+        const charWidth = Math.ceil(metrics.width);
+        const charHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
         let {width, height} = canvas.getBoundingClientRect();
 
         const padding = getElementPadding(canvas);
 
         this.sizes = {
             charWidth: charWidth,
+            charHeight: charHeight,
             height: config.lineHeight,
             cols: Math.floor((width - padding.x * 2) / charWidth),
             rows: Math.floor((height - padding.x * 2) / config.lineHeight),

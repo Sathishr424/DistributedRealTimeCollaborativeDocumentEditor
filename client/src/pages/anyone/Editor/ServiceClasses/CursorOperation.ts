@@ -201,7 +201,7 @@ export class CursorOperation implements HasSubscription {
 
     public moveCursor(newPos: Vec2) {
         let realPos = this.layout.convertTo1DPosition(newPos);
-        let diff = this.editor.getTotalCharsBeforeCursor().size() - realPos;
+        let diff = this.editor.getCursorPosition() - realPos;
 
         if (diff > 0) {
             this.editor.moveLeft(diff);

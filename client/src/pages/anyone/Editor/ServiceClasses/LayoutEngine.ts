@@ -11,11 +11,6 @@ export class LayoutEngine {
         this.sizes = sizes;
     }
 
-    public convertToCanvasPos(pos: Vec2): Vec2 {
-        const row = pos.y % this.sizes.rows;
-        return {x: pos.x * this.sizes.charWidth, y: row * this.sizes.height};
-    }
-
     public convertTo1DPositionOld(pos: Vec2): number {
         let index = 0;
         let row = 0;
@@ -114,6 +109,29 @@ export class LayoutEngine {
         return {x: colIndex % this.sizes.cols, y: this.editor.getLeftRows() + this.editor.getRightRows()};
     }
 
+    public getPosFrom1DIndex(index: number): Vec2 {
+        let rowsData = this.editor.getLeftRowsData();
+        let rows = 0;
+        for (let rowData of rowsData) {
+            if (index - rowData.cols < 0) {
+                return {x: index % this.sizes.cols, y: rows + Math.ceil(index / this.sizes.cols)};
+            }
+            rows += rowData.rowsSoFar;
+            index -= rowData.cols + 1;
+        }
+        rowsData = this.editor.getRightRowsData();
+        for (let i=rowsData.length - 1; i>=0; i--) {
+            const rowData = rowsData[i];
+
+            if (index - rowData.cols < 0) {
+                return {x: index % this.sizes.cols, y: rows + Math.ceil(index / this.sizes.cols)};
+            }
+            rows += rowData.rowsSoFar;
+            index -= rowData.cols + 1;
+        }
+        return {x: 0, y: rows};
+    }
+
     public checkIfCharIsInContinuous(char: string): boolean {
         return config.canPassthroughCharacters.includes(char);
     }
@@ -121,61 +139,65 @@ export class LayoutEngine {
     public continuousCharacterOnLeftWithPaddingPos(): Vec2 {
         let pos: Vec2 = this.calculateCursorPosition();
 
-        let node = this.editor.getTotalCharsBeforeCursor().getTail();
-        while (node && node.val === ' ') {
+        let leftChars = this.editor.getTotalCharsBeforeCursor();
+        let index = leftChars.length - 1;
+        while (index >= 0 && leftChars[index] === ' ') {
             if (pos.x == 0) {
                 pos.y--;
                 pos.x = this.sizes.cols;
             }
             pos.x--;
-            node = node.prev;
+            index--;
         }
 
-        return this.continuousCharacterOnLeftPos(pos, node, true);
+        return this.continuousCharacterOnLeftPos(pos, index, true);
     }
 
     public continuousCharacterOnRightWithPaddingPos(): Vec2 {
         let pos: Vec2 = this.calculateCursorPosition();
 
-        let node = this.editor.getTotalCharsAfterCursor().getHead();
-        while (node && node.val === ' ') {
+        let rightChars = this.editor.getTotalCharsAfterCursor();
+        let index = rightChars.length - 1;
+        while (index >= 0 && rightChars[index] === ' ') {
             if (pos.x == this.sizes.cols) {
                 pos.y++;
                 pos.x = 0;
             }
             pos.x++;
-            node = node.next;
+            index--;
         }
 
-        return this.continuousCharacterOnRightPos(pos, node, true);
+        return this.continuousCharacterOnRightPos(pos, index, true);
     }
 
-    public continuousCharacterOnLeftPos(pos: Vec2, node: DoublyLinkedList<string> | null, ignoreFirst = false): Vec2 {
+    public continuousCharacterOnLeftPos(pos: Vec2, index: number, ignoreFirst = false): Vec2 {
         let first = ignoreFirst;
-        while (node && (first || this.checkIfCharIsInContinuous(node.val))) {
+        let leftChars = this.editor.getTotalCharsBeforeCursor();
+        while (index >= 0 && (first || this.checkIfCharIsInContinuous( leftChars[index] ))) {
             if (pos.x == 0) {
                 pos.y--;
                 pos.x = this.sizes.cols;
             }
             pos.x--;
-            if (!this.checkIfCharIsInContinuous(node.val)) break;
-            node = node.prev;
+            if (!this.checkIfCharIsInContinuous( leftChars[index] )) break;
+            index--;
             first = false;
         }
 
         return pos;
     }
 
-    public continuousCharacterOnRightPos(pos: Vec2, node: DoublyLinkedList<string> | null, ignoreFirst = false): Vec2 {
+    public continuousCharacterOnRightPos(pos: Vec2, index: number, ignoreFirst = false): Vec2 {
         let first = ignoreFirst;
-        while (node && (first || this.checkIfCharIsInContinuous(node.val))) {
+        let rightChars = this.editor.getTotalCharsAfterCursor();
+        while (index >= 0 && (first || this.checkIfCharIsInContinuous(rightChars[index]))) {
             if (pos.x == this.sizes.cols) {
                 pos.y++;
                 pos.x = 0;
             }
             pos.x++;
-            if (!this.checkIfCharIsInContinuous(node.val)) break;
-            node = node.next;
+            if (!this.checkIfCharIsInContinuous(rightChars[index])) break;
+            index--;
             first = false;
         }
 

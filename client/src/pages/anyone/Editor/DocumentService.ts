@@ -41,6 +41,7 @@ export class DocumentService implements HasSubscription {
 
         this.pageController.handlePages();
         CursorUpdateSubscription.notifyForTextAndCursorUpdate();
+        this.pageController.initialRender();
     }
 
     public onScroll(e: Event) {
@@ -89,13 +90,8 @@ export class DocumentService implements HasSubscription {
     notify(usage: string): void {
         if (usage !== "TEXT OPERATION") return;
 
-        if (this.textController.isCursorInTextSelection()) {
-            const [start, end] = this.cursorOperation.getCursorPositionsStartAndEnd();
-
-            this.renderer.renderTextWithSelection(start, end);
-        } else {
-            this.renderer.renderText();
-        }
+        // this.renderer.renderText();
+        this.pageController.rerenderViewport();
     }
 
     public dispose() {

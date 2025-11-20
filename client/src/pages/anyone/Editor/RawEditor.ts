@@ -11,8 +11,8 @@ interface RowData {
 
 export class RawEditor {
     private sizes: DocumentSizes;
-    private left: Deque<string>;
-    private right: Deque<string>;
+    private left: string[];
+    private right: string[];
 
     private newlinesLeft: Deque<number>;
     private newlinesRight: Deque<number>;
@@ -27,8 +27,8 @@ export class RawEditor {
 
     constructor(sizes: DocumentSizes) {
         this.sizes = sizes;
-        this.left = new Deque<string>();
-        this.right = new Deque<string>();
+        this.left = [];
+        this.right = [];
 
         this.linesSizeLeft.push({cols: 0, rowsSoFar: 1});
 
@@ -39,8 +39,12 @@ export class RawEditor {
         this.insertText(sampleText);
     }
 
+    public getTotalCharsLength(): number {
+        return this.left.length + this.right.length;
+    }
+
     public getCursorPosition(): number {
-        return this.left.size();
+        return this.left.length;
     }
 
     public getLeftLines(): Deque<number> {
@@ -91,15 +95,15 @@ export class RawEditor {
         return this.columnIndex;
     }
 
-    public getTotalCharsBeforeCursor(): Deque<string> {
+    public getTotalCharsBeforeCursor(): string[] {
         return this.left;
     }
 
-    public getTotalCharsAfterCursor(): Deque<string> {
+    public getTotalCharsAfterCursor(): string[] {
         return this.right;
     }
 
-    public getRight(): Deque<string> {
+    public getRight(): string[] {
         return this.right;
     }
 
@@ -113,7 +117,7 @@ export class RawEditor {
         if (char === '\t') {
             return this.insertText(new Array(config.tabSize).fill(' ').join(''))
         }
-        this.left.pushBack(char);
+        this.left.push(char);
         this.newlinesLeft.updateBack(this.newlinesLeft.back()! + 1);
         this.columnIndex++;
 
@@ -128,7 +132,7 @@ export class RawEditor {
     }
 
     private insertNewLine() {
-        this.left.pushBack("\n");
+        this.left.push("\n");
 
         let rem = this.newlinesLeft.back()! - this.columnIndex;
         this.newlinesLeft.updateBack(this.columnIndex);
@@ -148,8 +152,17 @@ export class RawEditor {
         this.columnIndex = 0;
     }
 
+    public getCharAtIndex(index: number) {
+        if (index < this.getCursorPosition()) {
+            return this.left[index];
+        } else {
+            index -= this.left.length;
+            return this.right[this.right.length - index - 1];
+        }
+    }
+
     public getTextUntilPos(pos: number) {
-        let diff = this.left.size() - pos;
+        let diff = this.left.length - pos;
 
         if (diff < 0) {
             return this.getTextFromRight(-diff);
@@ -160,11 +173,11 @@ export class RawEditor {
 
     private getTextFromLeft(k: number) {
         let chars = [];
-        let node = this.left.getTail();
-        while (node && k) {
-            chars.push(node.val);
-            node = node.prev;
+        let i = this.left.length - 1;
+        while (i >= 0 && k) {
+            chars.push(this.left[i]);
             k--;
+            i--;
         }
 
         return chars.reverse().join('');
@@ -172,11 +185,11 @@ export class RawEditor {
 
     private getTextFromRight(k: number) {
         let chars = [];
-        let node = this.right.getHead();
-        while (node && k) {
-            chars.push(node.val);
-            node = node.next;
+        let i = this.right.length - 1;
+        while (i >= 0 && k) {
+            chars.push(this.right[i]);
             k--;
+            i--;
         }
 
         return chars.join('');
@@ -200,8 +213,8 @@ export class RawEditor {
 
     public deleteLeft(k: number): string {
         let deleted: string[] = [];
-        while (this.left.size() && k) {
-            let char = <string>this.left.popBack();
+        while (this.left.length && k) {
+            let char = <string>this.left.pop();
             if (char == '\n') {
                 const curr = this.newlinesLeft.popBack()!;
                 this.columnIndex = this.newlinesLeft.back()!;
@@ -231,8 +244,8 @@ export class RawEditor {
 
     public deleteRight(k: number): string {
         let deleted: string[] = [];
-        while (this.right.size() && k) {
-            let char = <string>this.right.popFront();
+        while (this.right.length && k) {
+            let char = <string>this.right.pop();
             if (char == '\n') {
                 const curr = this.newlinesRight.popFront()!;
                 this.newlinesLeft.updateBack(this.newlinesLeft.back()! + curr);
@@ -258,9 +271,9 @@ export class RawEditor {
     }
 
     public moveLeft(k: number) {
-        while (this.left.size() && k) {
-            let char = this.left.popBack();
-            this.right.pushFront(<string>char);
+        while (this.left.length && k) {
+            let char = this.left.pop();
+            this.right.push(<string>char);
             if (char == '\n') {
                 this.newlinesRight.pushFront(this.newlinesLeft.popBack()!);
                 this.columnIndex = this.newlinesLeft.back()!;
@@ -278,8 +291,8 @@ export class RawEditor {
     }
 
     public moveRight(k: number) {
-        while (this.right.size() && k) {
-            let char = this.right.popFront();
+        while (this.right.length && k) {
+            let char = this.right.pop();
             if (char == '\n') {
                 this.newlinesLeft.pushBack(this.newlinesRight.popFront()!);
                 this.columnIndex = 0;
@@ -292,7 +305,7 @@ export class RawEditor {
             } else {
                 this.columnIndex++;
             }
-            this.left.pushBack(<string>char);
+            this.left.push(<string>char);
             k--;
         }
     }

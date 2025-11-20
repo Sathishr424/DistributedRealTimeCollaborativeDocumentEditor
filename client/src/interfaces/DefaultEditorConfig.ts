@@ -1,6 +1,7 @@
 export interface DefaultEditorConfig {
     font: string;
     fontSize: number;
+    fontPadding: number;
     color: string;
     lineHeight: number;
     canvasWidth: number;

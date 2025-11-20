@@ -9,7 +9,7 @@ class RenderSubscription {
     }
 
     public notify(viewport: RenderViewport) {
-        console.log("RenderSubscription", viewport);
+        // console.log("RenderSubscription", viewport);
         for (let subscription of this.subscribers) {
             subscription.notify(viewport);
         }

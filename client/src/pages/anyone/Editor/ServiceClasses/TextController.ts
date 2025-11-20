@@ -44,7 +44,7 @@ export class TextController {
 
     public delete(newPos: Vec2, classCommand=InsertOperation) {
         let realPos = this.layout.convertTo1DPosition(newPos);
-        let diff = this.editor.getTotalCharsBeforeCursor().size() - realPos;
+        let diff = this.editor.getCursorPosition() - realPos;
 
         let deleted = '';
         if (diff > 0) {
@@ -105,11 +105,9 @@ export class TextController {
 
     public selectCurrentWord() {
         const pos = this.layout.calculateCursorPosition();
-        let node = this.editor.getTotalCharsBeforeCursor().getTail();
-        const left = this.layout.continuousCharacterOnLeftPos({...pos}, node);
+        const left = this.layout.continuousCharacterOnLeftPos({...pos}, this.editor.getCursorPosition() - 1);
 
-        node = this.editor.getTotalCharsAfterCursor().getHead();
-        const right = this.layout.continuousCharacterOnRightPos({...pos}, node);
+        const right = this.layout.continuousCharacterOnRightPos({...pos}, this.editor.getTotalCharsAfterCursor().length - 1);
 
         this.cursorOperation.moveCursor(right);
         this.setCursorWithinARange(left, right);
