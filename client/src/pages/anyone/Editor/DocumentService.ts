@@ -42,33 +42,35 @@ export class DocumentService implements HasSubscription {
         CursorUpdateSubscription.notifyForTextAndCursorUpdate();
     }
 
+    private calculateStartRow(pageHeight: number, scrollTop: number) {
+        const page = Math.floor(scrollTop / pageHeight) + 1
+        const remPageHeight = scrollTop % pageHeight;
+        // Current page top padding
+        let startRow = Math.min(config.canvasPadding + config.canvasMargin, remPageHeight);
+        // Current page bottom config.canvasPadding
+        startRow += Math.min(config.canvasPadding + config.canvasMargin, Math.max(0, remPageHeight - (config.canvasHeight + config.canvasMargin + config.canvasPadding)));
+        // Previous pages padding and margin
+        startRow += (page - 1) * ((config.canvasMargin + config.canvasPadding) * 2);
+        // And finally we get the total accurate rows
+        startRow = scrollTop - startRow;
+        startRow = Math.ceil(startRow / config.lineHeight);
+        return startRow;
+    }
+
     public onScroll(e: Event) {
         const el = document.querySelector(config.canvasContainerBodyClass);
         if (el) {
             const clientHeight = el.clientHeight;
             const height = el.scrollHeight;
             const scrollTop = el.scrollTop;
-
-            const padding = config.canvasPadding;
-            const margin = config.canvasMargin;
-            const pageHeight = config.canvasHeight + (padding + margin) * 2;
+            const pageHeight = config.canvasHeight + (config.canvasPadding + config.canvasMargin) * 2;
 
             const totalPages = height / pageHeight;
-            const startPage = Math.floor(scrollTop / pageHeight) + 1;
-            const endPage = Math.floor((scrollTop + clientHeight) / pageHeight) + 1;
 
-            // Calculating the starting rows on the screen
-            let row = (padding + margin) * 2 * (startPage - 1);
-            // To get the accurate row index, we also have to add the correct padding and margin of the current canvas page (only the top padding and margin here)
-            row += Math.min(padding + margin, scrollTop % pageHeight)
+            const startRow = this.calculateStartRow(pageHeight, scrollTop);
+            const endRow = this.calculateStartRow(pageHeight, scrollTop + clientHeight);
 
-            // Here we calculate the bottom margin and padding and adding
-            const diff = Math.max(0, (scrollTop % pageHeight) - (config.canvasHeight + margin + padding));
-            row += Math.min(padding + margin, diff)
-
-            row = Math.max(0, scrollTop - row);
-            row = Math.floor(row / config.lineHeight);
-            console.log(pageHeight, scrollTop, height, totalPages, [startPage, endPage], row);
+            console.log(pageHeight, scrollTop, height, totalPages, startRow, endRow);
         }
     }
 
