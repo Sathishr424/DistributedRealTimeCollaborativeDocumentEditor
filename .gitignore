@@ -1,3 +1,7 @@
 node_modules
 .idea
 /src/generated/prisma
+.env
+score.txt
+folderStructure.txt
+notes.txt
