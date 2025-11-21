@@ -1,4 +1,4 @@
-# 📝 Overview — Custom High-Performance Text Editor Engine (Built From Scratch)
+# Custom High-Performance Text Editor Engine (Built From Scratch)
 
 This repository contains a fully custom, high-performance text editor engine designed from the ground up with scalable system architecture, clean code, and zero third-party libraries.
 Every subsystem — layout, rendering, cursor logic, text model, pagination, undo/redo, selection, command system — is entirely hand-crafted.
