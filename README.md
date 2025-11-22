@@ -142,4 +142,8 @@ Including:
 - Multi-user realtime updates
 - Offline-safe merging (future)
 
---- Summary written with help of AI
+---
+### Note on Documentation:
+
+This high-level summary was engineered for clarity and polish using an advanced LLM. The underlying system design, data structures (Gap Buffer, DLL), and rendering logic were conceptualized and implemented from scratch in TypeScript by the repository owner.
+---
