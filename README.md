@@ -141,3 +141,5 @@ Including:
 - Cursor syncing
 - Multi-user realtime updates
 - Offline-safe merging (future)
+
+--- Summary written with help of AI
