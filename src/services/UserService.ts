@@ -16,6 +16,10 @@ class UserService {
 
         return UserResponseDTO.fromUser(users[0]);
     }
+
+    async isUserExists(email: string): Promise<boolean> {
+        return this.repo.isUserExists(email);
+    }
 }
 
 export default new UserService();

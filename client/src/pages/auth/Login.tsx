@@ -81,7 +81,7 @@ export default function Login() {
                 </div>
                 <div className="flex flex-row justify-center">
                     <p className="p-2">
-                        Don't have an account? <a className="text-blue-400 hover:underline" href="/client/src/pages/auth/Register">Sign Up</a>
+                        Don't have an account? <a className="text-blue-400 hover:underline" href="/register">Sign Up</a>
                     </p>
                 </div>
             </div>

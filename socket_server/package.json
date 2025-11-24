@@ -1,24 +1,20 @@
 {
-  "name": "collab_editor",
+  "name": "collab_editor_socket_server",
   "version": "1.0",
   "main": "index.js",
   "license": "MIT",
   "scripts": {
     "dev": "nodemon",
-    "dev_all": "npm run dev && npm run --prefix client dev && npm run --prefix socket_server dev",
     "build": "tsc",
     "start": "node dist/index.js"
   },
   "devDependencies": {
-    "@types/bcrypt": "^6.0.0",
     "@types/cors": "^2.8.19",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^24.10.0"
   },
   "dependencies": {
-    "@prisma/client": "^6.19.0",
     "@types/express": "^5.0.5",
-    "bcrypt": "^6.0.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.2",
     "cors": "^2.8.5",
@@ -27,7 +23,7 @@
     "jsonwebtoken": "^9.0.2",
     "mysql2": "^3.15.3",
     "nodemon": "^3.1.11",
-    "prisma": "^6.19.0",
+    "socket.io": "^4.8.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
   }

@@ -22,7 +22,7 @@ export default function Register() {
             setIsLoading(true);
             const data = await UserService.register({email, username, password});
             if (data.success) {
-                navigate("/");
+                return navigate("/");
             }
             setAlerts(prev => [...prev, { id: getRandomString(16), message: "Registration failed." }])
             setIsLoading(false);
@@ -88,7 +88,7 @@ export default function Register() {
                     </div>
                     <div className="flex flex-row justify-center">
                         <p className="p-2">
-                            Already have an account? <a className="text-blue-400 hover:underline" href="/client/src/pages/auth/Login">Login</a>
+                            Already have an account? <a className="text-blue-400 hover:underline" href="/login">Login</a>
                         </p>
                     </div>
                 </div>

@@ -11,6 +11,7 @@ import {TextController} from "./ServiceClasses/TextController";
 import {InputController} from "./ServiceClasses/InputController";
 import {PageController} from "./ServiceClasses/PageController";
 import {HasSubscription} from "./utils/HasSubscription";
+import {SocketClass} from "./ServiceClasses/SocketClass";
 
 export class DocumentService implements HasSubscription {
     private cursorOperation: CursorOperation;
@@ -22,8 +23,10 @@ export class DocumentService implements HasSubscription {
     private layout: LayoutEngine;
     private textController: TextController;
     private inputController: InputController;
+    private socketClass: SocketClass;
 
     constructor(canvasContainer: CanvasContainer, editor: RawEditor, sizes: DocumentSizes) {
+        this.socketClass = new SocketClass();
 
         this.layout = new LayoutEngine(editor, sizes);
         this.pageController = new PageController(this, canvasContainer, this.layout);
@@ -107,6 +110,7 @@ export class DocumentService implements HasSubscription {
         // @ts-ignore
         this.inputController = null;
         this.cursorOperation.dispose();
+        this.socketClass.dispose();
     }
 
     public updateLiveCursorPosition() {

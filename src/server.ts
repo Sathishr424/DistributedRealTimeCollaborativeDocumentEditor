@@ -1,6 +1,7 @@
 import express, { Request, Response } from "express";
 import authRouter from "./controllers/AuthController";
 import usersRouter from "./controllers/UserController";
+import documentRouter from "./controllers/DocumentController";
 import handleError from "./middlewares/ErrorHandler";
 import cors from "cors";
 
@@ -19,6 +20,7 @@ app.use(express.json());
 
 app.use("/api/auth", authRouter);
 app.use("/api/users", usersRouter);
+app.use("/api/document", documentRouter);
 
 app.get("/", (req: Request, res: Response) => {
     res.send("Hello world!")

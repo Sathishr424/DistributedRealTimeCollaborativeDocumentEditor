@@ -36,6 +36,11 @@ class AuthService {
         const user: UserTokenDTO = this.jwtService.validateToken(token);
         await this.repo.deleteUserToken(user.id);
     }
+
+    async getUserId(token: string): Promise<number> {
+        const user: UserTokenDTO = this.jwtService.validateToken(token);
+        return user.id;
+    }
 }
 
 export default new AuthService();

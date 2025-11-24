@@ -15,11 +15,52 @@ datasource db {
 }
 
 model Users {
-  id           Int      @id @default(autoincrement())
-  email        String   @unique
-  username     String?
-  password     String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @default(now()) @updatedAt
-  refreshToken String?
+  id              Int               @id @default(autoincrement())
+  email           String            @unique
+  username        String?
+  password        String
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @default(now()) @updatedAt
+  refreshToken    String?
+  Documents       Documents[]
+  DocumentAccess  DocumentAccess[]
+  DocumentHistory DocumentHistory[]
+}
+
+model Documents {
+  id                     Int               @id @default(autoincrement())
+  document_key           String
+  is_write_access_public Boolean           @default(false)
+  is_read_access_public  Boolean           @default(true)
+  owner                  Int
+  user                   Users             @relation(fields: [owner], references: [id])
+  DocumentAccess         DocumentAccess[]
+  createdAt              DateTime          @default(now())
+  updatedAt              DateTime          @default(now()) @updatedAt
+  DocumentHistory        DocumentHistory[]
+}
+
+model DocumentAccess {
+  document_id  Int
+  user_id      Int
+  read_access  Boolean   @default(true)
+  write_access Boolean   @default(true)
+  user         Users     @relation(fields: [user_id], references: [id])
+  document     Documents @relation(fields: [document_id], references: [id])
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @default(now()) @updatedAt
+
+  @@id([document_id, user_id])
+}
+
+model DocumentHistory {
+  document_id Int
+  user_id     Int
+
+  user     Users     @relation(fields: [user_id], references: [id])
+  document Documents @relation(fields: [document_id], references: [id])
+
+  last_opened DateTime @default(now())
+
+  @@id([document_id, user_id])
 }
