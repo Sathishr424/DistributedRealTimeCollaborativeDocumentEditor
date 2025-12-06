@@ -6,7 +6,7 @@ import UserRepository from "../repositories/UserRepository";
 import {UserNotExists} from "../exceptions/UserNotExists";
 
 const JWT_SECRET: jwt.Secret = process.env.JWT_SECRETKEY as string;
-console.log(JWT_SECRET);
+
 
 class JWTService {
     private userRepo = UserRepository;

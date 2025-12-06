@@ -29,6 +29,7 @@ export default function Login() {
             setIsLoading(false);
         } catch (error: any) {
             setIsLoading(false);
+            console.log(error);
             if (error.status === 401) {
                 setAlerts(prev => [...prev, { id: getRandomString(16), message: "Invalid Credentials" }])
             } else if (error.status === 400) {

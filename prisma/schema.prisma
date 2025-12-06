@@ -14,7 +14,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Users {
+model users {
   id              Int               @id @default(autoincrement())
   email           String            @unique
   username        String?
@@ -22,43 +22,43 @@ model Users {
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @default(now()) @updatedAt
   refreshToken    String?
-  Documents       Documents[]
-  DocumentAccess  DocumentAccess[]
-  DocumentHistory DocumentHistory[]
+  Documents       documents[]
+  DocumentAccess  documentaccess[]
+  DocumentHistory documenthistory[]
 }
 
-model Documents {
+model documents {
   id                     Int               @id @default(autoincrement())
   document_key           String
   is_write_access_public Boolean           @default(false)
   is_read_access_public  Boolean           @default(true)
   owner                  Int
-  user                   Users             @relation(fields: [owner], references: [id])
-  DocumentAccess         DocumentAccess[]
+  user                   users             @relation(fields: [owner], references: [id])
+  DocumentAccess         documentaccess[]
   createdAt              DateTime          @default(now())
   updatedAt              DateTime          @default(now()) @updatedAt
-  DocumentHistory        DocumentHistory[]
+  DocumentHistory        documenthistory[]
 }
 
-model DocumentAccess {
+model documentaccess {
   document_id  Int
   user_id      Int
   read_access  Boolean   @default(true)
   write_access Boolean   @default(true)
-  user         Users     @relation(fields: [user_id], references: [id])
-  document     Documents @relation(fields: [document_id], references: [id])
+  user         users     @relation(fields: [user_id], references: [id])
+  document     documents @relation(fields: [document_id], references: [id])
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @default(now()) @updatedAt
 
   @@id([document_id, user_id])
 }
 
-model DocumentHistory {
+model documenthistory {
   document_id Int
   user_id     Int
 
-  user     Users     @relation(fields: [user_id], references: [id])
-  document Documents @relation(fields: [document_id], references: [id])
+  user     users     @relation(fields: [user_id], references: [id])
+  document documents @relation(fields: [document_id], references: [id])
 
   last_opened DateTime @default(now())
 

@@ -1,12 +1,29 @@
-import {ReactNode, RefObject, useCallback, useEffect, useRef, useState} from "react";
-import Editor from "./Editor/Editor";
+import {ReactNode, RefObject, useCallback, useContext, useEffect, useRef, useState} from "react";
+import Editor from "@utils/Editor/Editor";
+import {useNavigate, useParams} from "react-router-dom";
+import DocumentService from "../../services/DocumentService";
+import AlertContext from "@components/AlertContext";
+import {getRandomString} from "@utils/helper";
 
 export default function DocumentEditor() {
+    const { alerts, setAlerts } = useContext(AlertContext);
+    const navigate = useNavigate();
+    const { document_key } = useParams();
+
     const editorInstanceRef: RefObject<Editor | null> = useRef(null);
 
-    useEffect(() => {
+    const initiateDocument = async () => {
+        if (!document_key) {
+            return navigate("/");
+        }
+        const documentAccess = await DocumentService.getDocumentAccess(document_key);
+        if (!documentAccess.read_access) {
+            setAlerts(prev => [...prev, { id: getRandomString(16), message: "You have no read access!" }]);
+            return navigate("/");
+        }
+
         if (editorInstanceRef.current === null) {
-            editorInstanceRef.current = new Editor();
+            editorInstanceRef.current = new Editor(document_key, documentAccess.write_access);
         }
 
         return () => {
@@ -15,6 +32,10 @@ export default function DocumentEditor() {
                 editorInstanceRef.current = null;
             }
         }
+    }
+
+    useEffect(() => {
+        initiateDocument();
     }, [])
 
     return (

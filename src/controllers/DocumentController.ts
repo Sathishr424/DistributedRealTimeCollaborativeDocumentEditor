@@ -26,7 +26,7 @@ class DocumentController {
     }
 
     private async getUserAccess(req: Request, res: Response) {
-        const document_key = req.query.document_key as string;
+        const document_key = req.params.document_key as string;
 
         try {
             const token = getBearerToken(req);
