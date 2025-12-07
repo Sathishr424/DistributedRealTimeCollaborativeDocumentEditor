@@ -8,7 +8,7 @@ import {DeleteOperation} from "../utils/DeleteOperation";
 import {EditHistory} from "../utils/EditHistory";
 import {PageController} from "./PageController";
 import {InsertOperationRight} from "../utils/InsertOperationRight";
-import {SocketClass} from "@utils/Editor/ServiceClasses/SocketClass";
+import {SocketClass} from "./SocketClass";
 
 export class TextController {
     private cursorOperation: CursorOperation;

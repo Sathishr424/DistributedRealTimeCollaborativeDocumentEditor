@@ -1,5 +1,5 @@
 import {io, Socket} from "socket.io-client";
-import JWTService from "../../../services/JWTService";
+import JWTService from "../../services/JWTService";
 
 const SOCKET_URL: string = import.meta.env.VITE_SOCKET_URL;
 

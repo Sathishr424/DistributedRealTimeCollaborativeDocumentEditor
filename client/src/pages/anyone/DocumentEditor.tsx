@@ -1,5 +1,5 @@
 import {ReactNode, RefObject, useCallback, useContext, useEffect, useRef, useState} from "react";
-import Editor from "@utils/Editor/Editor";
+import Editor from "../../Editor/Editor";
 import {useNavigate, useParams} from "react-router-dom";
 import DocumentService from "../../services/DocumentService";
 import AlertContext from "@components/AlertContext";

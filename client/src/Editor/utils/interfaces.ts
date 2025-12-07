@@ -1,4 +1,4 @@
-import {DefaultEditorConfig} from "../../../interfaces/DefaultEditorConfig";
+import {DefaultEditorConfig} from "../../interfaces/DefaultEditorConfig";
 import {KeyCommand} from "../handler/KeyCommand";
 import {TextController} from "../ServiceClasses/TextController";
 import {CursorOperation} from "../ServiceClasses/CursorOperation";
