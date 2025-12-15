@@ -2,6 +2,7 @@ import {LayoutEngine} from "../ServiceClasses/LayoutEngine";
 import {TextController} from "../ServiceClasses/TextController";
 import {InputController} from "../ServiceClasses/InputController";
 import {CursorOperation} from "../ServiceClasses/CursorOperation";
+import SocketClass from "../ServiceClasses/SocketClass";
 
 export class KeyCommandParent {
     protected inputController: InputController;

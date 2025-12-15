@@ -1,10 +1,12 @@
 import CursorUpdateSubscription from "../utils/CursorUpdateSubscription";
-import {CommandMap, config} from "../utils/interfaces";
+import {CommandMap} from "../utils/interfaces";
 import {LayoutEngine} from "./LayoutEngine";
 import {TextController} from "./TextController";
 import {initializeCommands} from "../CommandRegistry";
 import {CombinationKeyState} from "../utils/CombinationKeyState";
 import {CursorOperation} from "./CursorOperation";
+import {config} from "../../../../shared/config";
+import SocketClass from "./SocketClass";
 
 export class InputController {
     private layout: LayoutEngine;
@@ -20,6 +22,40 @@ export class InputController {
         this.combinationKeyState = new CombinationKeyState();
 
         this.commands = initializeCommands(this, this.layout, this.textController, this.cursorOperation);
+    }
+
+    public handleCopyCommand(e: ClipboardEvent) {
+        e.preventDefault();
+        const selectedText: string = this.textController.getTextSelection();
+
+        if (e.clipboardData !== null && selectedText.length > 0) {
+            e.preventDefault();
+            e.clipboardData.setData('text/plain', selectedText);
+        }
+    }
+
+    public handlePasteCommand(e: ClipboardEvent) {
+        e.preventDefault();
+        const clipboardData = e.clipboardData || (window as any).clipboardData;
+        const pastedText: string = clipboardData.getData('text/plain');
+
+        if (pastedText.length > 0) {
+            const change = this.textController.deleteTextSelection();
+            this.textController.insertText(pastedText, change);
+        }
+    }
+
+    public handleCutCommand(e: ClipboardEvent) {
+        e.preventDefault();
+        const selectedText: string = this.textController.getTextSelection();
+        this.textController.deleteTextSelection();
+        this.textController.checkPages();
+        CursorUpdateSubscription.notifyForTextAndCursorUpdate();
+
+        if (e.clipboardData !== null && selectedText.length > 0) {
+            e.preventDefault();
+            e.clipboardData.setData('text/plain', selectedText);
+        }
     }
 
     public handleBackSpace() {
@@ -40,7 +76,7 @@ export class InputController {
 
     public handleInsertChar(char: string) {
         const change = this.textController.deleteTextSelection()
-        this.textController.insertChar(char, change);
+        this.textController.insertText(char, change);
     }
 
     public handleInsertTab() {
@@ -50,7 +86,7 @@ export class InputController {
 
     public handleInsertNewLine() {
         const change = this.textController.deleteTextSelection()
-        this.textController.insertChar('\n', change);
+        this.textController.insertText('\n', change);
     }
 
     public handleArrowLeft() {

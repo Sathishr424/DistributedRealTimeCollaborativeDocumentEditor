@@ -8,7 +8,7 @@ import {DeleteOperation} from "../utils/DeleteOperation";
 import {EditHistory} from "../utils/EditHistory";
 import {PageController} from "./PageController";
 import {InsertOperationRight} from "../utils/InsertOperationRight";
-import {SocketClass} from "./SocketClass";
+import SocketClass from "./SocketClass";
 
 export class TextController {
     private cursorOperation: CursorOperation;
@@ -18,13 +18,13 @@ export class TextController {
     private pageController: PageController;
     private socketClass: SocketClass;
 
-    constructor(cursorOperation: CursorOperation, layout: LayoutEngine, editor: RawEditor, pageController: PageController, socketClass: SocketClass) {
+    constructor(cursorOperation: CursorOperation, layout: LayoutEngine, editor: RawEditor, pageController: PageController, documentKey: string) {
         this.cursorOperation = cursorOperation;
         this.layout = layout;
         this.editor = editor;
         this.pageController = pageController;
         this.editHistory = new EditHistory(cursorOperation, this);
-        this.socketClass = socketClass;
+        this.socketClass = new SocketClass(documentKey, this);
     }
 
     public undo() {
@@ -76,34 +76,60 @@ export class TextController {
         CursorUpdateSubscription.notifyForTextAndCursorUpdate();
     }
 
-    public insertChar(char: string, chain=false) {
-        this.socketClass.emitInsert(char, this.editor.getCursorPosition(), this.editor.getCursorPosition() + 1);
-        this.editor.insert(char);
-        this.editHistory.addHistory(char, this.editor.getCursorPosition() - char.length, DeleteOperation, chain);
+    public insertInitialText(text: string) {
+        this.editor.insertText(text);
         this.pageController.handlePages();
         CursorUpdateSubscription.notifyForTextAndCursorUpdate();
     }
 
     public insertText(text: string, chain=false) {
         this.socketClass.emitInsert(text, this.editor.getCursorPosition(), this.editor.getCursorPosition() + text.length);
-        this.editor.insertText(text);
-        if (text.length > 0) {
-            this.editHistory.addHistory(text, this.editor.getCursorPosition() - text.length, DeleteOperation, chain);
-        }
-        this.pageController.handlePages();
-        CursorUpdateSubscription.notifyForTextAndCursorUpdate();
+        // this.editor.insertText(text);
+        // if (text.length > 0) {
+        //     this.editHistory.addHistory(text, this.editor.getCursorPosition() - text.length, DeleteOperation, chain);
+        // }
+        // this.pageController.handlePages();
+        // CursorUpdateSubscription.notifyForTextAndCursorUpdate();
     }
 
     public deleteLeft(k: number): string {
         const pos = this.editor.getCursorPosition();
-        this.socketClass.emitDelete(this.editor.getTextUntilPos(pos - k), pos, pos - k);
-        return this.editor.deleteLeft(k);
+        this.socketClass.emitDelete(this.editor.getTextUntilPos(pos - k), pos - k, pos);
+        // return this.editor.deleteLeft(k);
+        return '';
     }
 
     public deleteRight(k: number): string {
         const pos = this.editor.getCursorPosition();
         this.socketClass.emitDelete(this.editor.getTextUntilPos(pos + k), pos, pos + k);
-        return this.editor.deleteRight(k);
+        // return this.editor.deleteRight(k);
+        return '';
+    }
+
+    public insertTextFromServer(pos: number, text: string) {
+        const oldPos = this.editor.getCursorPosition();
+        this.cursorOperation.moveToPosition(pos);
+        this.editor.insertText(text);
+        if (oldPos >= pos) {
+            this.cursorOperation.moveToPosition(oldPos + text.length);
+        } else {
+            this.cursorOperation.moveToPosition(oldPos);
+        }
+        this.pageController.handlePages();
+        CursorUpdateSubscription.notifyForTextAndCursorUpdate();
+    }
+
+    public deleteTextFromServer(pos: number, length: number) {
+        const oldPos = this.editor.getCursorPosition();
+        this.cursorOperation.moveToPosition(pos);
+        this.editor.deleteRight(length);
+        if (oldPos >= pos) {
+            this.cursorOperation.moveToPosition(oldPos - Math.min(length, oldPos - pos + 1));
+        } else {
+            this.cursorOperation.moveToPosition(oldPos);
+        }
+        this.pageController.handlePages();
+        CursorUpdateSubscription.notifyForTextAndCursorUpdate();
     }
 
     public setCursorWithinARange(left: Vec2, right: Vec2) {
@@ -156,5 +182,9 @@ export class TextController {
 
     public checkPages() {
         this.pageController.handlePages();
+    }
+
+    public dispose() {
+        this.socketClass.dispose();
     }
 }

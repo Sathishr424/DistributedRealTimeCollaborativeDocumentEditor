@@ -22,6 +22,7 @@ import {InputController} from "./ServiceClasses/InputController";
 import {CursorOperation} from "./ServiceClasses/CursorOperation";
 import {DeleteCommand} from "./handler/commands/DeleteCommand";
 import {CtrlDeleteCommand} from "./handler/commands/CtrlDeleteCommand";
+import SocketClass from "./ServiceClasses/SocketClass";
 
 type CommandConstructor = new (inputController: InputController, layout: LayoutEngine, textController: TextController, cursorOperation: CursorOperation) => KeyCommand;
 

@@ -1,6 +1,6 @@
 import {RawEditor} from "./RawEditor";
 import {DocumentRenderer} from "./ServiceClasses/DocumentRenderer";
-import {config, DocumentSizes, Vec2} from "./utils/interfaces";
+import {DocumentSizes, Vec2} from "./utils/interfaces";
 import {CursorOperation} from "./ServiceClasses/CursorOperation";
 import {KeyEvents} from "./handler/KeyEvents/KeyEvents";
 import CursorUpdateSubscription from "./utils/CursorUpdateSubscription";
@@ -11,7 +11,8 @@ import {TextController} from "./ServiceClasses/TextController";
 import {InputController} from "./ServiceClasses/InputController";
 import {PageController} from "./ServiceClasses/PageController";
 import {HasSubscription} from "./utils/HasSubscription";
-import {SocketClass} from "./ServiceClasses/SocketClass";
+import SocketClass from "./ServiceClasses/SocketClass";
+import {config} from "../../../shared/config";
 
 export class DocumentService implements HasSubscription {
     private cursorOperation: CursorOperation;
@@ -23,26 +24,23 @@ export class DocumentService implements HasSubscription {
     private layout: LayoutEngine;
     private textController: TextController;
     private inputController: InputController;
-    private socketClass: SocketClass;
-    private documentKey: string;
     private hasWriteAccess: boolean = false;
 
     constructor(canvasContainer: CanvasContainer, editor: RawEditor, sizes: DocumentSizes, documentKey: string, hasWriteAccess: boolean) {
-        this.documentKey = documentKey;
         this.hasWriteAccess = hasWriteAccess;
-        this.socketClass = new SocketClass(documentKey);
 
         this.layout = new LayoutEngine(editor, sizes);
         this.pageController = new PageController(this, canvasContainer, this.layout);
 
         this.cursorOperation = new CursorOperation(this, this.layout, editor);
-        this.textController = new TextController(this.cursorOperation, this.layout, editor, this.pageController, this.socketClass);
+
+        this.textController = new TextController(this.cursorOperation, this.layout, editor, this.pageController, documentKey);
         this.inputController = new InputController(this.layout, this.textController, this.cursorOperation);
 
         this.renderer = new DocumentRenderer(editor, this.layout, this.pageController, this.cursorOperation);
 
         this.keyEvents = new KeyEvents(this.inputController, this.textController);
-        this.clipboardEvents = new ClipboardEvents(this.textController);
+        this.clipboardEvents = new ClipboardEvents(this.textController, this.inputController);
 
         CursorUpdateSubscription.subscribe(this);
 
@@ -106,6 +104,7 @@ export class DocumentService implements HasSubscription {
 
     public dispose() {
         this.renderer.dispose();
+        this.textController.dispose();
         // @ts-ignore
         this.renderer = null;
         // @ts-ignore
@@ -117,7 +116,6 @@ export class DocumentService implements HasSubscription {
         // @ts-ignore
         this.inputController = null;
         this.cursorOperation.dispose();
-        this.socketClass.dispose();
     }
 
     public updateLiveCursorPosition() {

@@ -1,10 +1,11 @@
-import {config, Vec2} from "../utils/interfaces";
+import {Vec2} from "../utils/interfaces";
 import CursorUpdateSubscription from "../utils/CursorUpdateSubscription";
 import {DocumentService} from "../DocumentService";
 import {Deque} from "@utils/Deque";
 import {LayoutEngine} from "./LayoutEngine";
 import {RawEditor} from "../RawEditor";
 import {HasSubscription} from "../utils/HasSubscription";
+import {config} from "../../../../shared/config";
 
 export class CursorOperation implements HasSubscription {
     private service: DocumentService;

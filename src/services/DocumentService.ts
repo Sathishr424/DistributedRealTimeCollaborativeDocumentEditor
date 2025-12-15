@@ -3,13 +3,14 @@ import {UserNotExists} from "../exceptions/UserNotExists";
 import {User} from "../models/User";
 import JWTService from "./JWTService";
 import DocumentRepository from "../repositories/DocumentRepository";
-import {generateRandomString} from "../helpers/helper";
+import {documentPath, generateRandomString} from "../helpers/helper";
 import {DocumentUserAccessResponseDTO} from "../dto/response/DocumentUserAccessResponseDTO";
 import {MyDocument} from "../models/MyDocument";
 import {UserTokenDTO} from "../dto/UserTokenDTO";
 import {DocumentAccess} from "../models/DocumentAccess";
 import {DocumentAccessRequestDTO} from "../dto/request/DocumentAccessRequestDTO";
 import {DocumentResponseDTO} from "../dto/response/DocumentResponseDTO";
+import * as fs from "node:fs";
 
 class DocumentService {
     private repo = DocumentRepository;
@@ -20,23 +21,27 @@ class DocumentService {
         const document = await this.repo.createDocument(document_id, userToken.id);
         const documentAccess: DocumentAccessRequestDTO = {document_id: document.id, user_id: userToken.id, read_access: true, write_access: true};
         await this.repo.addUserAccessToDocument(documentAccess);
+
+        fs.writeFileSync(documentPath(document.document_key), "");
+
         return DocumentResponseDTO.fromDocument(document);
     }
 
-    async getDocument(document_key: string): Promise<MyDocument> {
-        return this.repo.getDocument(document_key);
+    async getDocument(document_key: string): Promise<DocumentUserAccessResponseDTO> {
+        const document = await this.repo.getDocument(document_key);
+        return DocumentUserAccessResponseDTO.fromDocument(document);
     }
 
     async getUserAccess(token: string, document_key: string): Promise<DocumentUserAccessResponseDTO> {
         const userToken = this.jwtService.validateToken(token);
-        const document = await this.getDocument(document_key);
+        const document = await this.repo.getDocument(document_key);
         const userAccess = await this.repo.getDocumentUserAccess(document_key, userToken.id);
 
         return DocumentUserAccessResponseDTO.fromDocumentAndUserAccess(document, userAccess);
     }
 
     async getUserAccessForAnyone(document_key: string): Promise<DocumentUserAccessResponseDTO> {
-        const document = await this.getDocument(document_key);
+        const document = await this.repo.getDocument(document_key);
         return DocumentUserAccessResponseDTO.fromDocument(document);
     }
 }

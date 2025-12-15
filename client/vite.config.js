@@ -5,6 +5,10 @@ import * as path from 'path'; // 1. Import the path module
 
 // https://vite.dev/config/
 export default defineConfig({
+    server: {
+        host: "0.0.0.0",
+        port: 5173
+    },
     plugins: [
         react(),
         tailwindcss(),

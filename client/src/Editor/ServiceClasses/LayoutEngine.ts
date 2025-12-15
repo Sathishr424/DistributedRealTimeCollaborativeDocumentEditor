@@ -1,6 +1,7 @@
-import {config, DocumentSizes, Vec2} from "../utils/interfaces";
+import {DocumentSizes, Vec2} from "../utils/interfaces";
 import {RawEditor} from "../RawEditor";
 import {DoublyLinkedList} from "@utils/DoublyLinkedList";
+import {config} from "../../../../shared/config";
 
 export class LayoutEngine {
     private editor: RawEditor;

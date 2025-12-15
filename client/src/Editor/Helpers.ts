@@ -1,4 +1,4 @@
-import {config} from "./utils/interfaces";
+import {config} from "../../../shared/config";
 
 export function getElementPadding(element: HTMLElement) {
     const styles = window.getComputedStyle(element);

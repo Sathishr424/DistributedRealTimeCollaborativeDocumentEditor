@@ -30,7 +30,7 @@ model users {
 model documents {
   id                     Int               @id @default(autoincrement())
   document_key           String
-  is_write_access_public Boolean           @default(false)
+  is_write_access_public Boolean           @default(true)
   is_read_access_public  Boolean           @default(true)
   owner                  Int
   user                   users             @relation(fields: [owner], references: [id])

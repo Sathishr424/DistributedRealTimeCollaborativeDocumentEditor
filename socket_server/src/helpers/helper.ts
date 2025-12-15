@@ -2,6 +2,7 @@ import {hash, compare} from "bcrypt";
 import {ServerError} from "../exceptions/ServerError";
 import {Request} from "express";
 import {TokenNotFound} from "../exceptions/TokenNotFound";
+import path from "node:path";
 
 
 export async function hashPassword(password: string) {
@@ -11,6 +12,11 @@ export async function hashPassword(password: string) {
         throw new ServerError(err);
     }
 }
+
+export function documentPath(documentKey: string) {
+    return path.join(process.cwd(), process.env.DOCUMENT_PATH as string, documentKey);
+}
+
 
 export async function checkPassword(password: string, hashedPassword: string): Promise<boolean> {
     try {

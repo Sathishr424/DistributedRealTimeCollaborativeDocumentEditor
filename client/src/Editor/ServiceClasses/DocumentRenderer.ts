@@ -1,10 +1,11 @@
-import {config, RenderViewport, Vec2} from "../utils/interfaces";
+import {RenderViewport, Vec2} from "../utils/interfaces";
 import {RawEditor} from "../RawEditor";
 import {PageController} from "./PageController";
 import {LayoutEngine} from "./LayoutEngine";
 import {CursorOperation} from "./CursorOperation";
 import {HasRenderSubscription} from "../utils/HasRenderSubscription";
 import RenderSubscription from "../utils/RenderSubscription";
+import {config} from "../../../../shared/config";
 
 interface SelectionPos {
     row: number;

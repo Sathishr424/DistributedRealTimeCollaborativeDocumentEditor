@@ -1,10 +1,11 @@
-import {config, RenderViewport, Vec2} from "../utils/interfaces";
+import {RenderViewport, Vec2} from "../utils/interfaces";
 import {getElementPadding} from "../Helpers";
 import {LayoutEngine} from "./LayoutEngine";
 import {CanvasContainer} from "../CanvasContainer";
 import {DocumentService} from "../DocumentService";
 import RenderSubscription from "../utils/RenderSubscription";
 import {Deque} from "@utils/Deque";
+import {config} from "../../../../shared/config";
 
 interface Viewport {
     startRow: number;
