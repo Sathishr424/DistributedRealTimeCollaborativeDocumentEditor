@@ -53,14 +53,15 @@ class SocketClass {
     public onReceive(data: SocketOperation) {
         if (!this.isLoaded) return;
         this.version = data.version;
-        console.log("Receive:", data);
+        // console.log("Receive:", data);
         if (data.type === OperationType.Insert) {
-            this.textController.insertTextFromServer(data.startIndex, data.text);
+            this.textController.insertTextFromServer(data.startIndex, data.text, data.senderId == this.myId);
         } else {
-            this.textController.deleteTextFromServer(data.startIndex, data.text.length);
+            this.textController.deleteTextFromServer(data.startIndex, data.text.length, data.senderId == this.myId);
         }
-        this.operationQueue.popFront();
-        if (this.operationQueue.size() > 0) this.emit(this.operationQueue.front()!);
+        if (data.senderId == this.myId) {
+
+        }
     }
 
     public emitInsert(text: string, startIndex: number, endIndex: number): void {
@@ -73,12 +74,13 @@ class SocketClass {
             type: OperationType.Insert,
             version: this.version,
             senderId: this.myId,
+            id: getRandomString(10),
         } as SocketOperation);
     }
 
     public emitDelete(text: string, startIndex: number, endIndex: number): void {
         if (!this.isLoaded) return;
-        this.operationQueue.pushBack({
+        this.emit({
                 documentKey: this.documentKey,
                 startIndex,
                 endIndex,
@@ -86,9 +88,9 @@ class SocketClass {
                 type: OperationType.Delete,
                 version: this.version,
                 senderId: this.myId,
+                id: getRandomString(10),
             } as SocketOperation
         );
-        if (this.operationQueue.size() == 1) this.emit(this.operationQueue.front()!);
     }
 
     private emit(socketData: SocketOperation) {

@@ -10,6 +10,7 @@ export interface BaseOperation {
     startIndex: number;
     endIndex: number;
     senderId: string;
+    id: string;
 }
 
 export interface InsertOperation extends BaseOperation {

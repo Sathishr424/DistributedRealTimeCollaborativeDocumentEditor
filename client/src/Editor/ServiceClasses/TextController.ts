@@ -106,11 +106,11 @@ export class TextController {
         return '';
     }
 
-    public insertTextFromServer(pos: number, text: string) {
+    public insertTextFromServer(pos: number, text: string, isMyOperation: boolean) {
         const oldPos = this.editor.getCursorPosition();
         this.cursorOperation.moveToPosition(pos);
         this.editor.insertText(text);
-        if (oldPos >= pos) {
+        if (oldPos >= pos || isMyOperation) {
             this.cursorOperation.moveToPosition(oldPos + text.length);
         } else {
             this.cursorOperation.moveToPosition(oldPos);
@@ -119,11 +119,11 @@ export class TextController {
         CursorUpdateSubscription.notifyForTextAndCursorUpdate();
     }
 
-    public deleteTextFromServer(pos: number, length: number) {
+    public deleteTextFromServer(pos: number, length: number, isMyOperation: boolean) {
         const oldPos = this.editor.getCursorPosition();
         this.cursorOperation.moveToPosition(pos);
         this.editor.deleteRight(length);
-        if (oldPos >= pos) {
+        if (oldPos >= pos || isMyOperation) {
             this.cursorOperation.moveToPosition(oldPos - Math.min(length, oldPos - pos + 1));
         } else {
             this.cursorOperation.moveToPosition(oldPos);

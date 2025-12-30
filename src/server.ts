@@ -8,9 +8,9 @@ import cors from "cors";
 const allowedOrigin = process.env.CLIENT_URL; // Example: your Angular or React dev server
 
 const corsOptions = {
-    origin: allowedOrigin,
+    origin: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    credentials: true,
+    credentials: false,
 };
 
 const app = express();
