@@ -4,11 +4,15 @@ import {useNavigate, useParams} from "react-router-dom";
 import DocumentService from "../../services/DocumentService";
 import AlertContext from "@components/AlertContext";
 import {getRandomString} from "@utils/helper";
+import ShareModal from "@components/ShareModal";
+import {DocumentAccessResponseDTO} from "../../dto/DTOs";
 
 export default function DocumentEditor() {
-    const { alerts, setAlerts } = useContext(AlertContext);
+    const {alerts, setAlerts} = useContext(AlertContext);
     const navigate = useNavigate();
-    const { document_key } = useParams();
+    const {document_key} = useParams();
+    const [toggleShare, setToggleShare] = useState(false);
+    const [documentAccess, setDocumentAccess] = useState<DocumentAccessResponseDTO | null>(null);
 
     const editorInstanceRef: RefObject<Editor | null> = useRef(null);
 
@@ -16,14 +20,15 @@ export default function DocumentEditor() {
         if (!document_key) {
             return navigate("/");
         }
-        const documentAccess = await DocumentService.getDocumentAccess(document_key);
-        if (!documentAccess.read_access) {
-            setAlerts(prev => [...prev, { id: getRandomString(16), message: "You have no read access!" }]);
+        const da = await DocumentService.getDocumentAccess(document_key);
+        if (!da.read_access) {
+            setAlerts(prev => [...prev, {id: getRandomString(16), message: "You have no read access!"}]);
             return navigate("/");
         }
 
         if (editorInstanceRef.current === null) {
-            editorInstanceRef.current = new Editor(document_key, documentAccess.write_access);
+            setDocumentAccess(da);
+            editorInstanceRef.current = new Editor(document_key, da.write_access);
         }
 
         return () => {
@@ -40,16 +45,19 @@ export default function DocumentEditor() {
 
     return (
         <main className="flex flex-col h-screen">
+            {
+                documentAccess !== null ? <ShareModal documentAccess={documentAccess} toggleShare={toggleShare} setToggleShare={setToggleShare} /> : <></>
+            }
             <header className="document-header bg-slate-100 border-b-2 border-gray-300">
                 <div className="flex flex-row items-center justify-between items-center p-4">
-                    <button className="btn-primary">
+                    <button onClick={() => setToggleShare(true)} className="btn-primary">
                         Share
                     </button>
                 </div>
             </header>
             <div className="document-body bg-slate-100 overflow-auto">
                 <div className="w-full flex flex-col items-center justify-center canvas-container">
-
+                    {/* Document lives here */}
                 </div>
             </div>
         </main>

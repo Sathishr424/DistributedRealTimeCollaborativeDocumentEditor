@@ -9,7 +9,7 @@ import JWTService from "../services/JWTService";
 export function authMiddleware(): RequestHandler {
     return async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const token = getBearerToken(req);
+            const token = getBearerToken(req.headers.authorization);
             req.body.userToken = await JWTService.validateAndVerifyToken(token);
             next();
         } catch (error) {

@@ -1,20 +1,22 @@
-import AuthRepository from "../repositories/AuthRepository";
-import {UserNotExists} from "../exceptions/UserNotExists";
-import {User} from "../models/User";
+import {Request} from "express";
 import JWTService from "./JWTService";
 import DocumentRepository from "../repositories/DocumentRepository";
-import {documentPath, generateRandomString} from "../helpers/helper";
+import {documentPath, generateRandomString, getBearerToken} from "../helpers/helper";
 import {DocumentUserAccessResponseDTO} from "../dto/response/DocumentUserAccessResponseDTO";
-import {MyDocument} from "../models/MyDocument";
 import {UserTokenDTO} from "../dto/UserTokenDTO";
-import {DocumentAccess} from "../models/DocumentAccess";
 import {DocumentAccessRequestDTO} from "../dto/request/DocumentAccessRequestDTO";
 import {DocumentResponseDTO} from "../dto/response/DocumentResponseDTO";
 import * as fs from "node:fs";
+import {TokenNotFound} from "../exceptions/TokenNotFound";
+import {ServerError} from "../exceptions/ServerError";
+import UserRepository from "../repositories/UserRepository";
+import {UserNotTheOwner} from "../exceptions/UserNotTheOwner";
+import {DocumentAccessUpdateDTO} from "../dto/request/DocumentAccessUpdateDTO";
 
 class DocumentService {
     private repo = DocumentRepository;
     private jwtService = JWTService;
+    private userRepo = UserRepository;
 
     async createDocument(userToken: UserTokenDTO): Promise<DocumentResponseDTO> {
         const document_id = generateRandomString(10);
@@ -26,10 +28,12 @@ class DocumentService {
 
         return DocumentResponseDTO.fromDocument(document);
     }
+    
+    async updateDocumentAccess(userToken: UserTokenDTO, documentAccess: DocumentAccessUpdateDTO) {
+        const document = await this.repo.getDocument(documentAccess.document_key);
 
-    async getDocument(document_key: string): Promise<DocumentUserAccessResponseDTO> {
-        const document = await this.repo.getDocument(document_key);
-        return DocumentUserAccessResponseDTO.fromDocument(document);
+        if (document.owner !== userToken.id) throw new UserNotTheOwner();
+        return await this.repo.updateDocumentAccess(userToken.id, documentAccess);
     }
 
     async getUserAccess(token: string, document_key: string): Promise<DocumentUserAccessResponseDTO> {

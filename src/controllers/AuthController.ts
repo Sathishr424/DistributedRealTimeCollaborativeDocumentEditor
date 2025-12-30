@@ -40,7 +40,7 @@ class AuthController {
     }
 
     private async logout(req: Request, res: Response) {
-        const token = getBearerToken(req);
+        const token = getBearerToken(req.headers.authorization);
         await this.service.logout(token);
 
         return res.status(200).json({

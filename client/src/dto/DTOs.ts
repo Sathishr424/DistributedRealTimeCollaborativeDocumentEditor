@@ -29,7 +29,22 @@ export interface DocumentResponseDTO {
     owner: number;
 }
 
+export interface DocumentDTO {
+    id: number;
+    owner: number;
+    document_key: string;
+    read_access: boolean;
+    write_access: boolean;
+}
+
 export interface DocumentAccessResponseDTO {
+    document: DocumentDTO
+    document_key: string;
+    read_access: boolean;
+    write_access: boolean;
+}
+
+export interface DocumentUpdateAccessRequestDTO {
     document_key: string;
     read_access: boolean;
     write_access: boolean;

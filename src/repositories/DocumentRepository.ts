@@ -8,6 +8,7 @@ import {MyDocument} from "../models/MyDocument";
 import {DocumentAccess} from "../models/DocumentAccess";
 import {DocumentNotFoundException} from "../exceptions/DocumentNotFoundException";
 import {DocumentAccessRequestDTO} from "../dto/request/DocumentAccessRequestDTO";
+import {DocumentAccessUpdateDTO} from "../dto/request/DocumentAccessUpdateDTO";
 
 interface Count extends RowDataPacket {
     count: number;
@@ -46,6 +47,16 @@ class DocumentRepository {
             return rows[0];
         } catch (err) {
             if (err instanceof DocumentNotFoundException) throw err;
+            throw new ServerError(err);
+        }
+    }
+
+    async updateDocumentAccess(user_id: number, documentAccess: DocumentAccessUpdateDTO) {
+        try {
+            const {document_key, read_access, write_access} = documentAccess;
+            await pool.execute<DocumentAccess[]>("UPDATE documents SET is_read_access_public=?, is_write_access_public=? WHERE document_key=? AND owner=?", [read_access, write_access, document_key, user_id]);
+            return true;
+        } catch (err) {
             throw new ServerError(err);
         }
     }

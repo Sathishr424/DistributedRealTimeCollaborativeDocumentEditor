@@ -2,12 +2,17 @@ import {defineConfig} from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import * as path from 'path'; // 1. Import the path module
+import fs from "fs";
 
 // https://vite.dev/config/
 export default defineConfig({
     server: {
         host: "0.0.0.0",
-        port: 5173
+        port: 5173,
+        https: {
+            key: fs.readFileSync("/home/sat/Documents/ssl/192.168.0.130+1-key.pem"),
+            cert: fs.readFileSync("/home/sat/Documents/ssl/192.168.0.130+1.pem"),
+        },
     },
     plugins: [
         react(),

@@ -69,9 +69,6 @@ export class DocumentService implements HasSubscription {
     }
 
     public onKeyDown(e: KeyboardEvent) {
-        if (!this.hasWriteAccess) {
-            return alert("You have not write access");
-        }
         this.keyEvents.handleKeyDown(e);
     }
 

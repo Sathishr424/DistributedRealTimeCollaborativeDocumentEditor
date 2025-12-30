@@ -25,9 +25,7 @@ export async function checkPassword(password: string, hashedPassword: string): P
     }
 }
 
-export function getBearerToken(req: Request): string {
-    const authHeader = req.headers.authorization;
-
+export function getBearerToken(authHeader: string | undefined): string {
     if (authHeader && authHeader.startsWith('Bearer ')) {
         return authHeader.substring(7);
     }

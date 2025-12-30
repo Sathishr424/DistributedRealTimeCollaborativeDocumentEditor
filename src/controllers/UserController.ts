@@ -18,7 +18,7 @@ class UserController {
     }
 
     private async getUser(req: Request, res: Response) {
-        const token = getBearerToken(req);
+        const token = getBearerToken(req.headers.authorization);
         const user = await this.service.getUser(token);
 
         return res.status(200).json(user);

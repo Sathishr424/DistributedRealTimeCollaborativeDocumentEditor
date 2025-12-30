@@ -3,12 +3,18 @@ dotenv.config();
 
 import { SocketOperation } from "../../shared/SocketOperation"
 import {Server} from "socket.io";
-import http from "http";
+import https from "https";
 import {MyDocument} from "./MyDocument";
 import {DocumentUserAccess} from "./dto/response/DocumentUserAccess";
 import DocumentService from "./services/DocumentService";
+import fs from "node:fs";
 
-const server = http.createServer();
+const options = {
+    key: fs.readFileSync("/home/sat/Documents/ssl/192.168.0.130+1-key.pem"),
+    cert: fs.readFileSync("/home/sat/Documents/ssl/192.168.0.130+1.pem"),
+};
+
+const server = https.createServer(options);
 const io = new Server(server, {
     cors: {
         origin: [process.env.CLIENT_URL!]
