@@ -20,7 +20,7 @@ server.listen(4000, "0.0.0.0", () => {
 });
 
 type DocumentObject = Record<string, MyDocument>;
-let usersConnected: Record<string, DocumentUserAccess> = {};
+let usersConnected: Record<string, Record<string, DocumentUserAccess>> = {};
 let documents: DocumentObject = {};
 
 io.on('connection', client => {
@@ -28,7 +28,17 @@ io.on('connection', client => {
 
     client.on('connect_document', async (data) => {
         const {documentKey, token, clientId} = data;
-        usersConnected[client.id] = await DocumentService.getUserAccess(token, documentKey);
+        if (usersConnected[documentKey] === undefined) {
+            usersConnected[documentKey] = {};
+        }
+        if (Object.keys(usersConnected[documentKey]).length >= parseInt(process.env.MAX_COLLAB_LIMIT || '0')) {
+            io.emit('collab_limit_reached', {
+                clientId,
+                message: "Collab limit reached"
+            });
+            return;
+        }
+        usersConnected[documentKey][client.id] = await DocumentService.getUserAccess(token, documentKey);
         if (documents[documentKey] === undefined) {
             documents[documentKey] = new MyDocument(documentKey);
         }
@@ -42,7 +52,7 @@ io.on('connection', client => {
     });
 
     client.on("operation", (data: SocketOperation) => {
-        if (usersConnected[client.id] !== undefined && usersConnected[client.id].write_access) {
+        if (usersConnected[data.documentKey] !== undefined && usersConnected[data.documentKey][client.id] !== undefined && usersConnected[data.documentKey][client.id] .write_access) {
             const res = documents[data.documentKey].processOperation(data);
             io.emit("operation", res);
             // console.log("Receive:", data);

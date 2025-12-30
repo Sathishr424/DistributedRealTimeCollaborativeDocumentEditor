@@ -31,6 +31,10 @@ class SocketClass {
             this.socket.emit('connect_document', {documentKey, token: JWTService.getToken(), clientId: this.myId});
         });
 
+        this.socket.on("disconnect", (reason) => {
+            console.log("user disconnected:", reason);
+        });
+
         this.socket.on("operation", this.onReceive.bind(this));
         this.socket.on("server_document", (data: any) => {
             if (data.clientId === this.myId) {
@@ -39,6 +43,11 @@ class SocketClass {
                 this.version = data.version;
             }
         });
+        this.socket.on("collab_limit_reached", (data: any) => {
+            if (data.clientId === this.myId) {
+                alert("Document already reached collab users limit. Please try again later.")
+            }
+        })
     }
 
     public onReceive(data: SocketOperation) {
