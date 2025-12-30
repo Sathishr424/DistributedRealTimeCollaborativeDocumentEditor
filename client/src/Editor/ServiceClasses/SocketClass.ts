@@ -3,6 +3,7 @@ import JWTService from "../../services/JWTService";
 import {SocketOperation, OperationType, DeleteOperation, InsertOperation} from "../../../../shared/SocketOperation";
 import {TextController} from "./TextController";
 import {getRandomString} from "@utils/helper";
+import {Deque} from "@utils/Deque";
 
 const SOCKET_URL: string = import.meta.env.VITE_SOCKET_URL;
 
@@ -13,8 +14,10 @@ class SocketClass {
     private textController: TextController;
     private myId: string;
     private isLoaded: boolean = false;
+    private operationQueue: Deque<SocketOperation>;
 
     constructor(documentKey: string, textController: TextController) {
+        this.operationQueue = new Deque<SocketOperation>();
         this.documentKey = documentKey;
         this.textController = textController;
         this.myId = getRandomString(16);
@@ -47,6 +50,8 @@ class SocketClass {
         } else {
             this.textController.deleteTextFromServer(data.startIndex, data.text.length);
         }
+        this.operationQueue.popFront();
+        if (this.operationQueue.size() > 0) this.emit(this.operationQueue.front()!);
     }
 
     public emitInsert(text: string, startIndex: number, endIndex: number): void {
@@ -64,19 +69,20 @@ class SocketClass {
 
     public emitDelete(text: string, startIndex: number, endIndex: number): void {
         if (!this.isLoaded) return;
-        this.emit({
-            documentKey: this.documentKey,
-            startIndex,
-            endIndex,
-            text,
-            type: OperationType.Delete,
-            version: this.version,
-            senderId: this.myId,
-        } as SocketOperation);
+        this.operationQueue.pushBack({
+                documentKey: this.documentKey,
+                startIndex,
+                endIndex,
+                text,
+                type: OperationType.Delete,
+                version: this.version,
+                senderId: this.myId,
+            } as SocketOperation
+        );
+        if (this.operationQueue.size() == 1) this.emit(this.operationQueue.front()!);
     }
 
     private emit(socketData: SocketOperation) {
-        console.log("Emit:", socketData);
         this.socket.emit("operation", socketData);
     }
 
